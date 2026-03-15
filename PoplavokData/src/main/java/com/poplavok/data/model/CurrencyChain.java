@@ -23,6 +23,7 @@ public class CurrencyChain {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency", nullable = false)
+    @Nullable
     private Currency currency;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,6 +54,9 @@ public class CurrencyChain {
     @Column
     @Nullable
     private String contractAddress;
+
+    public CurrencyChain() {
+    }
 
     public CurrencyChain(String currency, @Nullable String chain) {
         this.currency = new Currency(currency);

@@ -106,7 +106,7 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
         try {
             Currency curr = DBUtil.connectGetResultAndClose(conn -> CurrencyDAO.findById(conn, currency)).orElseThrow(() -> new RuntimeException("Currency not found"));
             CurrencyExtendedInfo currencyExtendedInfo = DBUtil.connectGetResultAndClose(conn -> CurrencyExtendedInfoDAO.findById(conn, currency)).orElse(null);
-            List<CurrencyChain> currencyChains = DBUtil.connectGetResultAndClose(conn -> CurrencyChainDAO.getForCurrencyEx(conn, currency));
+            List<CurrencyChain> currencyChains = DBUtil.connectGetResultAndClose(conn -> CurrencyChainDAO.getForCurrency(conn, currency));
 
             updateCurrencyView(curr);
             updateCurrencyExtendedInfoView(currencyExtendedInfo);

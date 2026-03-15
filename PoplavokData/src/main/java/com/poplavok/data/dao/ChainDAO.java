@@ -23,11 +23,11 @@ public class ChainDAO {
     }
 
     @Nullable
-    public static Chain getById(Session session, Long id) {
+    public static Chain getById(Session session, String id) {
         return session.find(Chain.class, id);
     }
 
-    public static Optional<Chain> findById(Session session, Long id) {
+    public static Optional<Chain> findById(Session session, String id) {
         return Optional.ofNullable(session.find(Chain.class, id));
     }
 
