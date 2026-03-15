@@ -34,7 +34,7 @@ public class Repayment extends Transaction {
     public Repayment(Loan loan, BigDecimal amount, LocalDateTime date) {
         // Diagram links Repayment to Level.
         // Assuming Repayment is related to a specific level (maybe repayment happens at a level?).
-        super(null, null, null, null, amount, date);
+        super(loan.getCurrency(), null, null, null, null, amount, date);
         this.loan = loan;
     }
 

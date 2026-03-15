@@ -12,7 +12,7 @@ import com.poplavok.data.dao.CurrencyChainDAO;
 import com.poplavok.data.dao.CurrencyDAO;
 import com.poplavok.data.dao.CurrencyExtendedInfoDAO;
 import com.poplavok.data.model.Currency;
-import com.poplavok.data.model.CurrencyChainEx;
+import com.poplavok.data.model.CurrencyChain;
 import com.poplavok.data.model.CurrencyExtendedInfo;
 import com.poplavok.data.utils.DBUtil;
 import com.poplavok.kucoin.EntityConverter;
@@ -68,12 +68,12 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
     @Nullable @FXML TextArea explorer;
     @Nullable @FXML TextArea introduceText;
 
-    @Nullable @FXML TableView<CurrencyChainEx> currencyChainExTable;
+    @Nullable @FXML TableView<CurrencyChain> currencyChainExTable;
 
-    final long currencyIdLong;
+    final String currency;
 
-    public Currency_geTaJlu(long currencyIdLong) {
-        this.currencyIdLong = currencyIdLong;
+    public Currency_geTaJlu(String currency) {
+        this.currency = currency;
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Currency_geTaJlu.fxml"));
         fxmlLoader.setRoot(this);
@@ -91,7 +91,7 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
     public void retrieveExtendedData(ActionEvent event) {
         try {
             ModalWindow.showModal(event,
-                    stage -> new ProgressForm(stage, this, progressCallback -> KucoinTool.retrieveCurrencyDetailsForCurrency(progressCallback, currencyIdLong)),
+                    stage -> new ProgressForm(stage, this, progressCallback -> KucoinTool.retrieveCurrencyDetailsForCurrency(progressCallback, currency)),
                     "Retrieve extended data",
                     StageStyle.UNDECORATED);
         } catch (Exception e) {
@@ -104,11 +104,11 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
     @Override
     public void refreshContent() {
         try {
-            Currency currency = DBUtil.connectGetResultAndClose(conn -> CurrencyDAO.findById(conn, currencyIdLong)).orElseThrow(() -> new RuntimeException("Currency not found"));
-            CurrencyExtendedInfo currencyExtendedInfo = DBUtil.connectGetResultAndClose(conn -> CurrencyExtendedInfoDAO.findById(conn, currencyIdLong)).orElse(null);
-            List<CurrencyChainEx> currencyChains = DBUtil.connectGetResultAndClose(conn -> CurrencyChainDAO.getForCurrencyEx(conn, currencyIdLong));
+            Currency curr = DBUtil.connectGetResultAndClose(conn -> CurrencyDAO.findById(conn, currency)).orElseThrow(() -> new RuntimeException("Currency not found"));
+            CurrencyExtendedInfo currencyExtendedInfo = DBUtil.connectGetResultAndClose(conn -> CurrencyExtendedInfoDAO.findById(conn, currency)).orElse(null);
+            List<CurrencyChain> currencyChains = DBUtil.connectGetResultAndClose(conn -> CurrencyChainDAO.getForCurrencyEx(conn, currency));
 
-            updateCurrencyView(currency);
+            updateCurrencyView(curr);
             updateCurrencyExtendedInfoView(currencyExtendedInfo);
             updateCurrencyChainsView(currencyChains);
         } catch (Exception e) {
@@ -119,7 +119,7 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
     }
 
     void updateCurrencyView(Currency currency) {
-        Preconditions.checkNotNull(currencyId).setText(currency.getId().toString());
+        Preconditions.checkNotNull(currencyId).setText(currency.getCurrency());
         Preconditions.checkNotNull(fullName).setText(currency.getFullName());
         Preconditions.checkNotNull(currencyText).setText(currency.getCurrency());
         Preconditions.checkNotNull(currencyName).setText(currency.getName());
@@ -153,9 +153,9 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
         } else {
             CurrencyExtendedInfoResponse info = EntityConverter.fromCurrencyExtendedInfo(currencyExtendedInfo);
 
-            Preconditions.checkNotNull(currencyExtendedInfoId).setText(currencyExtendedInfo.currencyExtendedInfoId() == null ? "-" : currencyExtendedInfo.currencyExtendedInfoId().toString());
+            Preconditions.checkNotNull(currencyExtendedInfoId).setText(currencyExtendedInfo.getCurrency() == null ? "-" : currencyExtendedInfo.getCurrency());
             Preconditions.checkNotNull(code).setText(info.code());
-            Preconditions.checkNotNull(symbol).setText(currencyExtendedInfo.symbol());
+            Preconditions.checkNotNull(symbol).setText(currencyExtendedInfo.getCurrency());
             Preconditions.checkNotNull(currencyExtendedInfoName).setText(info.coinName());
             Preconditions.checkNotNull(marketCap).setText(getString(info.marketCap()));
             Preconditions.checkNotNull(circulatingSupply).setText(getString(info.circulatingSupply()));
@@ -204,7 +204,7 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
         return builder.toString();
     }
 
-    void updateCurrencyChainsView(@Nullable List<CurrencyChainEx> currencyChains) {
+    void updateCurrencyChainsView(@Nullable List<CurrencyChain> currencyChains) {
         if (currencyChains == null) {
             currencyChains = ImmutableList.of();
         }

@@ -26,12 +26,12 @@ public class MarketTicker {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_currency_id", nullable = false)
+    @JoinColumn(name = "base_currency", nullable = false)
     @Nullable
     private Currency base;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quote_currency_id", nullable = false)
+    @JoinColumn(name = "quote_currency", nullable = false)
     @Nullable
     private Currency quote;
 

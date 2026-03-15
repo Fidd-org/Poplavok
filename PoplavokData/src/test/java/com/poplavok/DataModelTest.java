@@ -7,8 +7,6 @@ import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelStrategy;
 import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.LoanType;
-import com.poplavok.data.model.OperationHistory;
-import com.poplavok.data.model.OperationType;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Repayment;
 import com.poplavok.data.model.MarketTicker;
@@ -113,7 +111,7 @@ public class DataModelTest {
         Currency usdt = new Currency("USDT");
         session.persist(usdt);
 
-        Loan loan = new Loan(usdt, new BigDecimal("1000"), null, null,
+        Loan loan = new Loan(usdt, new BigDecimal("1000"), null,
                 LocalDateTime.now(), LoanType.EXTERNAL);
         session.persist(loan);
 
@@ -151,51 +149,5 @@ public class DataModelTest {
 
         assertEquals(1, accounts.size());
         assertEquals("BTC", accounts.get(0).getCurrency().getCurrency());
-    }
-
-    @Test
-    public void testOperationHistory() {
-        Transaction tx = session.beginTransaction();
-
-        Currency btc = new Currency("BTC");
-        Currency usdt = new Currency("USDT");
-        session.persist(btc);
-        session.persist(usdt);
-
-        MarketTicker marketTicker = new MarketTicker(btc, usdt, "BTCUSDT");
-        session.persist(marketTicker);
-
-        Poplavok poplavok = new Poplavok(
-                marketTicker,
-                LevelStrategy.EXPONENTIAL,
-                "{}",
-                new BigDecimal("60000"),
-                LocalDateTime.now()
-        );
-        session.persist(poplavok);
-
-        // Create a level since OperationHistory requires non-null level
-        Level level = new Level(1, poplavok, new BigDecimal("0.1"), new BigDecimal("5000"),
-                new BigDecimal("60000"), LocalDateTime.now());
-        poplavok.addLevel(level);
-        session.persist(level);
-
-        OperationHistory operation = new OperationHistory(
-                poplavok, level, OperationType.CREATION,
-                new BigDecimal("1.0"), new BigDecimal("60000"), LocalDateTime.now(),
-                "Poplavok created"
-        );
-        poplavok.addOperationHistory(operation);
-
-        tx.commit();
-        session.clear();
-
-        List<OperationHistory> operations = session
-                .createQuery("from OperationHistory", OperationHistory.class)
-                .list();
-
-        assertEquals(1, operations.size());
-        assertEquals(OperationType.CREATION, operations.get(0).getOperationType());
-        assertNotNull(operations.get(0).getPoplavok());
     }
 }

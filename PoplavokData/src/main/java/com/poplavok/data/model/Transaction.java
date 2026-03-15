@@ -56,12 +56,18 @@ public class Transaction {
     @Nullable
     private LocalDateTime date;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "currency", nullable = false)
+    @Nullable
+    private Currency currency;
+
     public Transaction() {
     }
 
-    public Transaction(@Nullable Account sourceAccount, @Nullable Level sourceLevel,
+    public Transaction(Currency currency, @Nullable Account sourceAccount, @Nullable Level sourceLevel,
                        @Nullable Account destinationAccount, @Nullable Level destinationLevel,
                        BigDecimal amount, LocalDateTime date) {
+        this.currency = currency;
         this.sourceAccount = sourceAccount;
         this.sourceLevel = sourceLevel;
         this.destinationAccount = destinationAccount;
@@ -124,5 +130,13 @@ public class Transaction {
 
     public void setDate(LocalDateTime date) {
         this.date = date;
+    }
+
+    public Currency getCurrency() {
+        return checkNotNull(currency);
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 }

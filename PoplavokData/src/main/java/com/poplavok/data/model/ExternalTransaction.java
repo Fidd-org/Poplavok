@@ -28,10 +28,10 @@ public class ExternalTransaction extends Transaction {
     public ExternalTransaction() {
     }
 
-    public ExternalTransaction(@Nullable Account account, BigDecimal amount, LocalDateTime date,
+    public ExternalTransaction(Account account, BigDecimal amount, LocalDateTime date,
                                String details, ExternalTransactionType type) {
         // External transactions usually affect accounts directly
-        super(account, null, null, null, amount, date);
+        super(account.getCurrency(), account, null, null, null, amount, date);
         this.details = details;
         this.type = type;
     }

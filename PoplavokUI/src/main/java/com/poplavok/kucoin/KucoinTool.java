@@ -76,7 +76,7 @@ public class KucoinTool {
                 DBUtil.connectCommitAndClose(conn -> CurrencyDAO.save(conn, EntityConverter.fromResponse(currencyResponse)));
             } else {
                 //Update
-                Currency retrievedCurrency = EntityConverter.fromResponse(curr.getId(), currencyResponse);
+                Currency retrievedCurrency = EntityConverter.fromResponse(currencyResponse);
                 if (!retrievedCurrency.equals(curr)) {
                     DBUtil.connectCommitAndClose(conn -> CurrencyDAO.update(conn, retrievedCurrency));
                 }
@@ -135,10 +135,10 @@ public class KucoinTool {
                 MarketTicker ticker = marketTickersBySymbol.get(marketTickerResponse.symbol());
                 if (ticker == null) {
                     //insert
-                    DBUtil.connectCommitAndClose(conn -> MarketTickerDAO.save(conn, EntityConverter.fromResponse(baseCurrency.getId(), quoteCurrency.getId(), marketTickerResponse)));
+                    DBUtil.connectCommitAndClose(conn -> MarketTickerDAO.save(conn, EntityConverter.fromResponse(baseCurrency.getCurrency(), quoteCurrency.getCurrency(), marketTickerResponse)));
                 } else {
                     //update
-                    DBUtil.connectCommitAndClose(conn -> MarketTickerDAO.update(conn, EntityConverter.fromResponse(ticker.getId(), baseCurrency.getId(), quoteCurrency.getId(), marketTickerResponse)));
+                    DBUtil.connectCommitAndClose(conn -> MarketTickerDAO.update(conn, EntityConverter.fromResponse(ticker.getId(), baseCurrency.getCurrency(), quoteCurrency.getCurrency(), marketTickerResponse)));
                 }
             } else {
                 LOGGER.warn("Retrieving MarketTickers from Exchange: Can't process MarketTicker: symbol {}, BaseCurrency {} - {}, QuoteCurrency {} - {}", marketTickerResponse.symbol(), symbolParts[0], baseCurrency != null ? "Found" : "Not found", symbolParts[1], quoteCurrency != null ? "Found" : "Not found");
@@ -397,7 +397,7 @@ public class KucoinTool {
         retrieveCurrencyDetailsForCurrencyInternal(null, currency);
     }
 
-    public static void retrieveCurrencyDetailsForCurrency(ProgressCallback progressCallback, long currencyId) {
+    public static void retrieveCurrencyDetailsForCurrency(ProgressCallback progressCallback, String currencyId) {
         try {
             progressCallback.updateProgress("Re-Loading currency from DB", 0.25, false);
             Currency currency = DBUtil.connectGetResultAndClose(conn -> CurrencyDAO.findById(conn, currencyId)).get();
@@ -415,7 +415,7 @@ public class KucoinTool {
         }
 
         //1. ExtendedInfo
-        Optional<CurrencyExtendedInfo> currencyExtendedInfoOpt = DBUtil.connectGetResultAndClose(conn -> CurrencyExtendedInfoDAO.findById(conn, currency.getId()));
+        Optional<CurrencyExtendedInfo> currencyExtendedInfoOpt = DBUtil.connectGetResultAndClose(conn -> CurrencyExtendedInfoDAO.findById(conn, currency.getCurrency()));
 
         int waitMs = 1000;
 
@@ -446,10 +446,10 @@ public class KucoinTool {
         CurrencyExtendedInfoResponse currencyExtendedInfoResponse = checkNotNull(currencyExtendedInfoResponseVar);
         if (currencyExtendedInfoOpt.isEmpty()) {
             //insert
-            DBUtil.connectCommitAndClose(conn -> CurrencyExtendedInfoDAO.save(conn, EntityConverter.fromResponse(currency.getId(), currency.getCurrency(), currencyExtendedInfoResponse)));
+            DBUtil.connectCommitAndClose(conn -> CurrencyExtendedInfoDAO.save(conn, EntityConverter.fromResponse(currency.getCurrency(), currencyExtendedInfoResponse)));
         } else {
             //update
-            DBUtil.connectCommitAndClose(conn -> CurrencyExtendedInfoDAO.update(conn, EntityConverter.fromResponse(currency.getId(), currency.getCurrency(), currencyExtendedInfoResponse)));
+            DBUtil.connectCommitAndClose(conn -> CurrencyExtendedInfoDAO.update(conn, EntityConverter.fromResponse(currency.getCurrency(), currencyExtendedInfoResponse)));
         }
 
         if (progressCallback != null) {
@@ -457,8 +457,8 @@ public class KucoinTool {
         }
 
         //2. CurrencyChains
-        Map<Long, CurrencyChain> currencyChainMap = DBUtil.connectGetResultAndClose(conn -> CurrencyChainDAO.getForCurrency(conn, currency.getId()))
-                .stream().collect(Collectors.toMap(CurrencyChain::chainId, c -> c));
+        Map<String, CurrencyChain> currencyChainMap = DBUtil.connectGetResultAndClose(conn -> CurrencyChainDAO.getForCurrency(conn, currency.getCurrency()))
+                .stream().collect(Collectors.toMap(cc -> checkNotNull(cc.getChain()).chain(), c -> c));
         CurrencyDetailV2Response currencyDetailV2Response = KyKu4_3anpocHuK.getCurrencyDetailV2(PUBLIC_API_PACK.currencyAPI(), currency.getCurrency());
 
         if (currencyDetailV2Response.list() != null) {
@@ -469,14 +469,14 @@ public class KucoinTool {
                     chain = DBUtil.connectGetResultAndClose(conn -> ChainDAO.getByChain(conn, chainResponse.chainId()));
                 }
 
-                long chainId = checkNotNull(chain.chainId());
-                CurrencyChain currencyChain = currencyChainMap.get(chainId);
+                String chain_ = checkNotNull(chain.chain());
+                CurrencyChain currencyChain = currencyChainMap.get(chain_);
                 if (currencyChain == null) {
                     //insert
-                    DBUtil.connectCommitAndClose(conn -> CurrencyChainDAO.save(conn, EntityConverter.fromResponse(currency.getId(), chainId, chainResponse)));
+                    DBUtil.connectCommitAndClose(conn -> CurrencyChainDAO.save(conn, EntityConverter.fromResponse(currency.getCurrency(), chain_, chainResponse)));
                 } else {
                     //update
-                    DBUtil.connectCommitAndClose(conn -> CurrencyChainDAO.update(conn, EntityConverter.fromResponse(currencyChain.currencyChainId(), currency.getId(), chainId, chainResponse)));
+                    DBUtil.connectCommitAndClose(conn -> CurrencyChainDAO.update(conn, EntityConverter.fromResponse(currencyChain.currencyChainId(), currency.getCurrency(), chain_, chainResponse)));
                 }
             }
         } else {

@@ -7,8 +7,6 @@ import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelStrategy;
 import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.LoanType;
-import com.poplavok.data.model.OperationHistory;
-import com.poplavok.data.model.OperationType;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.MarketTicker;
 import java.math.BigDecimal;
@@ -58,25 +56,10 @@ public class DemoApp {
         poplavok.addLevel(level2);
 
         // Create a loan for level 2
-        Loan loan = new Loan(usdt, new BigDecimal("6412.5"), poplavok, level2,
+        Loan loan = new Loan(usdt, new BigDecimal("6412.5"), level2,
                 LocalDateTime.now(), LoanType.POPLAVOK_FUNDED);
-        poplavok.addLoan(loan);
         level2.addLoan(loan);
         session.persist(loan);
-
-        // Add operation history
-        OperationHistory creation = new OperationHistory(
-                poplavok, level2, OperationType.CREATION,
-                new BigDecimal("35000"), new BigDecimal("45000"), LocalDateTime.now(),
-                "Poplavok created with entry price 45000"
-        );
-        OperationHistory buy = new OperationHistory(
-                poplavok, level1, OperationType.BUY,
-                new BigDecimal("0.1"), new BigDecimal("45000"), LocalDateTime.now(),
-                "Bought 0.1 BTC at level 1"
-        );
-        poplavok.addOperationHistory(creation);
-        poplavok.addOperationHistory(buy);
 
         tx.commit();
         session.close();

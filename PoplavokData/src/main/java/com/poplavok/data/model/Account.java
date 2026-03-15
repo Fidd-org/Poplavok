@@ -1,6 +1,5 @@
 package com.poplavok.data.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,14 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -29,7 +25,7 @@ public class Account {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "currency_id", nullable = false)
+    @JoinColumn(name = "currency", nullable = false)
     @Nullable
     private Currency currency;
 
@@ -40,9 +36,6 @@ public class Account {
     @Column(nullable = false, precision = 20, scale = 8)
     @Nullable
     private BigDecimal borrowed;
-
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AccountHistory> history = new ArrayList<>();
 
     @Column(nullable = false, precision = 20, scale = 8)
     @Nullable
@@ -104,19 +97,5 @@ public class Account {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
-    }
-
-    public List<AccountHistory> getHistory() {
-        return checkNotNull(history);
-    }
-
-    public void addHistory(AccountHistory entry) {
-        history.add(entry);
-        entry.setAccount(this);
-    }
-
-    public void removeHistory(AccountHistory entry) {
-        history.remove(entry);
-        entry.setAccount(null);
     }
 }

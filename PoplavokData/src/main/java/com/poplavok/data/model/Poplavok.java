@@ -71,12 +71,6 @@ public class Poplavok {
     @OneToMany(mappedBy = "poplavok", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Level> levels = new ArrayList<>();
 
-    @OneToMany(mappedBy = "poplavok", cascade = CascadeType.ALL)
-    private List<Loan> loans = new ArrayList<>();
-
-    @OneToMany(mappedBy = "poplavok", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OperationHistory> operationHistory = new ArrayList<>();
-
     protected Poplavok() {
     }
 
@@ -194,24 +188,6 @@ public class Poplavok {
     public void removeLevel(Level level) {
         levels.remove(level);
         level.setPoplavok(null);
-    }
-
-    public List<Loan> getLoans() {
-        return loans;
-    }
-
-    public void addLoan(Loan loan) {
-        loans.add(loan);
-        loan.setPoplavok(this);
-    }
-
-    public List<OperationHistory> getOperationHistory() {
-        return operationHistory;
-    }
-
-    public void addOperationHistory(OperationHistory operation) {
-        operationHistory.add(operation);
-        operation.setPoplavok(this);
     }
 }
 

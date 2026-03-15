@@ -21,8 +21,8 @@ public class CurrencyDAO {
         session.remove(currency);
     }
 
-    public static Optional<Currency> findById(Session session, Long id) {
-        return Optional.ofNullable(session.find(Currency.class, id));
+    public static Optional<Currency> findById(Session session, String currency) {
+        return Optional.ofNullable(session.find(Currency.class, currency));
     }
 
     public static Optional<Currency> findByName(Session session, String name) {

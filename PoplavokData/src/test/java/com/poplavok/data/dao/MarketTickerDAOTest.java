@@ -70,8 +70,8 @@ class MarketTickerDAOTest {
              MarketTicker found = session.find(MarketTicker.class, ticker.getId());
              assertNotNull(found);
              assertEquals("BTCUSD", found.getSymbol());
-             assertEquals(baseCurrency.getId(), found.getBase().getId());
-             assertEquals(quoteCurrency.getId(), found.getQuote().getId());
+             assertEquals(baseCurrency.getCurrency(), found.getBase().getCurrency());
+             assertEquals(quoteCurrency.getCurrency(), found.getQuote().getCurrency());
         }
     }
 

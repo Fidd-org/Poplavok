@@ -20,8 +20,8 @@ public class CurrencyExtendedInfoDAO {
         session.remove(info);
     }
 
-    public static Optional<CurrencyExtendedInfo> findById(Session session, Long id) {
-        return Optional.ofNullable(session.find(CurrencyExtendedInfo.class, id));
+    public static Optional<CurrencyExtendedInfo> findById(Session session, String currency) {
+        return Optional.ofNullable(session.find(CurrencyExtendedInfo.class, currency));
     }
 
     public static List<CurrencyExtendedInfo> findAll(Session session) {

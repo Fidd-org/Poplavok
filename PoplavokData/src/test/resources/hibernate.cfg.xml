@@ -22,7 +22,6 @@
         <mapping class="com.poplavok.data.model.MarketTicker"/>
         <mapping class="com.poplavok.data.model.Rate"/>
         <mapping class="com.poplavok.data.model.Account"/>
-        <mapping class="com.poplavok.data.model.AccountHistory"/>
         <mapping class="com.poplavok.data.model.Poplavok"/>
         <mapping class="com.poplavok.data.model.Level"/>
         <mapping class="com.poplavok.data.model.LevelTrade"/>
@@ -32,7 +31,6 @@
         <mapping class="com.poplavok.data.model.Loan"/>
         <mapping class="com.poplavok.data.model.Repayment"/>
         <mapping class="com.poplavok.data.model.ExternalLoan"/>
-        <mapping class="com.poplavok.data.model.OperationHistory"/>
     </session-factory>
 </hibernate-configuration>
 

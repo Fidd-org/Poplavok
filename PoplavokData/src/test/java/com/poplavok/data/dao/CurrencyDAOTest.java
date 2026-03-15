@@ -55,10 +55,10 @@ class CurrencyDAOTest {
             tx.commit();
         }
 
-        assertNotNull(currency.getId());
+        assertNotNull(currency.getCurrency());
 
         try (Session session = sessionFactory.openSession()) {
-             Currency found = session.find(Currency.class, currency.getId());
+             Currency found = session.find(Currency.class, currency.getCurrency());
              assertNotNull(found);
              assertEquals("BTC", found.getCurrency());
         }
@@ -81,7 +81,7 @@ class CurrencyDAOTest {
         }
 
         try (Session session = sessionFactory.openSession()) {
-             Currency found = session.find(Currency.class, currency.getId());
+             Currency found = session.find(Currency.class, currency.getCurrency());
              assertEquals("ETH-UPDATED", found.getCurrency());
         }
     }
@@ -94,7 +94,7 @@ class CurrencyDAOTest {
             CurrencyDAO.save(session, currency);
             tx.commit();
         }
-        Long id = currency.getId();
+        String id = currency.getCurrency();
 
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
@@ -119,13 +119,13 @@ class CurrencyDAOTest {
         }
 
         try (Session session = sessionFactory.openSession()) {
-            Optional<Currency> found = CurrencyDAO.findById(session, currency.getId());
+            Optional<Currency> found = CurrencyDAO.findById(session, currency.getCurrency());
             assertTrue(found.isPresent());
             assertEquals("LTC", found.get().getCurrency());
         }
 
         try (Session session = sessionFactory.openSession()) {
-            Optional<Currency> notFound = CurrencyDAO.findById(session, 999L);
+            Optional<Currency> notFound = CurrencyDAO.findById(session, "DOES_NOT_EXIST");
             assertFalse(notFound.isPresent());
         }
     }
@@ -143,7 +143,7 @@ class CurrencyDAOTest {
         try (Session session = sessionFactory.openSession()) {
             Optional<Currency> found = CurrencyDAO.findByName(session, "Dogecoin");
             assertTrue(found.isPresent());
-            assertEquals(currency.getId(), found.get().getId());
+            assertEquals(currency.getCurrency(), found.get().getCurrency());
         }
 
         try (Session session = sessionFactory.openSession()) {
@@ -192,7 +192,7 @@ class CurrencyDAOTest {
         }
 
         try (Session session = sessionFactory.openSession()) {
-            Currency found = session.find(Currency.class, currency.getId());
+            Currency found = session.find(Currency.class, currency.getCurrency());
             assertNotNull(found);
             assertEquals("Bitcoin Test", found.getFullName());
             assertEquals(8, found.getPrecision());

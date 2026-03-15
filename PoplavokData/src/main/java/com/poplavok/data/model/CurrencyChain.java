@@ -2,9 +2,12 @@ package com.poplavok.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
@@ -18,13 +21,14 @@ public class CurrencyChain {
     @Nullable
     private Long id;
 
-    @Column(nullable = false)
-    @Nullable
-    private Long currencyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "currency", nullable = false)
+    private Currency currency;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chain", nullable = false)
     @Nullable
-    private Long chainId;
+    private Chain chain;
 
     @Column
     @Nullable
@@ -50,14 +54,9 @@ public class CurrencyChain {
     @Nullable
     private String contractAddress;
 
-    public CurrencyChain() {
-        this.currencyId = 0L;
-        this.chainId = 0L;
-    }
-
-    public CurrencyChain(@Nullable Long currencyId, @Nullable Long chainId) {
-        this.currencyId = currencyId;
-        this.chainId = chainId;
+    public CurrencyChain(String currency, @Nullable String chain) {
+        this.currency = new Currency(currency);
+        this.chain = Chain.ofNew(chain);
     }
 
     // Accessors matching the interface request
@@ -68,13 +67,13 @@ public class CurrencyChain {
     }
 
     @Nullable
-    public Long currencyId() {
-        return currencyId;
+    public Currency currency() {
+        return currency;
     }
 
     @Nullable
-    public Long chainId() {
-        return chainId;
+    public Chain chain() {
+        return chain;
     }
 
     @Nullable
@@ -119,21 +118,21 @@ public class CurrencyChain {
     }
 
     @Nullable
-    public Long getCurrencyId() {
-        return currencyId;
+    public Currency getCurrency() {
+        return currency;
     }
 
-    public void setCurrencyId(@Nullable Long currencyId) {
-        this.currencyId = currencyId;
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
     @Nullable
-    public Long getChainId() {
-        return chainId;
+    public Chain getChain() {
+        return chain;
     }
 
-    public void setChainId(@Nullable Long chainId) {
-        this.chainId = chainId;
+    public void setChain(@Nullable Chain chain) {
+        this.chain = chain;
     }
 
     @Nullable

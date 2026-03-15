@@ -64,7 +64,7 @@ public class MainForm {
     }
 
     public void createCurrencyDetailTab(Currency currency) {
-        Currency_geTaJlu currency_geTaJlu = new Currency_geTaJlu(currency.getId());
+        Currency_geTaJlu currency_geTaJlu = new Currency_geTaJlu(currency.getCurrency());
         final Tab tab = new Tab(currency.getCurrency(), currency_geTaJlu);
         tab.setClosable(true);
 

@@ -23,23 +23,19 @@ public class EntityConverter {
     }
 
     public static Currency fromResponse(CurrencyResponse currencyResponse) {
-        return fromResponse(null, currencyResponse);
-    }
-
-    public static Currency fromResponse(@Nullable Long currencyId, CurrencyResponse currencyResponse) {
-        return of(currencyId, currencyResponse.fullName(), currencyResponse.currency(), currencyResponse.name(),
+        return of(currencyResponse.currency(), currencyResponse.fullName(), currencyResponse.name(),
                 currencyResponse.precision(), currencyResponse.withdrawalMinSize(), currencyResponse.withdrawalMinFee(),
                 currencyResponse.isWithdrawEnabled(), currencyResponse.isDepositEnabled(), currencyResponse.isMarginEnabled(),
                 currencyResponse.isDebitEnabled());
     }
 
-    private static Currency of(@Nullable Long id, String fullName, String currencyCode, String name, Integer precision,
+    private static Currency of(String currency, String fullName, String name, Integer precision,
                                BigDecimal withdrawalMinSize, BigDecimal withdrawalMinFee,
                                Boolean isWithdrawEnabled, Boolean isDepositEnabled,
                                Boolean isMarginEnabled, Boolean isDebitEnabled) {
-        Currency c = new Currency(currencyCode);
-        if (id != null) {
-            c.setId(id);
+        Currency c = new Currency(currency);
+        if (currency != null) {
+            c.setCurrency(currency);
         }
         c.setFullName(fullName);
         if (name != null) {
@@ -57,26 +53,26 @@ public class EntityConverter {
 
     // --------------------------------------------
 
-    public static MarketTicker fromResponse(Long baseCurrencyId, Long quoteCurrencyId, MarketTickerResponse marketTickerResponse) {
-        return fromResponse(null, baseCurrencyId, quoteCurrencyId, marketTickerResponse);
+    public static MarketTicker fromResponse(String baseCurrency, String quoteCurrency, MarketTickerResponse marketTickerResponse) {
+        return fromResponse(null, baseCurrency, quoteCurrency, marketTickerResponse);
     }
 
-    public static MarketTicker fromResponse(@Nullable Long marketTickerId, Long baseCurrencyId, Long quoteCurrencyId, MarketTickerResponse marketTickerResponse) {
-        return of(marketTickerId, baseCurrencyId, quoteCurrencyId, marketTickerResponse.symbol(),
+    public static MarketTicker fromResponse(@Nullable Long marketTickerId, String baseCurrency, String quoteCurrency, MarketTickerResponse marketTickerResponse) {
+        return of(marketTickerId, baseCurrency, quoteCurrency, marketTickerResponse.symbol(),
                 marketTickerResponse.symbolName(), marketTickerResponse.takerFeeRate(), marketTickerResponse.makerFeeRate(),
                 marketTickerResponse.takerCoefficient(), marketTickerResponse.makerCoefficient());
     }
 
-    private static MarketTicker of(@Nullable Long marketTickerId, Long baseCurrencyId, Long quoteCurrencyId, String symbol,
+    private static MarketTicker of(@Nullable Long marketTickerId, String baseCurrency, String quoteCurrency, String symbol,
                                    String symbolName, BigDecimal takerFeeRate, BigDecimal makerFeeRate,
                                    BigDecimal takerCoefficient, BigDecimal makerCoefficient) {
         MarketTicker ticker = new MarketTicker();
         ticker.setId(marketTickerId);
         Currency base = new Currency();
-        base.setId(baseCurrencyId);
+        base.setCurrency(baseCurrency);
         ticker.setBase(base);
         Currency quote = new Currency();
-        quote.setId(quoteCurrencyId);
+        quote.setCurrency(quoteCurrency);
         ticker.setQuote(quote);
         ticker.setSymbol(symbol);
         ticker.setSymbolName(symbolName);
@@ -89,20 +85,20 @@ public class EntityConverter {
 
     // --------------------------------------------
 
-    public static CurrencyChain fromResponse(Long currencyId, Long chainId, ApiCurrencyDetailChainPropertyResponse marketTickerResponse) {
-        return fromResponse(-1L, currencyId, chainId, marketTickerResponse);
+    public static CurrencyChain fromResponse(String currency, String chain, ApiCurrencyDetailChainPropertyResponse marketTickerResponse) {
+        return fromResponse(null, currency, chain, marketTickerResponse);
     }
 
-    public static CurrencyChain fromResponse(@Nullable Long currencyChainId, @Nullable Long currencyId, @Nullable Long chainId, ApiCurrencyDetailChainPropertyResponse marketTickerResponse) {
-        return of(currencyChainId, currencyId, chainId,
+    public static CurrencyChain fromResponse(@Nullable Long currencyChainId, String currency, @Nullable String chain, ApiCurrencyDetailChainPropertyResponse marketTickerResponse) {
+        return of(currencyChainId, currency, chain,
                 marketTickerResponse.minWithdrawSize() != null ? marketTickerResponse.minWithdrawSize().toString() : null,
                 marketTickerResponse.minWithdrawFee() != null ? marketTickerResponse.minWithdrawFee().toString() : null,
                 marketTickerResponse.isWithdrawEnabled(), marketTickerResponse.isDepositEnabled(), marketTickerResponse.confirms(), marketTickerResponse.contractAddress());
     }
 
-    private static CurrencyChain of(@Nullable Long id, @Nullable Long currencyId, @Nullable Long chainId, @Nullable String withdrawalMinSize, @Nullable String withdrawalMinFee,
+    private static CurrencyChain of(@Nullable Long id, String currency, @Nullable String chain_, @Nullable String withdrawalMinSize, @Nullable String withdrawalMinFee,
                                     @Nullable Boolean isWithdrawEnabled, @Nullable Boolean isDepositEnabled, @Nullable Integer confirms, @Nullable String contractAddress) {
-        CurrencyChain chain = new CurrencyChain(currencyId, chainId);
+        CurrencyChain chain = new CurrencyChain(currency, chain_);
         if (id != null && id != -1L) {
             chain.setId(id);
         }
@@ -117,21 +113,18 @@ public class EntityConverter {
 
     // --------------------------------------------
 
-    public static CurrencyExtendedInfo fromResponse(long currencyId, String symbol, CurrencyExtendedInfoResponse currencyExtendedInfoResponse) {
+    public static CurrencyExtendedInfo fromResponse(String currency, CurrencyExtendedInfoResponse currencyExtendedInfoResponse) {
         try {
             String currencyExtendedInfoJson = OBJECT_MAPPER.writeValueAsString(currencyExtendedInfoResponse);
-            return of(currencyId, symbol, currencyExtendedInfoJson);
+            return of(currency, currencyExtendedInfoJson);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static CurrencyExtendedInfo of(Long id, String symbol, String currencyExtendedInfoJson) {
-        CurrencyExtendedInfo info = new CurrencyExtendedInfo(symbol);
-        if (id != null) {
-            info.setId(id);
-        }
-        info.setSymbol(symbol);
+    private static CurrencyExtendedInfo of(String currency, String currencyExtendedInfoJson) {
+        CurrencyExtendedInfo info = new CurrencyExtendedInfo(currency);
+        info.setCurrency(currency);
         info.setCurrencyExtendedInfoJson(currencyExtendedInfoJson);
         return info;
     }

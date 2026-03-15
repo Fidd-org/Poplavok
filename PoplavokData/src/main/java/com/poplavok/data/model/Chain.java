@@ -2,8 +2,6 @@ package com.poplavok.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import javax.annotation.Nullable;
@@ -13,17 +11,12 @@ import javax.annotation.Nullable;
 public class Chain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Nullable
-    private Long id;
+    private String chain;
 
     @Column
     @Nullable
     private String chainName;
-
-    @Column(nullable = false, unique = true)
-    @Nullable
-    private String chain;
 
     public Chain() {
     }
@@ -35,10 +28,10 @@ public class Chain {
         return c;
     }
 
-    // Accessors matching the interface request
-    @Nullable
-    public Long chainId() {
-        return id;
+    public static Chain ofNew(@Nullable String chain) {
+        Chain c = new Chain();
+        c.setChain(chain);
+        return c;
     }
 
     @Nullable
@@ -52,15 +45,6 @@ public class Chain {
     }
 
     // Getters and Setters
-
-    @Nullable
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(@Nullable Long id) {
-        this.id = id;
-    }
 
     @Nullable
     public String getChainName() {

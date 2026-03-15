@@ -25,16 +25,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @PrimaryKeyJoinColumn(name = "transaction_id")
 public class Loan extends Transaction {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "currency_id", nullable = false)
-    @Nullable
-    private Currency currency;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "poplavok_id")
-    @Nullable
-    private Poplavok poplavok;
-
     @Column(name = "is_active", nullable = false)
     @Nullable
     private boolean isActive;
@@ -58,29 +48,11 @@ public class Loan extends Transaction {
     protected Loan() {
     }
 
-    public Loan(Currency currency, BigDecimal amount, Poplavok poplavok, Level level,
+    public Loan(Currency currency, BigDecimal amount, Level level,
                 LocalDateTime date, LoanType loanType) {
-        super(null, null, null, level, amount, date);
-        this.currency = currency;
-        this.poplavok = poplavok;
+        super(currency, null, null, null, level, amount, date);
         this.loanType = loanType;
         this.isActive = true;
-    }
-
-    public Currency getCurrency() {
-        return checkNotNull(currency);
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
-    public Poplavok getPoplavok() {
-        return checkNotNull(poplavok);
-    }
-
-    void setPoplavok(@Nullable Poplavok poplavok) {
-        this.poplavok = poplavok;
     }
 
     public boolean isActive() {

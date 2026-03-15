@@ -2,23 +2,14 @@ package com.poplavok.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import javax.annotation.Nullable;
 
 @Entity
 @Table(name = "currency_extended_info")
-public class CurrencyExtendedInfo {
-
-    @Id
-    @Nullable
-    private Long id;
-
-    @Column
-    @Nullable
-    String symbol;
+@PrimaryKeyJoinColumn(name = "currency")
+public class CurrencyExtendedInfo extends Currency {
 
     @Column(columnDefinition = "TEXT")
     @Nullable
@@ -27,29 +18,11 @@ public class CurrencyExtendedInfo {
     public CurrencyExtendedInfo() {
     }
 
-    public CurrencyExtendedInfo(String symbol) {
-        this.symbol = symbol;
+    public CurrencyExtendedInfo(String currency) {
+        super(currency);
     }
 
     // Accessor methods matching the interface requested
-
-    @Nullable
-    public Long currencyExtendedInfoId() {
-        return id;
-    }
-
-    public void setId(@Nullable Long id) {
-        this.id = id;
-    }
-
-    @Nullable
-    public String symbol() {
-        return symbol;
-    }
-
-    public void setSymbol(@Nullable String symbol) {
-        this.symbol = symbol;
-    }
 
     @Nullable
     public String getCurrencyExtendedInfoJson() {

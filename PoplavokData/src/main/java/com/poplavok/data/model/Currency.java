@@ -2,9 +2,9 @@ package com.poplavok.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -16,12 +16,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 @Entity
 @Table(name = "currencies")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Currency {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Nullable
-    private Long id;
-
     @Column(nullable = false, unique = true, length = 20)
     private String currency;
 
@@ -73,15 +70,6 @@ public class Currency {
 
     public Currency(String currency) {
         this.currency = currency;
-    }
-
-    public Long getId() {
-        return checkNotNull(id);
-    }
-
-    @Nullable
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getCurrency() {
