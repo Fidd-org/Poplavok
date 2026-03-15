@@ -2,8 +2,10 @@ package com.poplavok.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import javax.annotation.Nullable;
@@ -17,7 +19,8 @@ public class CurrencyExtendedInfo {
     private String currency; // Same PK as Currency
 
     @OneToOne
-    @JoinColumn(name = "currency", insertable = false, updatable = false)
+    @MapsId
+    @JoinColumn(name = "currency", foreignKey = @ForeignKey(name = "fk_currency_extended_info_currencies"))
     @Nullable
     private Currency currencyEntity;
 
@@ -31,6 +34,7 @@ public class CurrencyExtendedInfo {
 
     public CurrencyExtendedInfo(String currency) {
         this.currency = currency;
+        this.currencyEntity = new Currency(currency);
     }
 
     // Accessor methods matching the interface requested
