@@ -58,6 +58,8 @@ public class Account {
         this.currency = currency;
         this.available = available;
         this.borrowed = borrowed;
+        this.lentAmount = BigDecimal.ZERO;
+        this.creationDate = new Date();
     }
 
     public Long getId() {
@@ -118,4 +120,3 @@ public class Account {
         entry.setAccount(null);
     }
 }
-

@@ -61,7 +61,7 @@ public class Level {
     @Nullable
     private LocalDateTime closeDate;
 
-    @OneToMany(mappedBy = "level", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "destinationLevel", cascade = CascadeType.ALL)
     private List<Loan> loans = new ArrayList<>();
 
     @OneToMany(mappedBy = "level", cascade = CascadeType.ALL)

@@ -64,16 +64,6 @@ public class Trade {
     @Nullable
     private LocalDateTime date;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_currency_id")
-    @Nullable
-    private Currency baseCurrency;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quote_currency_id")
-    @Nullable
-    private Currency quoteCurrency;
-
     @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LevelTrade> levelTrades = new ArrayList<>();
 
@@ -146,22 +136,6 @@ public class Trade {
 
     public void setDate(LocalDateTime date) {
         this.date = date;
-    }
-
-    public @Nullable Currency getBaseCurrency() {
-        return baseCurrency;
-    }
-
-    public void setBaseCurrency(Currency baseCurrency) {
-        this.baseCurrency = baseCurrency;
-    }
-
-    public @Nullable Currency getQuoteCurrency() {
-        return quoteCurrency;
-    }
-
-    public void setQuoteCurrency(Currency quoteCurrency) {
-        this.quoteCurrency = quoteCurrency;
     }
 
     public List<LevelTrade> getLevelTrades() {
