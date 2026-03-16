@@ -1,5 +1,6 @@
 package com.poplavok;
 
+import com.KyKu4.npo4ee.KyKu4_XTTn;
 import com.poplavok.data.utils.DBUtil;
 import com.poplavok.data.utils.HibernateUtil;
 import com.poplavok.forms.MainForm;
@@ -37,6 +38,7 @@ public class App extends Application {
                 HibernateUtil.shutdown();
                 DBUtil.shutdown();
                 Platform.exit();
+                KyKu4_XTTn.closeHttpClient();
             });
 
             mainStage.setTitle("Poplavok");

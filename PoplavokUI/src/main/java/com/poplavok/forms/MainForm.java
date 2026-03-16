@@ -1,5 +1,6 @@
 package com.poplavok.forms;
 
+import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Currency;
 import com.google.common.base.Preconditions;
 import javafx.fxml.FXML;
@@ -29,14 +30,6 @@ public class MainForm {
 
     public void setStatusText(String text) {
         Preconditions.checkNotNull(serverInfoLabel).setText(text);
-    }
-
-    public void showTestForm() {
-        TestForm testForm = new TestForm();
-        final Tab tab = new Tab("Test " + (testFormCount++), testForm);
-        tab.setClosable(true);
-
-        addTab(tab);
     }
 
     public void showAboutDialog() {
@@ -74,6 +67,14 @@ public class MainForm {
     public void openMarketTickersTab() {
         MarketTickerTab marketTickerTab = new MarketTickerTab(/*this*/);
         final Tab tab = new Tab("MarketTickers", marketTickerTab);
+        tab.setClosable(true);
+
+        addTab(tab);
+    }
+
+    public void openAccountsTab() {
+        AccountListTab accountListTab = new AccountListTab(this);
+        final Tab tab = new Tab("Accounts", accountListTab);
         tab.setClosable(true);
 
         addTab(tab);

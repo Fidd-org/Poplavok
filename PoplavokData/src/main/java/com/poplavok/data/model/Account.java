@@ -31,33 +31,39 @@ public class Account {
 
     @Column(nullable = false, precision = 20, scale = 8)
     @Nullable
-    private BigDecimal available;
+    private BigDecimal availableAmount;
 
     @Column(nullable = false, precision = 20, scale = 8)
     @Nullable
-    private BigDecimal borrowed;
-
-    @Column(nullable = false, precision = 20, scale = 8)
-    @Nullable
-    public BigDecimal lentAmount;
+    public BigDecimal reservedAmount;
 
     @Nullable
     public Date creationDate;
 
-    public Account() {
+    @Column(nullable = false)
+    private boolean archived = false;
+
+    @Column
+    @Nullable
+    private String accountName;
+
+    public Account(Currency currency, BigDecimal availableAmount, BigDecimal reservedAmount) {
+        this.currency = currency;
+        this.availableAmount = availableAmount;
+        this.reservedAmount = reservedAmount;
+        this.creationDate = new Date();
+        this.archived = false;
     }
 
-    public Account(Currency currency, BigDecimal available, BigDecimal borrowed) {
-        this.currency = currency;
-        this.available = available;
-        this.borrowed = borrowed;
-        this.lentAmount = BigDecimal.ZERO;
-        this.creationDate = new Date();
+    public Account() {
+        this.archived = false;
     }
 
     public Long getId() {
         return checkNotNull(id);
     }
+
+    public void setId(@Nullable Long accountId) { this.id = accountId; }
 
     public Currency getCurrency() {
         return checkNotNull(currency);
@@ -67,28 +73,20 @@ public class Account {
         this.currency = currency;
     }
 
-    public BigDecimal getAvailable() {
-        return checkNotNull(available);
+    public BigDecimal getAvailableAmount() {
+        return checkNotNull(availableAmount);
     }
 
-    public void setAvailable(BigDecimal available) {
-        this.available = available;
+    public void setAvailableAmount(BigDecimal availableAmount) {
+        this.availableAmount = availableAmount;
     }
 
-    public BigDecimal getBorrowed() {
-        return checkNotNull(borrowed);
+    public @Nullable BigDecimal getReservedAmount() {
+        return reservedAmount != null ? reservedAmount : BigDecimal.ZERO;
     }
 
-    public void setBorrowed(BigDecimal borrowed) {
-        this.borrowed = borrowed;
-    }
-
-    public @Nullable BigDecimal getLentAmount() {
-        return lentAmount != null ? lentAmount : BigDecimal.ZERO;
-    }
-
-    public void setLentAmount(@Nullable BigDecimal lentAmount) {
-        this.lentAmount = lentAmount;
+    public void setReservedAmount(@Nullable BigDecimal reservedAmount) {
+        this.reservedAmount = reservedAmount;
     }
 
     public @Nullable Date getCreationDate() {
@@ -97,5 +95,34 @@ public class Account {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    @Nullable
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(@Nullable String accountName) {
+        this.accountName = accountName;
+    }
+
+    public String getCurrencyStr() {
+        return currency != null ? currency.getCurrency() : "N/A";
+    }
+
+    public String getAvailableAmountStr() {
+        return availableAmount != null ? availableAmount.toPlainString() : "0";
+    }
+
+    public String getReservedAmountStr() {
+        return reservedAmount != null ? reservedAmount.toPlainString() : "0";
     }
 }

@@ -14,6 +14,11 @@
             <MenuItem mnemonicParsing="false" onAction="#closeAllTabs" text="Close all tabs" />
             <MenuItem mnemonicParsing="false" onAction="#quit" text="Quit" />
         </Menu>
+      <Menu mnemonicParsing="false" text="Bank">
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#openAccountsTab" text="Accounts" />
+        </items>
+      </Menu>
       <Menu mnemonicParsing="false" text="Instruments">
         <items>
           <MenuItem mnemonicParsing="false" onAction="#openCurrenciesTab" text="Currencies" />
