@@ -60,7 +60,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
 
     public AccountListTab(MainForm mainApp) {
         this.mainApp = mainApp;
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("AccountList.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("AccountListTab.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

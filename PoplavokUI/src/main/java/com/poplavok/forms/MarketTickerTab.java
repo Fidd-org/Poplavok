@@ -46,7 +46,7 @@ public class MarketTickerTab extends AnchorPane implements Refreshable {
 
     public MarketTickerTab(/*MainApp mainApp*/) {
         //this.mainApp = mainApp;
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MarketTicker_JlucT.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MarketTickerTab.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 
