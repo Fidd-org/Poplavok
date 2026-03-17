@@ -19,7 +19,7 @@
             <Button mnemonicParsing="false" onAction="#renameAccount" text="[ Rename ]" />
             <Button mnemonicParsing="false" onAction="#deposit" text="[ Deposit ]" />
             <Button mnemonicParsing="false" onAction="#withdraw" text="[ Withdraw ]" />
-                <Button mnemonicParsing="false" onAction="#archiveAccount" text="[ Archive account ]" />
+                <Button mnemonicParsing="false" onAction="#archiveAccount" text="[ Un/Archive account ]" />
                 <Button mnemonicParsing="false" onAction="#refreshContent" text="[ Refresh (from DB) ]" />
             <CheckBox fx:id="showArchivedCheckBox" mnemonicParsing="false" text="Show archived" />
             </ToolBar>

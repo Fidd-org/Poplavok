@@ -179,7 +179,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
 
             // TODO: make sure that account has 0 available or reserved amount before archiving
 
-            DBUtil.connectCommitAndClose(sess -> AccountDAO.setArchived(sess, account.getId(), true));
+            DBUtil.connectCommitAndClose(sess -> AccountDAO.setArchived(sess, account.getId(), !account.isArchived()));
             refreshContent();
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error: " + e, ButtonType.OK);
