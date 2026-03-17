@@ -65,9 +65,14 @@ public class AccountListTab extends AnchorPane implements Refreshable {
         refreshContent();
     }
 
+    @Override
     public void refreshContent() {
         try {
-            //TODO: restore selection for account and transaction
+            Account selectedAccount = null;
+            if (accountsTable != null && accountsTable.getSelectionModel().getSelectedItem() != null) {
+                selectedAccount = accountsTable.getSelectionModel().getSelectedItem();
+            }
+
             ObservableList<Account> masterAccounts = FXCollections.observableList(DBUtil.connectGetResultAndClose(AccountDAO::findAll));
             accounts = new FilteredList<>(masterAccounts);
             SortedList<Account> sortableAccounts = new SortedList<>(accounts);
@@ -76,6 +81,15 @@ public class AccountListTab extends AnchorPane implements Refreshable {
             Preconditions.checkNotNull(accountsTable).itemsProperty().set(sortableAccounts);
             sortableAccounts.comparatorProperty().bind(accountsTable.comparatorProperty());
             accountsTable.refresh();
+
+            if (selectedAccount != null) {
+                for (Account account : accountsTable.getItems()) {
+                    if (account.getId().equals(selectedAccount.getId())) {
+                        accountsTable.getSelectionModel().select(account);
+                        break;
+                    }
+                }
+            }
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error: " + e, ButtonType.OK);
             LOGGER.error("Error:", e);
@@ -102,7 +116,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
         return account -> {
             if (!showArchived && account.isArchived()) return false;
             if (searchText == null || searchText.isEmpty()) return true;
-            return (account.getCurrency().getCurrency().toLowerCase().contains(searchText.toLowerCase().trim()));
+            return account.getCurrency().getCurrency().toLowerCase().contains(searchText.toLowerCase().trim());
         };
     }
 
