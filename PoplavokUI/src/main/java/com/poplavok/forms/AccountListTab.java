@@ -40,21 +40,10 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     @Nullable FilteredList<Account> accounts;
     @Nullable FilteredList<Transaction> transaction;
 
-    @FXML
-    @Nullable
-    TableView<Account> accountsTable;
-
-    @FXML
-    @Nullable
-    TableView<Transaction> transactionsTable;
-
-    @FXML
-    @Nullable
-    TextField filterTextField;
-
-    @FXML
-    @Nullable
-    CheckBox showArchivedCheckBox;
+    @FXML @Nullable TableView<Account> accountsTable;
+    @FXML @Nullable TableView<Transaction> transactionsTable;
+    @FXML @Nullable TextField filterTextField;
+    @FXML @Nullable CheckBox showArchivedCheckBox;
 
     protected final MainForm mainApp;
 
@@ -69,6 +58,9 @@ public class AccountListTab extends AnchorPane implements Refreshable {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+
+        checkNotNull(filterTextField).textProperty().addListener((observable, oldValue, newValue) -> filterTableView());
+        checkNotNull(showArchivedCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> filterTableView());
 
         refreshContent();
     }
@@ -106,7 +98,9 @@ public class AccountListTab extends AnchorPane implements Refreshable {
 
     private Predicate<Account> createFilterPredicate() {
         String searchText = Preconditions.checkNotNull(filterTextField).textProperty().get();
+        boolean showArchived = Preconditions.checkNotNull(showArchivedCheckBox).isSelected();
         return account -> {
+            if (!showArchived && account.isArchived()) return false;
             if (searchText == null || searchText.isEmpty()) return true;
             return (account.getCurrency().getCurrency().toLowerCase().contains(searchText.toLowerCase().trim()));
         };
