@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 public class DBUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(DBUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DBUtil.class);
     private static final int POOL_SIZE = 4;
 
     @Nullable
@@ -60,7 +60,7 @@ public class DBUtil {
     public static CompletableFuture<Void> runAsync(Runnable task) {
         return CompletableFuture.runAsync(task, scheduler())
                 .exceptionally(ex -> {
-                    logger.error("Error executing DB task", ex);
+                    LOGGER.error("Error executing DB task", ex);
                     throw new RuntimeException(ex);
                 });
     }
@@ -75,7 +75,7 @@ public class DBUtil {
     public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier) {
         return CompletableFuture.supplyAsync(supplier, scheduler())
                 .exceptionally(ex -> {
-                    logger.error("Error executing DB task", ex);
+                    LOGGER.error("Error executing DB task", ex);
                     throw new RuntimeException(ex);
                 });
     }
@@ -90,7 +90,7 @@ public class DBUtil {
     public static CompletableFuture<Void> executeAsync(Runnable action) {
         return CompletableFuture.runAsync(action, scheduler())
                 .exceptionally(ex -> {
-                    logger.error("Error executing DB task", ex);
+                    LOGGER.error("Error executing DB task", ex);
                     throw new RuntimeException(ex);
                 });
     }
@@ -108,7 +108,7 @@ public class DBUtil {
             try {
                 task.run();
             } catch (Exception ex) {
-                logger.error("Error executing scheduled DB task", ex);
+                LOGGER.error("Error executing scheduled DB task", ex);
                 throw new RuntimeException(ex);
             }
         }, delay, unit);
@@ -125,28 +125,39 @@ public class DBUtil {
      */
     public static <T> T connectGetResultAndClose(Function<Session, T> fn) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-        Session session = sessionFactory.openSession();
-        try (session) {
-            T result = supplyAsync(() -> fn.apply(session)).get();
-            return result;
+        try (Session session = sessionFactory.openSession()) {
+            return supplyAsync(() -> fn.apply(session)).get();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Throwable cause = e;
+            if (e instanceof java.util.concurrent.ExecutionException) {
+                cause = e.getCause();
+            }
+            LOGGER.error("Error connectedGetResultAndClose", cause);
+            throw new RuntimeException(cause);
         }
     }
 
     public static void connectCommitAndClose(Consumer<Session> fn) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-        Session session = sessionFactory.openSession();
         Transaction transaction = null;
-        try (session) {
-            transaction = session.beginTransaction();
-            executeAsync(() -> fn.accept(session)).get();
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
+        try (Session session = sessionFactory.openSession()) {
+            try {
+                transaction = session.beginTransaction();
+                executeAsync(() -> fn.accept(session)).get();
+                transaction.commit();
+            } catch (Exception e) {
+                if (transaction != null && transaction.getStatus().canRollback()) {
+                    transaction.rollback();
+                }
+                throw e;
             }
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            Throwable cause = e;
+            if (e instanceof java.util.concurrent.ExecutionException) {
+                cause = e.getCause();
+            }
+            LOGGER.error("Error connectCommitAndClose", cause);
+            throw new RuntimeException(cause);
         }
     }
 }
