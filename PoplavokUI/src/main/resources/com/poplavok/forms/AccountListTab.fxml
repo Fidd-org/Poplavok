@@ -57,9 +57,9 @@
                             <PropertyValueFactory property="creationDate" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Archived">
+                    <TableColumn text="Is Archived?">
                         <cellValueFactory>
-                            <PropertyValueFactory property="archived" />
+                            <PropertyValueFactory property="archivedStatus" />
                         </cellValueFactory>
                     </TableColumn>
                 </columns>

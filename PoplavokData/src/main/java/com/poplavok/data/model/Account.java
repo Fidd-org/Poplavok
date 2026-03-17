@@ -125,4 +125,8 @@ public class Account {
     public String getReservedAmountStr() {
         return reservedAmount != null ? reservedAmount.toPlainString() : "0";
     }
+
+    public String getArchivedStatus() {
+        return archived ? "Archived" : "Active";
+    }
 }
