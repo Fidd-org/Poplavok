@@ -116,7 +116,13 @@ public class AccountListTab extends AnchorPane implements Refreshable {
         return account -> {
             if (!showArchived && account.isArchived()) return false;
             if (searchText == null || searchText.isEmpty()) return true;
-            return account.getCurrency().getCurrency().toLowerCase().contains(searchText.toLowerCase().trim());
+            
+            String lowerCaseFilter = searchText.toLowerCase().trim();
+            
+            if (account.getCurrency().getCurrency().toLowerCase().contains(lowerCaseFilter)) {
+                return true;
+            }
+            return account.getAccountName() != null && account.getAccountName().toLowerCase().contains(lowerCaseFilter);
         };
     }
 
