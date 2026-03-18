@@ -5,6 +5,7 @@ import com.flower.fxutils.ProgressForm;
 import com.flower.fxutils.Refreshable;
 import com.google.common.base.Preconditions;
 import com.poplavok.data.dao.AccountDAO;
+import com.poplavok.data.dao.TransactionDAO;
 import com.poplavok.data.model.Account;
 import com.poplavok.data.model.ExternalTransaction;
 import com.poplavok.data.model.Transaction;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Date;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -210,26 +212,40 @@ public class AccountListTab extends AnchorPane implements Refreshable {
 
     public void deposit() {
         try {
+            Account account = Preconditions.checkNotNull(accountsTable).getSelectionModel().getSelectedItem();
+
             DepositWithdrawDialog depositWithdrawDialog = new DepositWithdrawDialog(true);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { depositWithdrawDialog.setStage(stage); return depositWithdrawDialog; },
-                    "Deposit");
+                    "Deposit to " + account.getAccountName());
 
             workspaceStage.setOnHidden(
-                    ev -> {
-                        try {
-                            ExternalTransaction transaction = depositWithdrawDialog.getReturnTransaction();
-                            if (transaction != null) {
-                                // TODO: update accounts balances according to transaction amount
-                                // TODO: add transaction to DB
-                                //addTransaction(transaction);
-                            }
-                        } catch (Exception e) {
-                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error depositing: " + e, ButtonType.OK);
-                            LOGGER.error("Error depositing: ", e);
-                            alert.showAndWait();
+                ev -> {
+                    try {
+                        ExternalTransaction transaction = depositWithdrawDialog.getReturnTransaction();
+                        if (transaction != null) {
+                            transaction.setDestinationAccount(account);
+                            transaction.setDate(new Date());
+                            transaction.setCurrency(account.getCurrency());
+
+                            // update accounts balances according to transaction amount
+                            account.setAvailableAmount(account.getAvailableAmount().add(transaction.getAmount()));
+
+                            // add transaction to DB
+                            DBUtil.connectCommitAndClose(sess -> {
+                                Account managedAccount = (Account) sess.merge(checkNotNull(account));
+                                transaction.setDestinationAccount(managedAccount);
+                                transaction.setCurrency(managedAccount.getCurrency());
+                                TransactionDAO.save(sess, checkNotNull(transaction));
+                            });
+                            refreshContent();
                         }
+                    } catch (Exception e) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Error depositing: " + e, ButtonType.OK);
+                        LOGGER.error("Error depositing: ", e);
+                        alert.showAndWait();
                     }
+                }
             );
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error depositing: " + e, ButtonType.OK);

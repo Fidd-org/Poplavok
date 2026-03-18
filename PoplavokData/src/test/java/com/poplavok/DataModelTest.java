@@ -11,7 +11,7 @@ import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Repayment;
 import com.poplavok.data.model.MarketTicker;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DataModelTest {
@@ -81,14 +80,14 @@ public class DataModelTest {
                 LevelStrategy.LINEAR,
                 "{}",
                 new BigDecimal("50000"),
-                LocalDateTime.now()
+                new Date()
         );
         session.persist(poplavok);
 
         Level level1 = new Level(1, poplavok, new BigDecimal("0.1"), new BigDecimal("5000"),
-                new BigDecimal("50000"), LocalDateTime.now());
+                new BigDecimal("50000"), new Date());
         Level level2 = new Level(2, poplavok, new BigDecimal("0.2"), new BigDecimal("9500"),
-                new BigDecimal("47500"), LocalDateTime.now());
+                new BigDecimal("47500"), new Date());
         poplavok.addLevel(level1);
         poplavok.addLevel(level2);
 
@@ -112,10 +111,10 @@ public class DataModelTest {
         session.persist(usdt);
 
         Loan loan = new Loan(usdt, new BigDecimal("1000"), null,
-                LocalDateTime.now(), LoanType.EXTERNAL);
+                new Date(), LoanType.EXTERNAL);
         session.persist(loan);
 
-        Repayment repayment = new Repayment(loan, new BigDecimal("500"), LocalDateTime.now());
+        Repayment repayment = new Repayment(loan, new BigDecimal("500"), new Date());
         loan.addRepayment(repayment);
 
         tx.commit();

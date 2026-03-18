@@ -5,17 +5,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,7 +46,7 @@ public class Loan extends Transaction {
     }
 
     public Loan(Currency currency, BigDecimal amount, Level level,
-                LocalDateTime date, LoanType loanType) {
+                Date date, LoanType loanType) {
         super(currency, null, null, null, level, amount, date);
         this.loanType = loanType;
         this.isActive = true;
@@ -79,25 +76,19 @@ public class Loan extends Transaction {
         this.interestRate = interestRate;
     }
 
-    public @Nullable String getNotes() {
-        return notes;
-    }
-
     public void setNotes(String notes) {
         this.notes = notes;
     }
 
     public List<Repayment> getRepayments() {
-        return checkNotNull(repayments);
+        return repayments;
+    }
+
+    public void setRepayments(List<Repayment> repayments) {
+        this.repayments = repayments;
     }
 
     public void addRepayment(Repayment repayment) {
         repayments.add(repayment);
-        repayment.setLoan(this);
-    }
-
-    public void removeRepayment(Repayment repayment) {
-        repayments.remove(repayment);
-        repayment.setLoan(null);
     }
 }

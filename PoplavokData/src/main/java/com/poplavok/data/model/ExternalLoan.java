@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -47,7 +47,7 @@ public class ExternalLoan {
 
     @Column(name = "last_interest_update")
     @Nullable
-    private LocalDateTime lastInterestUpdate;
+    private Date lastInterestUpdate;
 
     public ExternalLoan() {
     }
@@ -57,7 +57,7 @@ public class ExternalLoan {
         this.externalId = externalId;
         this.dailyInterestRate = dailyInterestRate;
         this.accruedInterest = BigDecimal.ZERO;
-        this.lastInterestUpdate = LocalDateTime.now();
+        this.lastInterestUpdate = new Date();
     }
 
     public Long getId() {
@@ -96,11 +96,11 @@ public class ExternalLoan {
         this.accruedInterest = accruedInterest;
     }
 
-    public LocalDateTime getLastInterestUpdate() {
+    public Date getLastInterestUpdate() {
         return checkNotNull(lastInterestUpdate);
     }
 
-    public void setLastInterestUpdate(LocalDateTime lastInterestUpdate) {
+    public void setLastInterestUpdate(Date lastInterestUpdate) {
         this.lastInterestUpdate = lastInterestUpdate;
     }
 }

@@ -10,7 +10,8 @@ import com.poplavok.data.model.LoanType;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.MarketTicker;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -43,21 +44,21 @@ public class DemoApp {
                 LevelStrategy.LINEAR,
                 "{\"step\": 0.05, \"multiplier\": 1.5}",
                 new BigDecimal("45000"),
-                LocalDateTime.now()
+                new Date()
         );
         session.persist(poplavok);
 
         // Create levels
         Level level1 = new Level(1, poplavok, new BigDecimal("0.1"), new BigDecimal("4500"),
-                new BigDecimal("45000"), LocalDateTime.now());
+                new BigDecimal("45000"), new Date());
         Level level2 = new Level(2, poplavok, new BigDecimal("0.15"), new BigDecimal("6412.5"),
-                new BigDecimal("42750"), LocalDateTime.now());
+                new BigDecimal("42750"), new Date());
         poplavok.addLevel(level1);
         poplavok.addLevel(level2);
 
         // Create a loan for level 2
         Loan loan = new Loan(usdt, new BigDecimal("6412.5"), level2,
-                LocalDateTime.now(), LoanType.POPLAVOK_FUNDED);
+                new Date(), LoanType.POPLAVOK_FUNDED);
         level2.addLoan(loan);
         session.persist(loan);
 

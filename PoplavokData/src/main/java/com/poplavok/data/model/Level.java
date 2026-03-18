@@ -14,8 +14,8 @@ import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -55,11 +55,11 @@ public class Level {
 
     @Column(name = "creation_date", nullable = false)
     @Nullable
-    private LocalDateTime creationDate;
+    private Date creationDate;
 
     @Column(name = "close_date")
     @Nullable
-    private LocalDateTime closeDate;
+    private Date closeDate;
 
     @OneToMany(mappedBy = "destinationLevel", cascade = CascadeType.ALL)
     private List<Loan> loans = new ArrayList<>();
@@ -71,7 +71,7 @@ public class Level {
     }
 
     public Level(int levelNum, Poplavok poplavok, BigDecimal amountBase, BigDecimal amountQuote,
-                 BigDecimal levelPrice, LocalDateTime creationDate) {
+                 BigDecimal levelPrice, Date creationDate) {
         this.levelNum = levelNum;
         this.poplavok = poplavok;
         this.amountBase = amountBase;
@@ -133,19 +133,19 @@ public class Level {
         this.levelPrice = levelPrice;
     }
 
-    public LocalDateTime getCreationDate() {
+    public Date getCreationDate() {
         return checkNotNull(creationDate);
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
+    public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
 
-    public LocalDateTime getCloseDate() {
+    public Date getCloseDate() {
         return checkNotNull(closeDate);
     }
 
-    public void setCloseDate(LocalDateTime closeDate) {
+    public void setCloseDate(Date closeDate) {
         this.closeDate = closeDate;
     }
 

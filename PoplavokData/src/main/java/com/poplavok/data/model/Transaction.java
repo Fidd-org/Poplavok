@@ -14,14 +14,14 @@ import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Entity
 @Table(name = "transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Transaction {
+public abstract class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,7 +54,7 @@ public class Transaction {
 
     @Column(nullable = false)
     @Nullable
-    private LocalDateTime date;
+    private Date date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency", nullable = false)
@@ -66,7 +66,7 @@ public class Transaction {
 
     public Transaction(Currency currency, @Nullable Account sourceAccount, @Nullable Level sourceLevel,
                        @Nullable Account destinationAccount, @Nullable Level destinationLevel,
-                       BigDecimal amount, LocalDateTime date) {
+                       BigDecimal amount, Date date) {
         this.currency = currency;
         this.sourceAccount = sourceAccount;
         this.sourceLevel = sourceLevel;
@@ -124,11 +124,11 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public LocalDateTime getDate() {
+    public Date getDate() {
         return checkNotNull(date);
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

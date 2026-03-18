@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -39,12 +39,12 @@ public class Rate {
 
     @Column(nullable = false)
     @Nullable
-    private LocalDateTime timestamp;
+    private Date timestamp;
 
     public Rate() {
     }
 
-    public Rate(MarketTicker marketTicker, BigDecimal price, BigDecimal tickerPrice, LocalDateTime timestamp) {
+    public Rate(MarketTicker marketTicker, BigDecimal price, BigDecimal tickerPrice, Date timestamp) {
         this.marketTicker = marketTicker;
         this.price = price;
         this.tickerPrice = tickerPrice;
@@ -79,11 +79,11 @@ public class Rate {
         this.tickerPrice = tickerPrice;
     }
 
-    public LocalDateTime getTimestamp() {
+    public Date getTimestamp() {
         return checkNotNull(timestamp);
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 }

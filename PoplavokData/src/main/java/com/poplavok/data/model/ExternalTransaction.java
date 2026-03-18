@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "external_transactions")
@@ -28,7 +28,7 @@ public class ExternalTransaction extends Transaction {
     public ExternalTransaction() {
     }
 
-    public ExternalTransaction(Account account, BigDecimal amount, LocalDateTime date,
+    public ExternalTransaction(Account account, BigDecimal amount, Date date,
                                String details, ExternalTransactionType type) {
         // External transactions usually affect accounts directly
         super(account.getCurrency(), account, null, null, null, amount, date);
@@ -54,4 +54,3 @@ public class ExternalTransaction extends Transaction {
         this.type = type;
     }
 }
-

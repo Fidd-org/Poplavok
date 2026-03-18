@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -31,7 +31,7 @@ public class Repayment extends Transaction {
     protected Repayment() {
     }
 
-    public Repayment(Loan loan, BigDecimal amount, LocalDateTime date) {
+    public Repayment(Loan loan, BigDecimal amount, Date date) {
         // Diagram links Repayment to Level.
         // Assuming Repayment is related to a specific level (maybe repayment happens at a level?).
         super(loan.getCurrency(), null, null, null, null, amount, date);
@@ -54,4 +54,3 @@ public class Repayment extends Transaction {
         this.notes = notes;
     }
 }
-
