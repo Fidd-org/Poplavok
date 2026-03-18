@@ -12,8 +12,8 @@ public class AccountDAO {
         session.persist(account);
     }
 
-    public static void update(Session session, Account account) {
-        session.merge(account);
+    public static Account update(Session session, Account account) {
+        return session.merge(account);
     }
 
     public static void delete(Session session, Account account) {

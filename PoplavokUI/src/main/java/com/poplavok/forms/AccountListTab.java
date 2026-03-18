@@ -233,10 +233,12 @@ public class AccountListTab extends AnchorPane implements Refreshable {
 
                             // add transaction to DB
                             DBUtil.connectCommitAndClose(sess -> {
-                                Account managedAccount = (Account) sess.merge(checkNotNull(account));
+                                Account managedAccount = AccountDAO.update(sess, checkNotNull(account));
+
                                 transaction.setDestinationAccount(managedAccount);
                                 transaction.setCurrency(managedAccount.getCurrency());
                                 TransactionDAO.save(sess, checkNotNull(transaction));
+
                             });
                             refreshContent();
                         }
