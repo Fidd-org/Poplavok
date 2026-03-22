@@ -8,7 +8,6 @@ import com.poplavok.data.dao.AccountDAO;
 import com.poplavok.data.dao.TransactionDAO;
 import com.poplavok.data.model.Account;
 import com.poplavok.data.model.ExternalTransaction;
-import com.poplavok.data.model.Transaction;
 import com.poplavok.data.utils.DBUtil;
 import com.poplavok.kucoin.KucoinTool;
 import javafx.collections.FXCollections;
@@ -40,10 +39,10 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(AccountListTab.class);
 
     @Nullable FilteredList<Account> accounts;
-    @Nullable FilteredList<Transaction> transactions;
+    @Nullable FilteredList<AccountTransaction> transactions;
 
     @FXML @Nullable TableView<Account> accountsTable;
-    @FXML @Nullable TableView<Transaction> transactionsTable;
+    @FXML @Nullable TableView<AccountTransaction> transactionsTable;
     @FXML @Nullable TextField filterTextField;
     @FXML @Nullable CheckBox showArchivedCheckBox;
 
@@ -85,7 +84,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
                 selectedAccount = accountsTable.getSelectionModel().getSelectedItem();
             }
 
-            Transaction selectedTransaction = null;
+            AccountTransaction selectedTransaction = null;
             if (transactionsTable != null && transactionsTable.getSelectionModel().getSelectedItem() != null) {
                 selectedTransaction = transactionsTable.getSelectionModel().getSelectedItem();
             }
@@ -105,7 +104,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
                         accountsTable.getSelectionModel().select(account);
 
                         if (selectedTransaction != null && transactionsTable != null) {
-                            for (Transaction t : transactionsTable.getItems()) {
+                            for (AccountTransaction t : transactionsTable.getItems()) {
                                 if (t.getId() != null && t.getId().equals(selectedTransaction.getId())) {
                                     transactionsTable.getSelectionModel().select(t);
                                     break;
@@ -125,11 +124,12 @@ public class AccountListTab extends AnchorPane implements Refreshable {
 
     private void refreshTransactions(Account account) {
         try {
-            ObservableList<Transaction> masterTransactions = FXCollections.observableList(
-                    DBUtil.connectGetResultAndClose(sess -> TransactionDAO.findByAccount(sess, account.getId())));
+            ObservableList<AccountTransaction> masterTransactions = FXCollections.observableList(
+                    DBUtil.connectGetResultAndClose(
+                            sess -> TransactionDAO.findByAccount(sess, account.getId()).stream().map(t -> new AccountTransaction(t, account)).toList()));
 
             transactions = new FilteredList<>(masterTransactions);
-            SortedList<Transaction> sortableTransactions = new SortedList<>(transactions);
+            SortedList<AccountTransaction> sortableTransactions = new SortedList<>(transactions);
 
             if (transactionsTable != null) {
                 transactionsTable.itemsProperty().set(sortableTransactions);
@@ -277,10 +277,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
 
                             // add transaction to DB
                             DBUtil.connectCommitAndClose(sess -> {
-                                Account managedAccount = AccountDAO.update(sess, checkNotNull(account));
-
-                                transaction.setDestinationAccount(managedAccount);
-                                transaction.setCurrency(managedAccount.getCurrency());
+                                AccountDAO.update(sess, checkNotNull(account));
                                 TransactionDAO.save(sess, checkNotNull(transaction));
 
                             });
@@ -301,7 +298,50 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     }
 
     public void withdraw() {
-        // TODO: amount, external transaction details.
+        try {
+            Account account = Preconditions.checkNotNull(accountsTable).getSelectionModel().getSelectedItem();
+
+            DepositWithdrawDialog depositWithdrawDialog = new DepositWithdrawDialog(true);
+            Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
+                    stage -> { depositWithdrawDialog.setStage(stage); return depositWithdrawDialog; },
+                    "Withdraw from " + account.getAccountName());
+
+            workspaceStage.setOnHidden(
+                    ev -> {
+                        try {
+                            ExternalTransaction transaction = depositWithdrawDialog.getReturnTransaction();
+                            if (transaction != null) {
+                                transaction.setSourceAccount(account);
+                                transaction.setDate(new Date());
+                                transaction.setCurrency(account.getCurrency());
+
+                                if (account.getAvailableAmount().compareTo(transaction.getAmount()) > 0) {
+                                    // update accounts balances according to transaction amount
+                                    account.setAvailableAmount(account.getAvailableAmount().subtract(transaction.getAmount()));
+
+                                    // add transaction to DB
+                                    DBUtil.connectCommitAndClose(sess -> {
+                                        AccountDAO.update(sess, checkNotNull(account));
+                                        TransactionDAO.save(sess, checkNotNull(transaction));
+                                    });
+                                    refreshContent();
+                                } else {
+                                    Alert alert = new Alert(Alert.AlertType.ERROR, "Not enough available amount to withdraw", ButtonType.OK);
+                                    alert.showAndWait();
+                                }
+                            }
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error withdrawing: " + e, ButtonType.OK);
+                            LOGGER.error("Error withdrawing: ", e);
+                            alert.showAndWait();
+                        }
+                    }
+            );
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error withdrawing: " + e, ButtonType.OK);
+            LOGGER.error("Error withdrawing: ", e);
+            alert.showAndWait();
+        }
     }
 
     // TODO: update transaction details dialog
