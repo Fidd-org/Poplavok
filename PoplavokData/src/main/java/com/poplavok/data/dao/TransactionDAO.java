@@ -98,4 +98,19 @@ public class TransactionDAO {
                         "order by et.date desc",
                 ExternalTransaction.class).list();
     }
+
+    public static List<Transaction> findByAccount(Session session, Long accountId) {
+        return session.createQuery(
+                "select t from Transaction t " +
+                        "left join fetch t.currency " +
+                        "left join fetch t.sourceAccount " +
+                        "left join fetch t.destinationAccount " +
+                        "left join fetch t.sourceLevel " +
+                        "left join fetch t.destinationLevel " +
+                        "where t.sourceAccount.id = :accountId or t.destinationAccount.id = :accountId " +
+                        "order by t.date desc",
+                Transaction.class)
+                .setParameter("accountId", accountId)
+                .list();
+    }
 }

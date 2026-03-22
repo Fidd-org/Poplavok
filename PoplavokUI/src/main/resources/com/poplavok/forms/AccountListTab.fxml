@@ -69,39 +69,39 @@
          <children>
             <TableView fx:id="transactionsTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <columns>
-                  <TableColumn text="MarketTickerId">
+                  <TableColumn text="TransactionId">
                      <cellValueFactory>
-                        <PropertyValueFactory property="id" />
+                        <PropertyValueFactory property="Id" />
                      </cellValueFactory>
                   </TableColumn>
-                  <TableColumn text="Symbol">
+                  <TableColumn text="TransactionType">
                      <cellValueFactory>
-                        <PropertyValueFactory property="symbol" />
+                        <PropertyValueFactory property="TransactionType" />
                      </cellValueFactory>
                   </TableColumn>
-                  <TableColumn text="SymbolName">
+                  <TableColumn text="Amount">
                      <cellValueFactory>
-                        <PropertyValueFactory property="symbolName" />
+                        <PropertyValueFactory property="Amount" />
                      </cellValueFactory>
                   </TableColumn>
-                  <TableColumn text="TakerFeeRate">
+                  <TableColumn text="Date">
                      <cellValueFactory>
-                        <PropertyValueFactory property="takerFeeRate" />
+                        <PropertyValueFactory property="Date" />
                      </cellValueFactory>
                   </TableColumn>
-                  <TableColumn text="MakerFeeRate">
+                  <TableColumn text="Currency">
                      <cellValueFactory>
-                        <PropertyValueFactory property="makerFeeRate" />
+                        <PropertyValueFactory property="CurrencyCode" />
+                     </cellValueFactory>
+                   </TableColumn>
+                  <TableColumn text="Source">
+                     <cellValueFactory>
+                        <PropertyValueFactory property="SourceName" />
                      </cellValueFactory>
                   </TableColumn>
-                  <TableColumn text="TakerCoefficient">
+                  <TableColumn text="Destination">
                      <cellValueFactory>
-                        <PropertyValueFactory property="takerCoefficient" />
-                     </cellValueFactory>
-                  </TableColumn>
-                  <TableColumn text="MakerCoefficient">
-                     <cellValueFactory>
-                        <PropertyValueFactory property="makerCoefficient" />
+                        <PropertyValueFactory property="DestinationName" />
                      </cellValueFactory>
                   </TableColumn>
                </columns>

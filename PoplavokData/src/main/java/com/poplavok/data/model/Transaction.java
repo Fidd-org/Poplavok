@@ -139,4 +139,42 @@ public abstract class Transaction {
     public void setCurrency(Currency currency) {
         this.currency = currency;
     }
+
+    public String getCurrencyCode() {
+        return getCurrency().getCurrency();
+    }
+
+    static String getAccountOrLevelName(@Nullable Account account, @Nullable Level level) {
+        if (account != null) {
+            String name = checkNotNull(account).getAccountName();
+            if (name == null) {
+                name += "ID " + checkNotNull(account).getId();
+            }
+            return name;
+        } else if (level != null) {
+            return level.getId().toString();
+        } else {
+            return "";
+        }
+    }
+
+    public String getSourceName() {
+        return getAccountOrLevelName(getSourceAccount(), getSourceLevel());
+    }
+
+    public String getDestinationName() {
+        return getAccountOrLevelName(getDestinationAccount(), getDestinationLevel());
+    }
+
+    public String getTransactionType() {
+        if (this instanceof Loan) {
+            return "Loan";
+        } else if (this instanceof Repayment) {
+            return "Repayment";
+        } else if (this instanceof ExternalTransaction) {
+            return "External";
+        } else {
+            return "Unknown";
+        }
+    }
 }

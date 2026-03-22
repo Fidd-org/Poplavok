@@ -40,7 +40,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(AccountListTab.class);
 
     @Nullable FilteredList<Account> accounts;
-    @Nullable FilteredList<Transaction> transaction;
+    @Nullable FilteredList<Transaction> transactions;
 
     @FXML @Nullable TableView<Account> accountsTable;
     @FXML @Nullable TableView<Transaction> transactionsTable;
@@ -64,6 +64,16 @@ public class AccountListTab extends AnchorPane implements Refreshable {
         checkNotNull(filterTextField).textProperty().addListener((observable, oldValue, newValue) -> filterTableView());
         checkNotNull(showArchivedCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> filterTableView());
 
+        checkNotNull(accountsTable).getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                refreshTransactions(newValue);
+            } else {
+                if (transactionsTable != null) {
+                    transactionsTable.setItems(FXCollections.observableArrayList());
+                }
+            }
+        });
+
         refreshContent();
     }
 
@@ -73,6 +83,11 @@ public class AccountListTab extends AnchorPane implements Refreshable {
             Account selectedAccount = null;
             if (accountsTable != null && accountsTable.getSelectionModel().getSelectedItem() != null) {
                 selectedAccount = accountsTable.getSelectionModel().getSelectedItem();
+            }
+
+            Transaction selectedTransaction = null;
+            if (transactionsTable != null && transactionsTable.getSelectionModel().getSelectedItem() != null) {
+                selectedTransaction = transactionsTable.getSelectionModel().getSelectedItem();
             }
 
             ObservableList<Account> masterAccounts = FXCollections.observableList(DBUtil.connectGetResultAndClose(AccountDAO::findAll));
@@ -88,6 +103,15 @@ public class AccountListTab extends AnchorPane implements Refreshable {
                 for (Account account : accountsTable.getItems()) {
                     if (account.getId().equals(selectedAccount.getId())) {
                         accountsTable.getSelectionModel().select(account);
+
+                        if (selectedTransaction != null && transactionsTable != null) {
+                            for (Transaction t : transactionsTable.getItems()) {
+                                if (t.getId() != null && t.getId().equals(selectedTransaction.getId())) {
+                                    transactionsTable.getSelectionModel().select(t);
+                                    break;
+                                }
+                            }
+                        }
                         break;
                     }
                 }
@@ -95,6 +119,26 @@ public class AccountListTab extends AnchorPane implements Refreshable {
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error: " + e, ButtonType.OK);
             LOGGER.error("Error:", e);
+            alert.showAndWait();
+        }
+    }
+
+    private void refreshTransactions(Account account) {
+        try {
+            ObservableList<Transaction> masterTransactions = FXCollections.observableList(
+                    DBUtil.connectGetResultAndClose(sess -> TransactionDAO.findByAccount(sess, account.getId())));
+
+            transactions = new FilteredList<>(masterTransactions);
+            SortedList<Transaction> sortableTransactions = new SortedList<>(transactions);
+
+            if (transactionsTable != null) {
+                transactionsTable.itemsProperty().set(sortableTransactions);
+                sortableTransactions.comparatorProperty().bind(transactionsTable.comparatorProperty());
+                transactionsTable.refresh();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error refreshing transactions:", e);
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error refreshing transactions: " + e, ButtonType.OK);
             alert.showAndWait();
         }
     }
@@ -259,4 +303,6 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     public void withdraw() {
         // TODO: amount, external transaction details.
     }
+
+    // TODO: update transaction details dialog
 }
