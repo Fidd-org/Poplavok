@@ -79,7 +79,6 @@ public class DataModelTest {
                 marketTicker,
                 LevelStrategy.LINEAR,
                 "{}",
-                new BigDecimal("50000"),
                 new Date()
         );
         session.persist(poplavok);

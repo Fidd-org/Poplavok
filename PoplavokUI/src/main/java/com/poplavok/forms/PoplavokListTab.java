@@ -1,6 +1,5 @@
 package com.poplavok.forms;
 
-import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
 import com.google.common.base.Preconditions;
 import com.poplavok.data.dao.PoplavokDAO;
@@ -18,7 +17,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +26,8 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class PoplavoksTab extends AnchorPane implements Refreshable {
-    final static Logger LOGGER = LoggerFactory.getLogger(PoplavoksTab.class);
+public class PoplavokListTab extends AnchorPane implements Refreshable {
+    final static Logger LOGGER = LoggerFactory.getLogger(PoplavokListTab.class);
 
     @Nullable FilteredList<Poplavok> poplavoks;
 
@@ -39,9 +37,9 @@ public class PoplavoksTab extends AnchorPane implements Refreshable {
 
     protected final MainForm mainApp;
 
-    public PoplavoksTab(MainForm mainApp) {
+    public PoplavokListTab(MainForm mainApp) {
         this.mainApp = mainApp;
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PoplavoksTab.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PoplavokListTab.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

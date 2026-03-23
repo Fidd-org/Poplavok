@@ -1,6 +1,5 @@
 package com.poplavok.forms;
 
-import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Currency;
 import com.google.common.base.Preconditions;
 import javafx.fxml.FXML;
@@ -81,8 +80,8 @@ public class MainForm {
     }
 
     public void openPoplavoksTab() {
-        PoplavoksTab poplavoksTab = new PoplavoksTab(this);
-        final Tab tab = new Tab("Poplavoks", poplavoksTab);
+        PoplavokListTab poplavokListTab = new PoplavokListTab(this);
+        final Tab tab = new Tab("Poplavoks", poplavokListTab);
         tab.setClosable(true);
 
         addTab(tab);

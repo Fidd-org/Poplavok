@@ -43,7 +43,6 @@ public class DemoApp {
                 btcUsdt,
                 LevelStrategy.LINEAR,
                 "{\"step\": 0.05, \"multiplier\": 1.5}",
-                new BigDecimal("45000"),
                 new Date()
         );
         session.persist(poplavok);
