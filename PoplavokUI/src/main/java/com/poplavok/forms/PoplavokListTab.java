@@ -1,5 +1,6 @@
 package com.poplavok.forms;
 
+import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
 import com.google.common.base.Preconditions;
 import com.poplavok.data.dao.PoplavokDAO;
@@ -17,6 +18,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,65 +128,63 @@ public class PoplavokListTab extends AnchorPane implements Refreshable {
     }
 
     public void newPoplavok() {
-        /*try {
-            AccountAddDialog accountAddDialog = new AccountAddDialog(null);
+        try {
+            PoplavokAddDialog poplavokAddDialog = new PoplavokAddDialog(null);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
-                    stage -> { accountAddDialog.setStage(stage); return accountAddDialog; },
-                    "New Account");
+                    stage -> { poplavokAddDialog.setStage(stage); return poplavokAddDialog; },
+                    "New Poplavok");
 
             workspaceStage.setOnHidden(
                     ev -> {
                         try {
-                            Account account = accountAddDialog.getReturnAccount();
-                            if (account != null) {
-                                DBUtil.connectCommitAndClose(sess -> AccountDAO.save(sess, checkNotNull(account)));
+                            Poplavok poplavok = poplavokAddDialog.getReturnPoplavok();
+                            if (poplavok != null) {
+                                DBUtil.connectCommitAndClose(sess -> PoplavokDAO.save(sess, checkNotNull(poplavok)));
                                 refreshContent();
                             }
                         } catch (Exception e) {
-                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating account: " + e, ButtonType.OK);
-                            LOGGER.error("Error creating account: ", e);
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating poplavok: " + e, ButtonType.OK);
+                            LOGGER.error("Error creating poplavok: ", e);
                             alert.showAndWait();
                         }
                     }
             );
         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating account: " + e, ButtonType.OK);
-            LOGGER.error("Error creating account: ", e);
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating poplavok: " + e, ButtonType.OK);
+            LOGGER.error("Error creating poplavok: ", e);
             alert.showAndWait();
-        }*/
+        }
     }
 
     public void renamePoplavok() {
-        /*try {
-            Account origAccount = Preconditions.checkNotNull(poplavoksTable).getSelectionModel().getSelectedItem();
-            if (origAccount == null) { return; }
+        try {
+            Poplavok origPoplavok = Preconditions.checkNotNull(poplavoksTable).getSelectionModel().getSelectedItem();
+            if (origPoplavok == null) { return; }
 
-            AccountAddDialog accountAddDialog = new AccountAddDialog(origAccount);
+            PoplavokAddDialog poplavokAddDialog = new PoplavokAddDialog(origPoplavok);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
-                    stage -> { accountAddDialog.setStage(stage); return accountAddDialog; },
-                    "Rename Account");
+                    stage -> { poplavokAddDialog.setStage(stage); return poplavokAddDialog; },
+                    "Rename Poplavok");
 
             workspaceStage.setOnHidden(
                     ev -> {
                         try {
-                            Account account = accountAddDialog.getReturnAccount();
-                            if (account != null) {
-                                DBUtil.connectCommitAndClose(sess -> AccountDAO.update(sess, checkNotNull(account)));
+                            Poplavok poplavok = poplavokAddDialog.getReturnPoplavok();
+                            if (poplavok != null) {
+                                DBUtil.connectCommitAndClose(sess -> PoplavokDAO.update(sess, checkNotNull(poplavok)));
                                 refreshContent();
                             }
                         } catch (Exception e) {
-                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating account: " + e, ButtonType.OK);
-                            LOGGER.error("Error creating account: ", e);
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating poplavok: " + e, ButtonType.OK);
+                            LOGGER.error("Error creating poplavok: ", e);
                             alert.showAndWait();
                         }
                     }
             );
         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating account: " + e, ButtonType.OK);
-            LOGGER.error("Error creating account: ", e);
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating poplavok: " + e, ButtonType.OK);
+            LOGGER.error("Error creating poplavok: ", e);
             alert.showAndWait();
-        }*/
+        }
     }
-
-    // TODO: update transaction details dialog
 }

@@ -35,7 +35,7 @@ public class Poplavok {
     private MarketTicker marketTicker;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "level_strategy", nullable = false, length = 30)
+    @Column(name = "level_strategy", nullable = true, length = 30)
     @Nullable
     private LevelStrategy levelStrategy;
 
@@ -66,7 +66,7 @@ public class Poplavok {
     @OneToMany(mappedBy = "poplavok", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Level> levels = new ArrayList<>();
 
-    protected Poplavok() {
+    public Poplavok() {
     }
 
     public Poplavok(MarketTicker marketTicker, LevelStrategy levelStrategy, String strategyParameters, Date creationDate) {
@@ -79,6 +79,10 @@ public class Poplavok {
 
     public Long getId() {
         return checkNotNull(id);
+    }
+
+    public void setId(@Nullable Long id) {
+        this.id = id;
     }
 
     public MarketTicker getTicker() {

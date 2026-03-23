@@ -39,27 +39,17 @@
                             <PropertyValueFactory property="tickerSymbol" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Strategy">
-                        <cellValueFactory>
-                            <PropertyValueFactory property="strategyStr" />
-                        </cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Entry Price">
-                        <cellValueFactory>
-                            <PropertyValueFactory property="entryPrice" />
-                        </cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Active">
+                    <TableColumn text="IsActive">
                         <cellValueFactory>
                             <PropertyValueFactory property="active" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Created">
+                    <TableColumn text="Creation Date">
                         <cellValueFactory>
                             <PropertyValueFactory property="creationDate" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Closed">
+                    <TableColumn text="Close Date">
                         <cellValueFactory>
                             <PropertyValueFactory property="closeDate" />
                         </cellValueFactory>
