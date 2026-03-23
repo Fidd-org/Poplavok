@@ -61,6 +61,10 @@ public class Level {
     @Nullable
     private Date closeDate;
 
+    @Column(name = "notes", nullable = false)
+    @Nullable
+    private String notes;
+
     @OneToMany(mappedBy = "destinationLevel", cascade = CascadeType.ALL)
     private List<Loan> loans = new ArrayList<>();
 
@@ -147,6 +151,14 @@ public class Level {
 
     public void setCloseDate(Date closeDate) {
         this.closeDate = closeDate;
+    }
+
+    public String getNotes() {
+        return checkNotNull(notes);
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public List<Loan> getLoans() {

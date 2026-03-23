@@ -79,4 +79,12 @@ public class MainForm {
 
         addTab(tab);
     }
+
+    public void openPoplavoksTab() {
+        PoplavoksTab poplavoksTab = new PoplavoksTab(this);
+        final Tab tab = new Tab("Poplavoks", poplavoksTab);
+        tab.setClosable(true);
+
+        addTab(tab);
+    }
 }

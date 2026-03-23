@@ -40,7 +40,7 @@ public class Poplavok {
     @Nullable
     private LevelStrategy levelStrategy;
 
-    @Column(name = "strategy_parameters", length = 500)
+    @Column(name = "strategy_parameters", length = 5000)
     @Nullable
     private String strategyParameters;
 

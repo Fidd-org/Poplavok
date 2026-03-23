@@ -19,6 +19,11 @@
           <MenuItem mnemonicParsing="false" onAction="#openAccountsTab" text="Accounts" />
         </items>
       </Menu>
+      <Menu mnemonicParsing="false" text="Trading">
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#openPoplavoksTab" text="Poplavoks" />
+        </items>
+      </Menu>
       <Menu mnemonicParsing="false" text="Instruments">
         <items>
           <MenuItem mnemonicParsing="false" onAction="#openCurrenciesTab" text="Currencies" />
