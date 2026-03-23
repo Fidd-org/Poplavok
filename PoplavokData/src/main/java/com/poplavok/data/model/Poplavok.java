@@ -15,7 +15,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,10 +55,6 @@ public class Poplavok {
     @Nullable
     private boolean isActive;
 
-    @Column(name = "entry_price", precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal entryPrice;
-
     @Column(name = "creation_date", nullable = false)
     @Nullable
     private Date creationDate;
@@ -74,12 +69,10 @@ public class Poplavok {
     protected Poplavok() {
     }
 
-    public Poplavok(MarketTicker marketTicker, LevelStrategy levelStrategy, String strategyParameters,
-                    BigDecimal entryPrice, Date creationDate) {
+    public Poplavok(MarketTicker marketTicker, LevelStrategy levelStrategy, String strategyParameters, Date creationDate) {
         this.marketTicker = marketTicker;
         this.levelStrategy = levelStrategy;
         this.strategyParameters = strategyParameters;
-        this.entryPrice = entryPrice;
         this.creationDate = creationDate;
         this.isActive = true;
     }
@@ -143,14 +136,6 @@ public class Poplavok {
         isActive = active;
     }
 
-    public BigDecimal getEntryPrice() {
-        return checkNotNull(entryPrice);
-    }
-
-    public void setEntryPrice(BigDecimal entryPrice) {
-        this.entryPrice = entryPrice;
-    }
-
     public Date getCreationDate() {
         return checkNotNull(creationDate);
     }
@@ -176,6 +161,11 @@ public class Poplavok {
         level.setPoplavok(this);
     }
 
+    public void removeLevel(Level level) {
+        levels.remove(level);
+        level.setPoplavok(null);
+    }
+
     @Nullable
     public Direction getDirection() {
         return direction;
@@ -185,9 +175,12 @@ public class Poplavok {
         this.direction = direction;
     }
 
-    public void removeLevel(Level level) {
-        levels.remove(level);
-        level.setPoplavok(null);
+    public String getTickerSymbol() {
+        return marketTicker != null ? marketTicker.getSymbol() : "";
+    }
+
+    public String getStrategyStr() {
+        return levelStrategy != null ? levelStrategy.toString() : "";
     }
 }
 

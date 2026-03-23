@@ -3,8 +3,8 @@ package com.poplavok.forms;
 import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
 import com.google.common.base.Preconditions;
-import com.poplavok.data.dao.AccountDAO;
-import com.poplavok.data.model.Account;
+import com.poplavok.data.dao.PoplavokDAO;
+import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.utils.DBUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,10 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class PoplavoksTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(PoplavoksTab.class);
 
-    @Nullable FilteredList<Account> accounts;
-    @Nullable FilteredList<AccountTransaction> transactions;
+    @Nullable FilteredList<Poplavok> poplavoks;
 
-    @FXML @Nullable TableView<Account> poplavoksTable;
+    @FXML @Nullable TableView<Poplavok> poplavoksTable;
     @FXML @Nullable TextField filterTextField;
     @FXML @Nullable CheckBox showClosedCheckBox;
 
@@ -53,7 +52,7 @@ public class PoplavoksTab extends AnchorPane implements Refreshable {
         }
 
         checkNotNull(filterTextField).textProperty().addListener((observable, oldValue, newValue) -> filterTableView());
-        checkNotNull(showClosedCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> filterTableView());
+        checkNotNull(showClosedCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> refreshContent());
 
         refreshContent();
     }
@@ -61,24 +60,36 @@ public class PoplavoksTab extends AnchorPane implements Refreshable {
     @Override
     public void refreshContent() {
         try {
-            Account selectedAccount = null;
+            Poplavok selectedPoplavok = null;
             if (poplavoksTable != null && poplavoksTable.getSelectionModel().getSelectedItem() != null) {
-                selectedAccount = poplavoksTable.getSelectionModel().getSelectedItem();
+                selectedPoplavok = poplavoksTable.getSelectionModel().getSelectedItem();
             }
 
-            ObservableList<Account> masterAccounts = FXCollections.observableList(DBUtil.connectGetResultAndClose(AccountDAO::findAll));
-            accounts = new FilteredList<>(masterAccounts);
-            SortedList<Account> sortableAccounts = new SortedList<>(accounts);
+            // If checked (Show Closed) -> fetch ALL (Active + Closed)
+            // If unchecked (Show Only Active) -> fetch isActive=true
+            boolean showClosed = checkNotNull(showClosedCheckBox).isSelected();
+            
+            ObservableList<Poplavok> masterPoplavoks;
+            if (showClosed) {
+                 masterPoplavoks = FXCollections.observableList(
+                    DBUtil.connectGetResultAndClose(PoplavokDAO::findAll));
+            } else {
+                 masterPoplavoks = FXCollections.observableList(
+                    DBUtil.connectGetResultAndClose(sess -> PoplavokDAO.findByActive(sess, true)));
+            }
 
-            accounts.setPredicate(createFilterPredicate());
-            Preconditions.checkNotNull(poplavoksTable).itemsProperty().set(sortableAccounts);
-            sortableAccounts.comparatorProperty().bind(poplavoksTable.comparatorProperty());
+            poplavoks = new FilteredList<>(masterPoplavoks);
+            SortedList<Poplavok> sortablePoplavoks = new SortedList<>(poplavoks);
+
+            poplavoks.setPredicate(createFilterPredicate());
+            Preconditions.checkNotNull(poplavoksTable).itemsProperty().set(sortablePoplavoks);
+            sortablePoplavoks.comparatorProperty().bind(poplavoksTable.comparatorProperty());
             poplavoksTable.refresh();
 
-            if (selectedAccount != null) {
-                for (Account account : poplavoksTable.getItems()) {
-                    if (account.getId().equals(selectedAccount.getId())) {
-                        poplavoksTable.getSelectionModel().select(account);
+            if (selectedPoplavok != null) {
+                for (Poplavok poplavok : poplavoksTable.getItems()) {
+                    if (poplavok.getId().equals(selectedPoplavok.getId())) {
+                        poplavoksTable.getSelectionModel().select(poplavok);
                         break;
                     }
                 }
@@ -90,30 +101,34 @@ public class PoplavoksTab extends AnchorPane implements Refreshable {
         }
     }
 
-    private Predicate<Account> createFilterPredicate() {
+    private Predicate<Poplavok> createFilterPredicate() {
         String searchText = Preconditions.checkNotNull(filterTextField).textProperty().get();
-        boolean showClosed = Preconditions.checkNotNull(showClosedCheckBox).isSelected();
-        return account -> {
-            if (!showClosed && account.isArchived()) return false;
+        return poplavok -> {
             if (searchText == null || searchText.isEmpty()) return true;
             
             String lowerCaseFilter = searchText.toLowerCase().trim();
             
-            if (account.getCurrency().getCurrency().toLowerCase().contains(lowerCaseFilter)) {
+            if (poplavok.getName() != null && poplavok.getName().toLowerCase().contains(lowerCaseFilter)) {
                 return true;
             }
-            return account.getAccountName() != null && account.getAccountName().toLowerCase().contains(lowerCaseFilter);
+            if (poplavok.getTickerSymbol().toLowerCase().contains(lowerCaseFilter)) {
+                return true;
+            }
+             if (poplavok.getStrategyStr().toLowerCase().contains(lowerCaseFilter)) {
+                return true;
+            }
+            return false;
         };
     }
 
     public void filterTableView() {
-        if (accounts != null) {
-            accounts.setPredicate(createFilterPredicate());
+        if (poplavoks != null) {
+            poplavoks.setPredicate(createFilterPredicate());
         }
     }
 
     public void newPoplavok() {
-        try {
+        /*try {
             AccountAddDialog accountAddDialog = new AccountAddDialog(null);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { accountAddDialog.setStage(stage); return accountAddDialog; },
@@ -138,11 +153,11 @@ public class PoplavoksTab extends AnchorPane implements Refreshable {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating account: " + e, ButtonType.OK);
             LOGGER.error("Error creating account: ", e);
             alert.showAndWait();
-        }
+        }*/
     }
 
     public void renamePoplavok() {
-        try {
+        /*try {
             Account origAccount = Preconditions.checkNotNull(poplavoksTable).getSelectionModel().getSelectedItem();
             if (origAccount == null) { return; }
 
@@ -170,7 +185,7 @@ public class PoplavoksTab extends AnchorPane implements Refreshable {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating account: " + e, ButtonType.OK);
             LOGGER.error("Error creating account: ", e);
             alert.showAndWait();
-        }
+        }*/
     }
 
     // TODO: update transaction details dialog

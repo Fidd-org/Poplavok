@@ -29,34 +29,39 @@
                             <PropertyValueFactory property="id" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Account Name">
+                    <TableColumn text="Name">
                         <cellValueFactory>
-                            <PropertyValueFactory property="accountName" />
+                            <PropertyValueFactory property="name" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Currency">
+                    <TableColumn text="Ticker">
                         <cellValueFactory>
-                            <PropertyValueFactory property="currencyStr" />
+                            <PropertyValueFactory property="tickerSymbol" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="AvailableAmount">
+                    <TableColumn text="Strategy">
                         <cellValueFactory>
-                            <PropertyValueFactory property="availableAmountStr" />
+                            <PropertyValueFactory property="strategyStr" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="ReservedAmount">
+                    <TableColumn text="Entry Price">
                         <cellValueFactory>
-                            <PropertyValueFactory property="reservedAmountStr" />
+                            <PropertyValueFactory property="entryPrice" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="CreationDate">
+                    <TableColumn text="Active">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="active" />
+                        </cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Created">
                         <cellValueFactory>
                             <PropertyValueFactory property="creationDate" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Is Archived?">
+                    <TableColumn text="Closed">
                         <cellValueFactory>
-                            <PropertyValueFactory property="archivedStatus" />
+                            <PropertyValueFactory property="closeDate" />
                         </cellValueFactory>
                     </TableColumn>
                 </columns>
