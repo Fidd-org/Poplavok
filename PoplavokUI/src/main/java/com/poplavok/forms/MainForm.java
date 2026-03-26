@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 
@@ -79,9 +80,18 @@ public class MainForm {
         addTab(tab);
     }
 
-    public void openPoplavoksTab() {
+    public void openPoplavokListTab() {
         PoplavokListTab poplavokListTab = new PoplavokListTab(this);
         final Tab tab = new Tab("Poplavoks", poplavokListTab);
+        tab.setClosable(true);
+
+        addTab(tab);
+    }
+
+    public void openPoplavokTab(Long poplavokId, @Nullable String poplavokName) {
+        poplavokName = StringUtils.defaultIfBlank(poplavokName, poplavokId.toString());
+        PoplavokTab poplavokTab = new PoplavokTab(this, poplavokId);
+        final Tab tab = new Tab("§ " + poplavokName, poplavokTab);
         tab.setClosable(true);
 
         addTab(tab);

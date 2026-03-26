@@ -83,10 +83,10 @@ public class DataModelTest {
         );
         session.persist(poplavok);
 
-        Level level1 = new Level(1, poplavok, new BigDecimal("0.1"), new BigDecimal("5000"),
-                new BigDecimal("50000"), new Date());
-        Level level2 = new Level(2, poplavok, new BigDecimal("0.2"), new BigDecimal("9500"),
-                new BigDecimal("47500"), new Date());
+        Level level1 = new Level(poplavok, new BigDecimal("0.1"), new BigDecimal("5000"),
+                new BigDecimal("50000"), new BigDecimal("50000"), new BigDecimal("50000"), new BigDecimal("50000"), new BigDecimal("50000"), new Date());
+        Level level2 = new Level(poplavok, new BigDecimal("0.2"), new BigDecimal("9500"),
+                new BigDecimal("47500"), new BigDecimal("47500"), new BigDecimal("47500"), new BigDecimal("47500"), new BigDecimal("47500"), new Date());
         poplavok.addLevel(level1);
         poplavok.addLevel(level2);
 

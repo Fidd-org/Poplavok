@@ -15,6 +15,7 @@
         <AnchorPane maxHeight="40.0" minHeight="40.0" prefHeight="40.0" SplitPane.resizableWithParent="false">
             <ToolBar AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <TextField fx:id="filterTextField" onKeyTyped="#filterTableView" />
+            <Button mnemonicParsing="false" onAction="#openPoplavok" text="[ Open poplavok ]" />
                 <Button mnemonicParsing="false" onAction="#newPoplavok" text="[ New poplavok ]" />
             <Button mnemonicParsing="false" onAction="#renamePoplavok" text="[ Rename ]" />
                 <Button mnemonicParsing="false" onAction="#refreshContent" text="[ Refresh (from DB) ]" />
@@ -22,7 +23,7 @@
             </ToolBar>
         </AnchorPane>
         <AnchorPane>
-            <TableView fx:id="poplavoksTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView fx:id="poplavoksTable" onMouseClicked="#poplavokDoubleClick" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <columns>
                     <TableColumn text="Id">
                         <cellValueFactory>

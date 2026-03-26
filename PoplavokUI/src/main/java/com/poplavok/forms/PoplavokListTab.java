@@ -17,6 +17,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -175,16 +176,35 @@ public class PoplavokListTab extends AnchorPane implements Refreshable {
                                 refreshContent();
                             }
                         } catch (Exception e) {
-                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating poplavok: " + e, ButtonType.OK);
-                            LOGGER.error("Error creating poplavok: ", e);
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error renaming poplavok: " + e, ButtonType.OK);
+                            LOGGER.error("Error renaming poplavok: ", e);
                             alert.showAndWait();
                         }
                     }
             );
         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating poplavok: " + e, ButtonType.OK);
-            LOGGER.error("Error creating poplavok: ", e);
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error renaming poplavok: " + e, ButtonType.OK);
+            LOGGER.error("Error renaming poplavok: ", e);
             alert.showAndWait();
+        }
+    }
+
+    public void openPoplavok() {
+        try {
+            Poplavok origPoplavok = Preconditions.checkNotNull(poplavoksTable).getSelectionModel().getSelectedItem();
+            if (origPoplavok == null) { return; }
+
+            mainApp.openPoplavokTab(origPoplavok.getId(), origPoplavok.getName());
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error opening poplavok: " + e, ButtonType.OK);
+            LOGGER.error("Error opening poplavok: ", e);
+            alert.showAndWait();
+        }
+    }
+
+    public void poplavokDoubleClick(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            openPoplavok();
         }
     }
 }

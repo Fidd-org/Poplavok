@@ -44,11 +44,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable TableView<Account> accountsTable;
     @FXML @Nullable TableView<AccountTransaction> transactionsTable;
     @FXML @Nullable TextField filterTextField;
-    @FXML @Nullable CheckBox showArchivedCheckBox;
 
     protected final MainForm mainApp;
 
-    public PoplavokTab(MainForm mainApp) {
+    public PoplavokTab(MainForm mainApp, Long poplavokId) {
         this.mainApp = mainApp;
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PoplavokTab.fxml"));
         fxmlLoader.setRoot(this);
@@ -61,7 +60,6 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
 
         checkNotNull(filterTextField).textProperty().addListener((observable, oldValue, newValue) -> filterTableView());
-        checkNotNull(showArchivedCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> filterTableView());
 
         checkNotNull(accountsTable).getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -158,9 +156,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     private Predicate<Account> createFilterPredicate() {
         String searchText = Preconditions.checkNotNull(filterTextField).textProperty().get();
-        boolean showArchived = Preconditions.checkNotNull(showArchivedCheckBox).isSelected();
         return account -> {
-            if (!showArchived && account.isArchived()) return false;
+            if (account.isArchived()) return false;
             if (searchText == null || searchText.isEmpty()) return true;
             
             String lowerCaseFilter = searchText.toLowerCase().trim();

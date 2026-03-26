@@ -28,30 +28,14 @@ public class Level {
     @Nullable
     private Long id;
 
-    @Column(name = "level_num", nullable = false)
-    @Nullable
-    private int levelNum;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poplavok_id", nullable = false)
     @Nullable
     private Poplavok poplavok;
 
-    @Column(name = "amount_base", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal amountBase;
-
-    @Column(name = "amount_quote", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal amountQuote;
-
     @Column(name = "is_active", nullable = false)
     @Nullable
     private boolean isActive;
-
-    @Column(name = "level_price", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal levelPrice;
 
     @Column(name = "creation_date", nullable = false)
     @Nullable
@@ -65,6 +49,34 @@ public class Level {
     @Nullable
     private String notes;
 
+    @Column(name = "available_amount_base", nullable = false, precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal availableAmountBase;
+
+    @Column(name = "available_amount_quote", nullable = false, precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal availableAmountQuote;
+
+    @Column(name = "lent_amount_base", nullable = false, precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal lentAmountBase;
+
+    @Column(name = "lent_amount_quote", nullable = false, precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal lentAmountQuote;
+
+    @Column(name = "debt_base", nullable = false, precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal debtBase;
+
+    @Column(name = "debt_quote", nullable = false, precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal debtQuote;
+
+    @Column(name = "projected_price", nullable = false, precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal projectedPrice;
+
     @OneToMany(mappedBy = "destinationLevel", cascade = CascadeType.ALL)
     private List<Loan> loans = new ArrayList<>();
 
@@ -74,27 +86,27 @@ public class Level {
     public Level() {
     }
 
-    public Level(int levelNum, Poplavok poplavok, BigDecimal amountBase, BigDecimal amountQuote,
-                 BigDecimal levelPrice, Date creationDate) {
-        this.levelNum = levelNum;
+    public Level(Poplavok poplavok,
+                 BigDecimal availableAmountBase, BigDecimal availableAmountQuote,
+                 BigDecimal lentAmountBase, BigDecimal lentAmountQuote,
+                 BigDecimal debtBase, BigDecimal debtQuote,
+                 BigDecimal projectedPrice, Date creationDate) {
         this.poplavok = poplavok;
-        this.amountBase = amountBase;
-        this.amountQuote = amountQuote;
-        this.levelPrice = levelPrice;
+
+        this.availableAmountBase = availableAmountBase;
+        this.availableAmountQuote = availableAmountQuote;
+        this.lentAmountBase = lentAmountBase;
+        this.lentAmountQuote = lentAmountQuote;
+        this.debtBase = debtBase;
+        this.debtQuote = debtQuote;
+
+        this.projectedPrice = projectedPrice;
         this.creationDate = creationDate;
         this.isActive = true;
     }
 
     public Long getId() {
         return checkNotNull(id);
-    }
-
-    public int getLevelNum() {
-        return levelNum;
-    }
-
-    public void setLevelNum(int levelNum) {
-        this.levelNum = levelNum;
     }
 
     public Poplavok getPoplavok() {
@@ -105,20 +117,58 @@ public class Level {
         this.poplavok = poplavok;
     }
 
-    public BigDecimal getAmountBase() {
-        return checkNotNull(amountBase);
+    @Nullable
+    public BigDecimal getAvailableAmountBase() {
+        return availableAmountBase;
     }
 
-    public void setAmountBase(BigDecimal amountBase) {
-        this.amountBase = amountBase;
+    public void setAvailableAmountBase(@Nullable BigDecimal availableAmountBase) {
+        this.availableAmountBase = availableAmountBase;
     }
 
-    public BigDecimal getAmountQuote() {
-        return checkNotNull(amountQuote);
+    @Nullable
+    public BigDecimal getAvailableAmountQuote() {
+        return availableAmountQuote;
     }
 
-    public void setAmountQuote(BigDecimal amountQuote) {
-        this.amountQuote = amountQuote;
+    public void setAvailableAmountQuote(@Nullable BigDecimal availableAmountQuote) {
+        this.availableAmountQuote = availableAmountQuote;
+    }
+
+    @Nullable
+    public BigDecimal getLentAmountBase() {
+        return lentAmountBase;
+    }
+
+    public void setLentAmountBase(@Nullable BigDecimal lentAmountBase) {
+        this.lentAmountBase = lentAmountBase;
+    }
+
+    @Nullable
+    public BigDecimal getLentAmountQuote() {
+        return lentAmountQuote;
+    }
+
+    public void setLentAmountQuote(@Nullable BigDecimal lentAmountQuote) {
+        this.lentAmountQuote = lentAmountQuote;
+    }
+
+    @Nullable
+    public BigDecimal getDebtBase() {
+        return debtBase;
+    }
+
+    public void setDebtBase(@Nullable BigDecimal debtBase) {
+        this.debtBase = debtBase;
+    }
+
+    @Nullable
+    public BigDecimal getDebtQuote() {
+        return debtQuote;
+    }
+
+    public void setDebtQuote(@Nullable BigDecimal debtQuote) {
+        this.debtQuote = debtQuote;
     }
 
     public boolean isActive() {
@@ -129,12 +179,12 @@ public class Level {
         isActive = active;
     }
 
-    public BigDecimal getLevelPrice() {
-        return checkNotNull(levelPrice);
+    public BigDecimal getProjectedPrice() {
+        return checkNotNull(projectedPrice);
     }
 
-    public void setLevelPrice(BigDecimal levelPrice) {
-        this.levelPrice = levelPrice;
+    public void setProjectedPrice(BigDecimal projectedPrice) {
+        this.projectedPrice = projectedPrice;
     }
 
     public Date getCreationDate() {
