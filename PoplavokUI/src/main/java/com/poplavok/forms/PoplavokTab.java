@@ -59,8 +59,6 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             throw new RuntimeException(exception);
         }
 
-        checkNotNull(filterTextField).textProperty().addListener((observable, oldValue, newValue) -> filterTableView());
-
         checkNotNull(accountsTable).getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 refreshTransactions(newValue);
@@ -91,7 +89,6 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             accounts = new FilteredList<>(masterAccounts);
             SortedList<Account> sortableAccounts = new SortedList<>(accounts);
 
-            accounts.setPredicate(createFilterPredicate());
             Preconditions.checkNotNull(accountsTable).itemsProperty().set(sortableAccounts);
             sortableAccounts.comparatorProperty().bind(accountsTable.comparatorProperty());
             accountsTable.refresh();
@@ -151,27 +148,6 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error: " + e, ButtonType.OK);
             LOGGER.error("Error:", e);
             alert.showAndWait();
-        }
-    }
-
-    private Predicate<Account> createFilterPredicate() {
-        String searchText = Preconditions.checkNotNull(filterTextField).textProperty().get();
-        return account -> {
-            if (account.isArchived()) return false;
-            if (searchText == null || searchText.isEmpty()) return true;
-            
-            String lowerCaseFilter = searchText.toLowerCase().trim();
-            
-            if (account.getCurrency().getCurrency().toLowerCase().contains(lowerCaseFilter)) {
-                return true;
-            }
-            return account.getAccountName() != null && account.getAccountName().toLowerCase().contains(lowerCaseFilter);
-        };
-    }
-
-    public void filterTableView() {
-        if (accounts != null) {
-            accounts.setPredicate(createFilterPredicate());
         }
     }
 
