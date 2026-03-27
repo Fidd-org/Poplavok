@@ -55,12 +55,6 @@ public class DemoApp {
         poplavok.addLevel(level1);
         poplavok.addLevel(level2);
 
-        // Create a loan for level 2
-        Loan loan = new Loan(usdt, new BigDecimal("6412.5"), level2,
-                new Date(), LoanType.POPLAVOK_FUNDED);
-        level2.addLoan(loan);
-        session.persist(loan);
-
         tx.commit();
         session.close();
 

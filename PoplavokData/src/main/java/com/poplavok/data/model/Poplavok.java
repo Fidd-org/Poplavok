@@ -148,8 +148,8 @@ public class Poplavok {
         this.creationDate = creationDate;
     }
 
-    public Date getCloseDate() {
-        return checkNotNull(closeDate);
+    public @Nullable Date getCloseDate() {
+        return closeDate;
     }
 
     public void setCloseDate(Date closeDate) {

@@ -1,6 +1,5 @@
 package com.poplavok.data.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,14 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,43 +41,37 @@ public class Level {
     @Nullable
     private Date closeDate;
 
-    @Column(name = "notes", nullable = false)
+    @Column(name = "notes")
     @Nullable
     private String notes;
-
-    @Column(name = "available_amount_base", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal availableAmountBase;
-
-    @Column(name = "available_amount_quote", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal availableAmountQuote;
-
-    @Column(name = "lent_amount_base", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal lentAmountBase;
-
-    @Column(name = "lent_amount_quote", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal lentAmountQuote;
-
-    @Column(name = "debt_base", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal debtBase;
-
-    @Column(name = "debt_quote", nullable = false, precision = 20, scale = 8)
-    @Nullable
-    private BigDecimal debtQuote;
 
     @Column(name = "projected_price", nullable = false, precision = 20, scale = 8)
     @Nullable
     private BigDecimal projectedPrice;
 
-    @OneToMany(mappedBy = "destinationLevel", cascade = CascadeType.ALL)
-    private List<Loan> loans = new ArrayList<>();
+    @Column(name = "available_amount_base", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal availableAmountBase;
 
-    @OneToMany(mappedBy = "level", cascade = CascadeType.ALL)
-    private List<LevelTrade> levelTrades = new ArrayList<>();
+    @Column(name = "available_amount_quote", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal availableAmountQuote;
+
+    @Column(name = "lent_amount_base", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal lentAmountBase;
+
+    @Column(name = "lent_amount_quote", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal lentAmountQuote;
+
+    @Column(name = "debt_base", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal debtBase;
+
+    @Column(name = "debt_quote", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal debtQuote;
 
     public Level() {
     }
@@ -109,11 +99,13 @@ public class Level {
         return checkNotNull(id);
     }
 
+    public void setId(@Nullable Long id) { this.id = id; }
+
     public Poplavok getPoplavok() {
         return checkNotNull(poplavok);
     }
 
-    void setPoplavok(@Nullable Poplavok poplavok) {
+    public void setPoplavok(@Nullable Poplavok poplavok) {
         this.poplavok = poplavok;
     }
 
@@ -209,23 +201,5 @@ public class Level {
 
     public void setNotes(String notes) {
         this.notes = notes;
-    }
-
-    public List<Loan> getLoans() {
-        return loans;
-    }
-
-    public List<LevelTrade> getLevelTrades() {
-        return levelTrades;
-    }
-
-    public void addLevelTrade(LevelTrade levelTrade) {
-        levelTrades.add(levelTrade);
-        levelTrade.setLevel(this);
-    }
-
-    public void addLoan(Loan loan) {
-        loans.add(loan);
-        loan.setDestinationLevel(this);
     }
 }

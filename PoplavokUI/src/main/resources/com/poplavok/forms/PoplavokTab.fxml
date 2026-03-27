@@ -18,20 +18,22 @@
     <SplitPane dividerPositions="0.0, 0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
         <AnchorPane maxHeight="40.0" minHeight="40.0" prefHeight="40.0" SplitPane.resizableWithParent="false">
             <ToolBar AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                <Button mnemonicParsing="false" onAction="#newAccount" text="[ Add level ]" />
-            <Button mnemonicParsing="false" text="[ Edit level ]" />
-            <Button mnemonicParsing="false" onAction="#deposit" text="[ Close level ]" />
+                <Button mnemonicParsing="false" onAction="#newLevel" text="[ Add level ]" />
+            <Button mnemonicParsing="false" onAction="#editLevel" text="[ Edit level ]" />
+            <Button mnemonicParsing="false" onAction="#closeLevel" text="[ Close level ]" />
             <Separator orientation="VERTICAL" prefHeight="200.0" />
             <Label text="Ticker:" />
-            <TextField editable="false" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
+            <TextField fx:id="tickerTextField" editable="false" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
             <Label text="Fee:" />
-            <TextField editable="false" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" />
+            <TextField fx:id="feeTextField" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" />
             <Separator orientation="VERTICAL" prefHeight="200.0" />
+            <Label text="Direction:" />
+            <TextField fx:id="directionTextBox" editable="false" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
             <Label text="Price:" />
-            <TextField maxWidth="50.0" />
-            <Button mnemonicParsing="false" text="Refresh" />
+            <TextField fx:id="priceTextField" maxWidth="50.0" />
+            <Button mnemonicParsing="false" onAction="#refreshPrice" text="[ Refresh Price ]" />
             <Separator orientation="VERTICAL" prefHeight="200.0" />
-            <Button mnemonicParsing="false" text="[ Close poplavok ]" />
+            <Button mnemonicParsing="false" onAction="#closePoplavok" text="[ Close poplavok ]" />
             </ToolBar>
         </AnchorPane>
         <AnchorPane>
@@ -39,31 +41,11 @@
            <items>
              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                   <children>
-                        <TableView fx:id="accountsTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TableView fx:id="levelsTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <columns>
                                 <TableColumn text="Id">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="id" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn text="Account Name">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="accountName" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn text="Currency">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="currencyStr" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn text="AvailableAmount">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="availableAmountStr" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn text="ReservedAmount">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="reservedAmountStr" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn text="CreationDate">
@@ -71,9 +53,54 @@
                                         <PropertyValueFactory property="creationDate" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn text="Is Archived?">
+                                <TableColumn text="Notes">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="archivedStatus" />
+                                        <PropertyValueFactory property="notes" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="ProjectedPrice">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="projectedPrice" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="AvailableAmountBase">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="availableAmountBase" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="AvailableAmountQuote">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="availableAmountQuote" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="DebtBase">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="debtBase" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="DebtQuote">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="debtQuote" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="LentAmountBase">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="lentAmountBase" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="LentAmountQuote">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="lentAmountQuote" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="IsActive">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="isActive" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="CloseDate">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="closeDate" />
                                     </cellValueFactory>
                                 </TableColumn>
                             </columns>
@@ -170,7 +197,7 @@
                                     </AnchorPane>
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                        <children>
-                                          <TableView fx:id="transactionsTable1" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <TableView fx:id="tradesTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <columns>
                                                 <TableColumn text="TransactionId">
                                                    <cellValueFactory>

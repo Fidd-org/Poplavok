@@ -35,6 +35,11 @@
                             <PropertyValueFactory property="name" />
                         </cellValueFactory>
                     </TableColumn>
+                    <TableColumn text="Direction">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="direction" />
+                        </cellValueFactory>
+                    </TableColumn>
                     <TableColumn text="Ticker">
                         <cellValueFactory>
                             <PropertyValueFactory property="tickerSymbol" />
@@ -53,6 +58,11 @@
                     <TableColumn text="Close Date">
                         <cellValueFactory>
                             <PropertyValueFactory property="closeDate" />
+                        </cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Details">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="details" />
                         </cellValueFactory>
                     </TableColumn>
                 </columns>
