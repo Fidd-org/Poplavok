@@ -2,6 +2,7 @@ package com.poplavok.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,9 +32,10 @@ public class Level {
     @Nullable
     private Poplavok poplavok;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "state", nullable = false)
+    @Enumerated(jakarta.persistence.EnumType.STRING)
     @Nullable
-    private boolean isActive;
+    private LevelState state;
 
     @Column(name = "creation_date", nullable = false)
     @Nullable
@@ -87,6 +89,7 @@ public class Level {
     }
 
     public Level(Poplavok poplavok,
+                 LevelState state,
                  BigDecimal availableAmountBase, BigDecimal availableAmountQuote,
                  BigDecimal lentAmountBase, BigDecimal lentAmountQuote,
                  BigDecimal debtBase, BigDecimal debtQuote,
@@ -102,7 +105,7 @@ public class Level {
 
         this.projectedPrice = projectedPrice;
         this.creationDate = creationDate;
-        this.isActive = true;
+        this.state = state;
     }
 
     public Long getId() {
@@ -219,12 +222,12 @@ public class Level {
         return formatAmount(lentAmountBase) + SEPARATOR + formatAmount(lentAmountQuote);
     }
 
-    public boolean isActive() {
-        return isActive;
+    public LevelState getState() {
+        return checkNotNull(state);
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setState(LevelState state) {
+        this.state = state;
     }
 
     public BigDecimal getProjectedPrice() {

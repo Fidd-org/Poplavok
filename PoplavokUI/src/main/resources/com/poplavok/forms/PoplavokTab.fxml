@@ -41,7 +41,7 @@
          <children>
             <ToolBar prefHeight="40.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <items>
-                      <Button mnemonicParsing="false" onAction="#newLevel" text="[ Add level ]" />
+                  <Button mnemonicParsing="false" onAction="#newLevel" text="[ New level ]" />
                   <Button mnemonicParsing="false" onAction="#editLevel" text="[ Edit level ]" />
                   <Button mnemonicParsing="false" onAction="#closeLevel" text="[ Close level ]" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
@@ -99,9 +99,9 @@
                                         <PropertyValueFactory property="lentAmount" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn text="Status">
+                                <TableColumn text="State">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="status" />
+                                        <PropertyValueFactory property="state" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn text="CloseDate">
@@ -281,7 +281,7 @@
                                                 <ComboBox prefWidth="150.0" />
                                                 <Label text="Enty point:" />
                                                 <TextField maxWidth="50.0" minWidth="50.0" prefWidth="50.0" />
-                                                <Button mnemonicParsing="false" text="[ Add Level ]" />
+                                                <Button mnemonicParsing="false" text="[ New Level ]" />
                                              </items>
                                           </ToolBar>
                                        </children>

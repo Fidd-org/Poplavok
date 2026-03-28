@@ -1,6 +1,7 @@
 package com.poplavok.forms;
 
 import com.poplavok.data.model.Level;
+import com.poplavok.data.model.LevelState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -95,6 +96,7 @@ public class LevelAddDialog extends VBox {
     public void okClose() {
         try {
             Level level = new Level();
+            level.setState(LevelState.INCEPTION);
             level.setId(levelId);
             level.setCreationDate(new Date());
             level.setProjectedPrice(new BigDecimal(checkNotNull(priceTextField).textProperty().get()));

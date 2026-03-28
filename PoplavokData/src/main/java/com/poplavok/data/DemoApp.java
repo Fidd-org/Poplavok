@@ -1,12 +1,11 @@
 package com.poplavok.data;
 
+import com.poplavok.data.model.LevelState;
 import com.poplavok.data.utils.HibernateUtil;
 import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Currency;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelStrategy;
-import com.poplavok.data.model.Loan;
-import com.poplavok.data.model.LoanType;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.MarketTicker;
 import java.math.BigDecimal;
@@ -48,9 +47,9 @@ public class DemoApp {
         session.persist(poplavok);
 
         // Create levels
-        Level level1 = new Level(poplavok, new BigDecimal("0.1"), new BigDecimal("4500"),
+        Level level1 = new Level(poplavok, LevelState.INCEPTION, new BigDecimal("0.1"), new BigDecimal("4500"),
                 new BigDecimal("45000"), new BigDecimal("45000"), new BigDecimal("45000"), new BigDecimal("45000"), new BigDecimal("45000"), new Date());
-        Level level2 = new Level(poplavok, new BigDecimal("0.15"), new BigDecimal("6412.5"),
+        Level level2 = new Level(poplavok, LevelState.INCEPTION, new BigDecimal("0.15"), new BigDecimal("6412.5"),
                 new BigDecimal("42750"), new BigDecimal("42750"), new BigDecimal("42750"), new BigDecimal("42750"), new BigDecimal("42750"), new Date());
         poplavok.addLevel(level1);
         poplavok.addLevel(level2);
