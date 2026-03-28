@@ -63,9 +63,6 @@ public class Poplavok {
     @Nullable
     private Date closeDate;
 
-    @OneToMany(mappedBy = "poplavok", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Level> levels = new ArrayList<>();
-
     public Poplavok() {
     }
 
@@ -156,20 +153,6 @@ public class Poplavok {
         this.closeDate = closeDate;
     }
 
-    public List<Level> getLevels() {
-        return levels;
-    }
-
-    public void addLevel(Level level) {
-        levels.add(level);
-        level.setPoplavok(this);
-    }
-
-    public void removeLevel(Level level) {
-        levels.remove(level);
-        level.setPoplavok(null);
-    }
-
     @Nullable
     public Direction getDirection() {
         return direction;
@@ -187,4 +170,3 @@ public class Poplavok {
         return levelStrategy != null ? levelStrategy.toString() : "";
     }
 }
-

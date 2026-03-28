@@ -20,6 +20,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -67,6 +68,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable TextField averagingPriceTextField;
 
     @FXML @Nullable Button closeLevelButton;
+    @FXML @Nullable CheckBox showClosedLevelsCheckBox;
 
     protected final MainForm mainApp;
     protected final Long poplavokId;
@@ -88,6 +90,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         checkNotNull(levelsTable).getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         checkNotNull(levelsTable).getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Level> c) -> {
             updateLevelsSelection();
+        });
+
+        checkNotNull(showClosedLevelsCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            refreshContent();
         });
 
         refreshContent();
@@ -218,16 +224,14 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             DBUtil.connectCommitAndClose(sess -> {
                 this.poplavok = PoplavokDAO.findById(sess, poplavokId)
                         .orElseThrow(() -> new RuntimeException("Poplavok not found"));
-
-                // Initialize lazy collections
-                List<Level> levels = this.poplavok.getLevels();
-                if (levels != null) { int size = levels.size(); }
                 this.poplavok.getTicker().getSymbol();
             });
 
-            if (levelsTable != null && poplavok != null) {
-                this.levels = new FilteredList<>(FXCollections.observableArrayList(poplavok.getLevels()));
-                levelsTable.setItems(this.levels);
+            if (poplavok != null) {
+                boolean showClosed = checkNotNull(showClosedLevelsCheckBox).isSelected();
+                List<Level> levelList = DBUtil.connectGetResultAndClose(sess -> LevelDAO.findByPoplavokId(sess, poplavokId, showClosed));
+                this.levels = new FilteredList<>(FXCollections.observableArrayList(levelList));
+                checkNotNull(levelsTable).setItems(this.levels);
 
                 if (!selectedLevelIds.isEmpty()) {
                     levelsTable.getSelectionModel().clearSelection();

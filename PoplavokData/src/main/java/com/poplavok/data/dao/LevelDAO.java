@@ -26,5 +26,14 @@ public class LevelDAO {
     public static List<Level> findAll(Session session) {
         return session.createQuery("from Level", Level.class).list();
     }
-}
 
+    public static List<Level> findByPoplavokId(Session session, Long poplavokId, boolean includeClosed) {
+        String hql = "from Level l where l.poplavok.id = :poplavokId";
+        if (!includeClosed) {
+            hql += " and l.state != com.poplavok.data.model.LevelState.CLOSED";
+        }
+        return session.createQuery(hql, Level.class)
+                .setParameter("poplavokId", poplavokId)
+                .list();
+    }
+}

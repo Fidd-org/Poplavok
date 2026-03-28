@@ -46,14 +46,6 @@ public class DemoApp {
         );
         session.persist(poplavok);
 
-        // Create levels
-        Level level1 = new Level(poplavok, LevelState.INCEPTION, new BigDecimal("0.1"), new BigDecimal("4500"),
-                new BigDecimal("45000"), new BigDecimal("45000"), new BigDecimal("45000"), new BigDecimal("45000"), new BigDecimal("45000"), new Date());
-        Level level2 = new Level(poplavok, LevelState.INCEPTION, new BigDecimal("0.15"), new BigDecimal("6412.5"),
-                new BigDecimal("42750"), new BigDecimal("42750"), new BigDecimal("42750"), new BigDecimal("42750"), new BigDecimal("42750"), new Date());
-        poplavok.addLevel(level1);
-        poplavok.addLevel(level2);
-
         tx.commit();
         session.close();
 

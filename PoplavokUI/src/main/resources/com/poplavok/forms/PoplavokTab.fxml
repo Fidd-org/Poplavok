@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
@@ -47,7 +48,10 @@
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                 <Button mnemonicParsing="false" text="[ Reserve funds ]" />
                   <Button mnemonicParsing="false" text="[ Repay ]" />
+                  <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <Button mnemonicParsing="false" text="[ Perform trade ]" />
+                  <Separator orientation="VERTICAL" prefHeight="200.0" />
+                  <CheckBox fx:id="showClosedLevelsCheckBox" mnemonicParsing="false" text="Show closed" />
               </items>
             </ToolBar>
          </children>
@@ -74,16 +78,6 @@
                                         <PropertyValueFactory property="notes" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn text="ProjectedPrice">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="projectedPrice" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn text="ProjectedAmount">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="projectedAmount" />
-                                    </cellValueFactory>
-                                </TableColumn>
                                 <TableColumn text="AvailableAmount">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="availableAmount" />
@@ -107,6 +101,16 @@
                                 <TableColumn text="CloseDate">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="closeDate" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="ProjectedPrice">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="projectedPrice" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn text="ProjectedAmount">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="projectedAmount" />
                                     </cellValueFactory>
                                 </TableColumn>
                             </columns>

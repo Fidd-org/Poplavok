@@ -84,13 +84,6 @@ public class DataModelTest {
         );
         session.persist(poplavok);
 
-        Level level1 = new Level(poplavok, LevelState.INCEPTION, new BigDecimal("0.1"), new BigDecimal("5000"),
-                new BigDecimal("50000"), new BigDecimal("50000"), new BigDecimal("50000"), new BigDecimal("50000"), new BigDecimal("50000"), new Date());
-        Level level2 = new Level(poplavok, LevelState.INCEPTION, new BigDecimal("0.2"), new BigDecimal("9500"),
-                new BigDecimal("47500"), new BigDecimal("47500"), new BigDecimal("47500"), new BigDecimal("47500"), new BigDecimal("47500"), new Date());
-        poplavok.addLevel(level1);
-        poplavok.addLevel(level2);
-
         tx.commit();
         session.clear();
 
@@ -99,7 +92,6 @@ public class DataModelTest {
                 .list();
 
         assertEquals(1, poplavoks.size());
-        assertEquals(2, poplavoks.get(0).getLevels().size());
         assertTrue(poplavoks.get(0).isActive());
     }
 
