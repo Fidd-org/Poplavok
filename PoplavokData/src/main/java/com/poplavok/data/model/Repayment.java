@@ -7,6 +7,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -27,6 +29,11 @@ public class Repayment extends Transaction {
     @Column(length = 500)
     @Nullable
     private String notes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "repayment_type", length = 50)
+    @Nullable
+    private RepaymentType type;
 
     protected Repayment() {
     }
@@ -52,5 +59,13 @@ public class Repayment extends Transaction {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public @Nullable RepaymentType getRepaymentType() {
+        return type;
+    }
+
+    public void setRepaymentType(RepaymentType type) {
+        this.type = type;
     }
 }
