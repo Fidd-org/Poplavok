@@ -43,7 +43,7 @@
               <items>
                   <Button mnemonicParsing="false" onAction="#newLevel" text="[ New level ]" />
                   <Button mnemonicParsing="false" onAction="#editLevel" text="[ Edit level ]" />
-                  <Button mnemonicParsing="false" onAction="#closeLevel" text="[ Close level ]" />
+                  <Button fx:id="closeLevelButton" mnemonicParsing="false" onAction="#closeLevel" text="[ Close level ]" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                 <Button mnemonicParsing="false" text="[ Reserve funds ]" />
                   <Button mnemonicParsing="false" text="[ Repay ]" />

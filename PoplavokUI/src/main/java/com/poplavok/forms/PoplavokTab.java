@@ -4,6 +4,7 @@ import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
 import com.poplavok.data.dao.RateDAO;
 import com.poplavok.data.model.Level;
+import com.poplavok.data.model.LevelState;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Rate;
@@ -17,6 +18,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -63,6 +65,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable TextField pnlTextField;
     @FXML @Nullable TextField averagingPriceTextField;
 
+    @FXML @Nullable Button closeLevelButton;
+
     protected final MainForm mainApp;
     protected final Long poplavokId;
 
@@ -88,9 +92,26 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         refreshContent();
     }
 
-    private void updateLevelsSelection() {
+    protected boolean isEmpty(@Nullable BigDecimal amount) {
+        return amount == null || amount.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    protected boolean isLevelEmpty(Level lvl) {
+        return isEmpty(lvl.getAvailableAmountBase()) &&
+                isEmpty(lvl.getAvailableAmountQuote()) &&
+                isEmpty(lvl.getDebtBase()) &&
+                isEmpty(lvl.getDebtQuote()) &&
+                isEmpty(lvl.getLentAmountBase()) &&
+                isEmpty(lvl.getLentAmountQuote());
+    }
+
+    protected void updateLevelsSelection() {
         List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
         if (selected == null || selected.isEmpty()) {
+            if (closeLevelButton != null) {
+                closeLevelButton.setDisable(true);
+                closeLevelButton.setText("[ Close level ]");
+            }
             if (holdingBaseTextField != null) holdingBaseTextField.setText("");
             if (holdingQuoteTextField != null) holdingQuoteTextField.setText("");
             if (oweBaseTextField != null) oweBaseTextField.setText("");
@@ -102,6 +123,30 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             if (pnlTextField != null) pnlTextField.setText("");
             if (averagingPriceTextField != null) averagingPriceTextField.setText("");
             return;
+        }
+
+        if (closeLevelButton != null) {
+            if (selected.size() != 1) {
+                closeLevelButton.setDisable(true);
+                closeLevelButton.setText("[ Close level ]");
+            } else {
+                Level lvl = selected.get(0);
+                LevelState state = lvl.getState();
+                if (state == LevelState.INCEPTION) {
+                    closeLevelButton.setDisable(false);
+                    closeLevelButton.setText("[ Delete level ]");
+                } else if (state == LevelState.FUNDING) {
+                    closeLevelButton.setText("[ Delete level ]");
+                    // Only can delete empty levels
+                    closeLevelButton.setDisable(!isLevelEmpty(lvl));
+                } else if (state == LevelState.TRADING) {
+                    closeLevelButton.setDisable(false);
+                    closeLevelButton.setText("[ Close level ]");
+                } else if (state == LevelState.CLOSED) {
+                    closeLevelButton.setDisable(true);
+                    closeLevelButton.setText("[ Close level ]");
+                }
+            }
         }
 
         BigDecimal holdingBase = BigDecimal.ZERO;
@@ -243,7 +288,9 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     public void editLevel() {}
 
-    public void closeLevel() {}
+    public void closeLevel() {
+        //
+    }
 
     public void refreshPrice() {}
 
