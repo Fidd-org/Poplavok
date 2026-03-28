@@ -49,6 +49,14 @@ public class Level {
     @Nullable
     private BigDecimal projectedPrice;
 
+    @Column(name = "projected_amount_base", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal projectedAmountBase;
+
+    @Column(name = "projected_amount_quote", precision = 20, scale = 8)
+    @Nullable
+    private BigDecimal projectedAmountQuote;
+
     @Column(name = "available_amount_base", precision = 20, scale = 8)
     @Nullable
     private BigDecimal availableAmountBase;
@@ -107,6 +115,24 @@ public class Level {
 
     public void setPoplavok(@Nullable Poplavok poplavok) {
         this.poplavok = poplavok;
+    }
+
+    @Nullable
+    public BigDecimal getProjectedAmountBase() {
+        return projectedAmountBase;
+    }
+
+    public void setProjectedAmountBase(@Nullable BigDecimal projectedAmountBase) {
+        this.projectedAmountBase = projectedAmountBase;
+    }
+
+    @Nullable
+    public BigDecimal getProjectedAmountQuote() {
+        return projectedAmountQuote;
+    }
+
+    public void setProjectedAmountQuote(@Nullable BigDecimal projectedAmountQuote) {
+        this.projectedAmountQuote = projectedAmountQuote;
     }
 
     @Nullable
@@ -187,16 +213,16 @@ public class Level {
         this.creationDate = creationDate;
     }
 
-    public Date getCloseDate() {
-        return checkNotNull(closeDate);
+    public @Nullable Date getCloseDate() {
+        return closeDate;
     }
 
     public void setCloseDate(Date closeDate) {
         this.closeDate = closeDate;
     }
 
-    public String getNotes() {
-        return checkNotNull(notes);
+    public @Nullable String getNotes() {
+        return notes;
     }
 
     public void setNotes(String notes) {
