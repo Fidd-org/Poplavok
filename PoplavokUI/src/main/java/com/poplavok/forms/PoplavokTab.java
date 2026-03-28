@@ -28,6 +28,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
+import java.math.BigDecimal;
+import javafx.collections.ListChangeListener;
+import javafx.scene.control.SelectionMode;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -48,6 +51,17 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     @FXML @Nullable TextField directionTextBox;
 
+    @FXML @Nullable TextField holdingBaseTextField;
+    @FXML @Nullable TextField holdingQuoteTextField;
+    @FXML @Nullable TextField oweBaseTextField;
+    @FXML @Nullable TextField oweQuoteTextField;
+    @FXML @Nullable TextField lentBaseTextField;
+    @FXML @Nullable TextField lentQuoteTextField;
+    @FXML @Nullable TextField marketValueBaseTextField;
+    @FXML @Nullable TextField marketValueQuoteTextField;
+    @FXML @Nullable TextField pnlTextField;
+    @FXML @Nullable TextField averagingPriceTextField;
+
     protected final MainForm mainApp;
     protected final Long poplavokId;
 
@@ -65,7 +79,79 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             throw new RuntimeException(exception);
         }
 
+        checkNotNull(levelsTable).getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        checkNotNull(levelsTable).getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Level> c) -> {
+            updateLevelsSelection();
+        });
+
         refreshContent();
+    }
+
+    private void updateLevelsSelection() {
+        List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+        if (selected == null || selected.isEmpty()) {
+            if (holdingBaseTextField != null) holdingBaseTextField.setText("");
+            if (holdingQuoteTextField != null) holdingQuoteTextField.setText("");
+            if (oweBaseTextField != null) oweBaseTextField.setText("");
+            if (oweQuoteTextField != null) oweQuoteTextField.setText("");
+            if (lentBaseTextField != null) lentBaseTextField.setText("");
+            if (lentQuoteTextField != null) lentQuoteTextField.setText("");
+            if (marketValueBaseTextField != null) marketValueBaseTextField.setText("");
+            if (marketValueQuoteTextField != null) marketValueQuoteTextField.setText("");
+            if (pnlTextField != null) pnlTextField.setText("");
+            if (averagingPriceTextField != null) averagingPriceTextField.setText("");
+            return;
+        }
+
+        BigDecimal holdingBase = BigDecimal.ZERO;
+        BigDecimal holdingQuote = BigDecimal.ZERO;
+        BigDecimal oweBase = BigDecimal.ZERO;
+        BigDecimal oweQuote = BigDecimal.ZERO;
+        BigDecimal lentBase = BigDecimal.ZERO;
+        BigDecimal lentQuote = BigDecimal.ZERO;
+
+        for (Level lvl : selected) {
+            holdingBase = holdingBase.add(lvl.getAvailableAmountBase() != null ? lvl.getAvailableAmountBase() : BigDecimal.ZERO);
+            holdingQuote = holdingQuote.add(lvl.getAvailableAmountQuote() != null ? lvl.getAvailableAmountQuote() : BigDecimal.ZERO);
+            oweBase = oweBase.add(lvl.getDebtBase() != null ? lvl.getDebtBase() : BigDecimal.ZERO);
+            oweQuote = oweQuote.add(lvl.getDebtQuote() != null ? lvl.getDebtQuote() : BigDecimal.ZERO);
+            lentBase = lentBase.add(lvl.getLentAmountBase() != null ? lvl.getLentAmountBase() : BigDecimal.ZERO);
+            lentQuote = lentQuote.add(lvl.getLentAmountQuote() != null ? lvl.getLentAmountQuote() : BigDecimal.ZERO);
+        }
+
+        if (holdingBaseTextField != null) holdingBaseTextField.setText(holdingBase.toPlainString());
+        if (holdingQuoteTextField != null) holdingQuoteTextField.setText(holdingQuote.toPlainString());
+        if (oweBaseTextField != null) oweBaseTextField.setText(oweBase.toPlainString());
+        if (oweQuoteTextField != null) oweQuoteTextField.setText(oweQuote.toPlainString());
+        if (lentBaseTextField != null) lentBaseTextField.setText(lentBase.toPlainString());
+        if (lentQuoteTextField != null) lentQuoteTextField.setText(lentQuote.toPlainString());
+
+        BigDecimal totalBase = holdingBase.add(lentBase).subtract(oweBase);
+        BigDecimal totalQuote = holdingQuote.add(lentQuote).subtract(oweQuote);
+
+        if (marketValueBaseTextField != null) marketValueBaseTextField.setText(totalBase.toPlainString());
+        if (marketValueQuoteTextField != null) marketValueQuoteTextField.setText(totalQuote.toPlainString());
+
+        BigDecimal currentPrice = BigDecimal.ZERO;
+        if (priceTextField != null && priceTextField.getText() != null && !priceTextField.getText().trim().isEmpty()) {
+            try {
+                currentPrice = new BigDecimal(priceTextField.getText().trim());
+            } catch (Exception e) {}
+        }
+        
+        if (currentPrice.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal pnl = totalQuote.add(totalBase.multiply(currentPrice));
+            if (pnlTextField != null) pnlTextField.setText(pnl.toPlainString());
+        } else {
+            if (pnlTextField != null) pnlTextField.setText("");
+        }
+        
+        if (totalBase.compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal avgPrice = totalQuote.negate().divide(totalBase, 8, java.math.RoundingMode.HALF_UP);
+            if (averagingPriceTextField != null) averagingPriceTextField.setText(avgPrice.toPlainString());
+        } else {
+            if (averagingPriceTextField != null) averagingPriceTextField.setText("");
+        }
     }
 
     @Override
@@ -95,6 +181,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                     checkNotNull(priceTextField).setText(rate.getPrice().toPlainString());
                 }
             }
+            updateLevelsSelection(); // Update stats in case something changed
         } catch (Exception e) {
             LOGGER.error("Error refreshing content: ", e);
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error loading Poplavok: " + e, ButtonType.OK);
