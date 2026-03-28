@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
 import java.math.BigDecimal;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.SelectionMode;
@@ -156,6 +157,18 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     @Override
     public void refreshContent() {
+        List<Long> selectedLevelIds = new ArrayList<>();
+        if (levelsTable != null && levelsTable.getSelectionModel() != null) {
+            List<Level> selectedItems = levelsTable.getSelectionModel().getSelectedItems();
+            if (selectedItems != null) {
+                for (Level l : selectedItems) {
+                    if (l != null && l.getId() != null) {
+                        selectedLevelIds.add(l.getId());
+                    }
+                }
+            }
+        }
+
         try {
             DBUtil.connectCommitAndClose(sess -> {
                 this.poplavok = PoplavokDAO.findById(sess, poplavokId)
@@ -170,6 +183,15 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             if (levelsTable != null && poplavok != null) {
                 this.levels = new FilteredList<>(FXCollections.observableArrayList(poplavok.getLevels()));
                 levelsTable.setItems(this.levels);
+
+                if (!selectedLevelIds.isEmpty()) {
+                    levelsTable.getSelectionModel().clearSelection();
+                    for (Level l : this.levels) {
+                        if (l != null && l.getId() != null && selectedLevelIds.contains(l.getId())) {
+                            levelsTable.getSelectionModel().select(l);
+                        }
+                    }
+                }
             }
             MarketTicker ticker = checkNotNull(poplavok).getTicker();
             if (ticker != null) {
