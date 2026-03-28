@@ -194,7 +194,7 @@ public class Level {
         this.debtQuote = debtQuote;
     }
 
-    private String formatAmount(@Nullable BigDecimal amount) {
+    public static String formatAmount(@Nullable BigDecimal amount) {
         if (amount == null) {
             return "0.00";
         }

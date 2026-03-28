@@ -24,6 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,8 +138,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                     closeLevelButton.setText("[ Delete level ]");
                 } else if (state == LevelState.FUNDING) {
                     closeLevelButton.setText("[ Delete level ]");
-                    // Only can delete empty levels
-                    closeLevelButton.setDisable(!isLevelEmpty(lvl));
+                    closeLevelButton.setDisable(false);
                 } else if (state == LevelState.TRADING) {
                     closeLevelButton.setDisable(false);
                     closeLevelButton.setText("[ Close level ]");
@@ -286,10 +286,74 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
     }
 
-    public void editLevel() {}
+    public void editLevel() {
+        try {
+            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (selected == null || selected.size() != 1) return;
+
+            Level lvl = selected.get(0);
+            LevelState state = lvl.getState();
+
+            if (state == LevelState.CLOSED) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "CLOSED level can't be edited.");
+                alert.showAndWait();
+                return;
+            }
+
+            LevelAddDialog levelAddDialog = new LevelAddDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(), lvl.getProjectedPrice());
+            Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
+                stage -> { levelAddDialog.setStage(stage); return levelAddDialog; },
+                "Edit Level " + StringUtils.defaultIfBlank(lvl.getNotes(), "#" + lvl.getId()));
+
+            workspaceStage.setOnHidden(
+                ev -> {
+                    try {
+                        Level level = levelAddDialog.getReturnLevel();
+                        if (level != null) {
+                            level.setPoplavok(checkNotNull(poplavok));
+                            DBUtil.connectCommitAndClose(sess -> LevelDAO.update(sess, checkNotNull(level)));
+                            refreshContent();
+                        }
+                    } catch (Exception e) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating level: " + e, ButtonType.OK);
+                        LOGGER.error("Error creating level: ", e);
+                        alert.showAndWait();
+                    }
+                }
+            );
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error updating level: " + e, ButtonType.OK);
+            LOGGER.error("Error updating level: ", e);
+            alert.showAndWait();
+        }
+    }
 
     public void closeLevel() {
-        //
+        try {
+            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (selected == null || selected.size() != 1) return;
+
+            Level lvl = selected.get(0);
+            LevelState state = lvl.getState();
+
+            if (state == LevelState.INCEPTION || (state == LevelState.FUNDING && isLevelEmpty(lvl))) {
+                DBUtil.connectCommitAndClose(sess -> LevelDAO.delete(sess, lvl));
+            } else if (state == LevelState.TRADING && isLevelEmpty(lvl)) {
+                lvl.setState(LevelState.CLOSED);
+                DBUtil.connectCommitAndClose(sess -> LevelDAO.update(sess, lvl));
+            } else if (!isLevelEmpty(lvl)) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Level is not empty. Can't close / delete.");
+                alert.showAndWait();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Can't close / delete level.");
+                alert.showAndWait();
+            }
+            refreshContent();
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error closing level: " + e, ButtonType.OK);
+            LOGGER.error("Error closing level: ", e);
+            alert.showAndWait();
+        }
     }
 
     public void refreshPrice() {}

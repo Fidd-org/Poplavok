@@ -64,9 +64,9 @@
                                         <PropertyValueFactory property="id" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn text="CreationDate">
+                                <TableColumn text="State">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="creationDate" />
+                                        <PropertyValueFactory property="state" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn text="Notes">
@@ -99,9 +99,9 @@
                                         <PropertyValueFactory property="lentAmount" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn text="State">
+                                <TableColumn text="CreationDate">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="state" />
+                                        <PropertyValueFactory property="creationDate" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn text="CloseDate">
