@@ -82,7 +82,7 @@ public class MainForm {
 
     public void openPoplavokListTab() {
         PoplavokListTab poplavokListTab = new PoplavokListTab(this);
-        final Tab tab = new Tab("Poplavoks", poplavokListTab);
+        final Tab tab = new Tab("§§ Poplavoks", poplavokListTab);
         tab.setClosable(true);
 
         addTab(tab);
