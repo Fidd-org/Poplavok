@@ -42,7 +42,7 @@ public class Loan extends Transaction {
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Repayment> repayments = new ArrayList<>();
 
-    protected Loan() {
+    public Loan() {
     }
 
     public Loan(Currency currency, BigDecimal amount, Level level,

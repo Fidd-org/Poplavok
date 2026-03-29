@@ -3,8 +3,10 @@ package com.poplavok.forms;
 import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
 import com.poplavok.data.dao.RateDAO;
+import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelState;
+import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Rate;
@@ -12,6 +14,7 @@ import com.poplavok.data.model.Trade;
 import com.poplavok.data.model.Transaction;
 import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.PoplavokDAO;
+import com.poplavok.data.dao.LoanDAO;
 import com.poplavok.data.utils.DBUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
@@ -363,4 +366,56 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     public void refreshPrice() {}
 
     public void closePoplavok() {}
+
+    public void allocateFunds() {
+        try {
+            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (selected == null || selected.size() != 1) return;
+
+            Level lvl = selected.get(0);
+            LevelState state = lvl.getState();
+
+            if (state == LevelState.CLOSED) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Funds can't be allocated for CLOSED levels.");
+                alert.showAndWait();
+                return;
+            }
+
+            String loanCurrency = null;
+            BigDecimal defaultAmount = null;
+            if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
+                loanCurrency = checkNotNull(poplavok).getTicker().getQuote().getCurrency();
+                defaultAmount = lvl.getProjectedAmountQuote();
+            } else {
+                loanCurrency = checkNotNull(poplavok).getTicker().getBase().getCurrency();
+                defaultAmount = lvl.getProjectedAmountBase();
+            }
+
+            AllocateFundsDialog allocateFundsDialog = new AllocateFundsDialog(loanCurrency, defaultAmount);
+            Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
+                    stage -> { allocateFundsDialog.setStage(stage); return allocateFundsDialog; },
+                    "Allocate Funds");
+
+            workspaceStage.setOnHidden(
+                    ev -> {
+                        try {
+                            Loan loan = allocateFundsDialog.getReturnLoan();
+                            if (loan != null) {
+                                DBUtil.connectCommitAndClose(sess -> LoanDAO.save(sess, checkNotNull(loan)));
+                                refreshContent();
+                            }
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error allocating funds: " + e, ButtonType.OK);
+                            LOGGER.error("Error allocating funds: ", e);
+                            alert.showAndWait();
+                        }
+                    }
+            );
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error allocating funds: " + e, ButtonType.OK);
+            LOGGER.error("Error allocating funds: ", e);
+            alert.showAndWait();
+        }
+    }
+
 }

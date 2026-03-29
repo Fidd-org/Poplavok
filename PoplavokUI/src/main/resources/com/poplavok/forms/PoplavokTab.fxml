@@ -46,7 +46,7 @@
                   <Button mnemonicParsing="false" onAction="#editLevel" text="[ Edit level ]" />
                   <Button fx:id="closeLevelButton" mnemonicParsing="false" onAction="#closeLevel" text="[ Close level ]" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
-                <Button mnemonicParsing="false" text="[ Reserve funds ]" />
+                <Button mnemonicParsing="false" onAction="#allocateFunds" text="[ Allocate funds ]" />
                   <Button mnemonicParsing="false" text="[ Repay ]" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <Button mnemonicParsing="false" text="[ Perform trade ]" />
