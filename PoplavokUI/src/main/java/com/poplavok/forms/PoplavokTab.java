@@ -2,7 +2,9 @@ package com.poplavok.forms;
 
 import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
+import com.poplavok.data.dao.AccountDAO;
 import com.poplavok.data.dao.RateDAO;
+import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Currency;
 import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
@@ -41,7 +43,11 @@ import java.math.BigDecimal;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.SelectionMode;
 
+import static com.flower.fxutils.JavaFxUtils.showMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.model.LoanType.ACCOUNT_FUNDED;
+import static com.poplavok.data.model.LoanType.EXTERNAL;
+import static com.poplavok.data.model.LoanType.POPLAVOK_FUNDED;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 public class PoplavokTab extends AnchorPane implements Refreshable {
@@ -387,14 +393,23 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 return;
             }
 
-            Currency loanCurrency = null;
-            BigDecimal defaultAmount = null;
-            if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
+            Currency loanCurrency;
+            BigDecimal defaultAmount;
+            Direction poplavokDirection = checkNotNull(poplavok).getDirection();
+            if (poplavokDirection == Direction.LONG) {
                 loanCurrency = checkNotNull(poplavok).getTicker().getQuote();
                 defaultAmount = lvl.getProjectedAmountQuote();
+                defaultAmount = defaultAmount == null ? BigDecimal.ZERO : defaultAmount;
+                if (lvl.getAvailableAmountQuote() != null) {
+                    defaultAmount = defaultAmount.subtract(lvl.getAvailableAmountQuote());
+                }
             } else {
                 loanCurrency = checkNotNull(poplavok).getTicker().getBase();
                 defaultAmount = lvl.getProjectedAmountBase();
+                defaultAmount = defaultAmount == null ? BigDecimal.ZERO : defaultAmount;
+                if (lvl.getAvailableAmountBase() != null) {
+                    defaultAmount = defaultAmount.subtract(lvl.getAvailableAmountBase());
+                }
             }
 
             AllocateFundsDialog allocateFundsDialog = new AllocateFundsDialog(lvl, loanCurrency, defaultAmount);
@@ -407,7 +422,57 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                         try {
                             Loan loan = allocateFundsDialog.getReturnLoan();
                             if (loan != null) {
-                                DBUtil.connectCommitAndClose(sess -> LoanDAO.save(sess, checkNotNull(loan)));
+                                if (loan.getLoanType() == ACCOUNT_FUNDED && loan.getLoanType() == POPLAVOK_FUNDED && loan.getLoanType() == EXTERNAL) {
+                                    showMessage("Unsupported loan type: " + loan.getLoanType());
+                                    return;
+                                }
+
+                                // Add loan funds to our level
+                                if (poplavokDirection == Direction.LONG) {
+                                    lvl.setAvailableAmountQuote(lvl.getAvailableAmountQuote() != null ? lvl.getAvailableAmountQuote().add(loan.getAmount()) : loan.getAmount());
+                                } else {
+                                    lvl.setAvailableAmountQuote(lvl.getAvailableAmountQuote() != null ? lvl.getAvailableAmountQuote().add(loan.getAmount()) : loan.getAmount());
+                                }
+
+                                if (loan.getLoanType() == ACCOUNT_FUNDED) {
+                                    // Remove loan funds from source account
+                                    Account sourceAccount = checkNotNull(loan.getSourceAccount());
+                                    sourceAccount.setAvailableAmount(loan.getSourceAccount().getAvailableAmount().subtract(loan.getAmount()));
+
+                                    // save new loan, update level and source account
+                                    DBUtil.connectCommitAndClose(sess -> {
+                                        AccountDAO.update(sess, sourceAccount);
+                                        LoanDAO.save(sess, loan);
+                                        LevelDAO.update(sess, lvl);
+                                    });
+                                }
+                                if (loan.getLoanType() == POPLAVOK_FUNDED) {
+                                    Level sourceLevel = checkNotNull(loan.getSourceLevel());
+                                    Poplavok sourcePoplavok = sourceLevel.getPoplavok();
+                                    Currency sourceBase = sourcePoplavok.getTicker().getBase();
+                                    Currency sourceQuote = sourcePoplavok.getTicker().getQuote();
+
+                                    if (loanCurrency.getCurrency().equals(sourceBase.getCurrency())) {
+                                        sourceLevel.setAvailableAmountBase(checkNotNull(sourceLevel.getAvailableAmountBase()).subtract(loan.getAmount()));
+                                    } else if (loanCurrency.getCurrency().equals(sourceQuote.getCurrency())) {
+                                        sourceLevel.setAvailableAmountQuote(checkNotNull(sourceLevel.getAvailableAmountQuote()).subtract(loan.getAmount()));
+                                    } else {
+                                        showMessage("Source level currency doesn't match loan currency");
+                                        return;
+                                    }
+                                    DBUtil.connectCommitAndClose(sess -> {
+                                        LevelDAO.update(sess, sourceLevel);
+                                        LoanDAO.save(sess, loan);
+                                        LevelDAO.update(sess, lvl);
+                                    });
+                                }
+                                if (loan.getLoanType() == EXTERNAL) {
+                                    DBUtil.connectCommitAndClose(sess -> {
+                                        LoanDAO.save(sess, loan);
+                                        LevelDAO.update(sess, lvl);
+                                    });
+                                }
+
                                 refreshContent();
                             }
                         } catch (Exception e) {

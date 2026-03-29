@@ -61,6 +61,7 @@ public class AllocateFundsDialog extends VBox {
 
     final Level lvl;
     final Currency currency;
+    @Nullable final BigDecimal defaultAmount;
     @Nullable volatile Loan returnLoan = null;
 
     public AllocateFundsDialog(Level lvl, Currency currency, @Nullable BigDecimal defaultAmount) {
@@ -76,9 +77,10 @@ public class AllocateFundsDialog extends VBox {
 
         this.lvl = lvl;
         this.currency = currency;
+        this.defaultAmount = defaultAmount;
 
         checkNotNull(currencyLabel).textProperty().set(currency.getCurrency());
-        checkNotNull(amountTextField).textProperty().set(formatAmount(defaultAmount));
+        resetAmount();
 
         checkNotNull(interestRateTextField).setTextFormatter(createDecimalTextFormatter());
 
@@ -185,5 +187,35 @@ public class AllocateFundsDialog extends VBox {
     @Nullable
     public Loan getReturnLoan() {
         return returnLoan;
+    }
+
+    public void useMaxAvailableAmount() {
+        Tab selectedTab = checkNotNull(sourceTabPane).getSelectionModel().getSelectedItem();
+        if (selectedTab == sourceAccountTab) {
+            Account selectedAccount = checkNotNull(accountsTableView).getSelectionModel().getSelectedItem();
+            if (selectedAccount != null) {
+                checkNotNull(amountTextField).textProperty().set(formatAmount(selectedAccount.getAvailableAmount()));
+            }
+        } else if (selectedTab == sourceLevelTab) {
+            Level selectedLevel = checkNotNull(levelsTableView).getSelectionModel().getSelectedItem();
+            if (selectedLevel != null) {
+                Currency levelBase = selectedLevel.getPoplavok().getTicker().getBase();
+                Currency levelQuote = selectedLevel.getPoplavok().getTicker().getQuote();
+
+                if (levelBase.getCurrency().equals(currency.getCurrency())) {
+                    checkNotNull(amountTextField).textProperty().set(formatAmount(selectedLevel.getAvailableAmountQuote()));
+                } else if (levelQuote.getCurrency().equals(currency.getCurrency())) {
+                    checkNotNull(amountTextField).textProperty().set(formatAmount(selectedLevel.getAvailableAmountBase()));
+                }
+            }
+        }
+    }
+
+    public void resetAmount() {
+        if (defaultAmount != null) {
+            checkNotNull(amountTextField).textProperty().set(formatAmount(defaultAmount));
+        } else {
+            checkNotNull(amountTextField).textProperty().set("");
+        }
     }
 }
