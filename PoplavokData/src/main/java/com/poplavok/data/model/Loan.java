@@ -35,6 +35,11 @@ public class Loan extends Transaction {
     @Nullable
     private BigDecimal interestRate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "interest_rate_type", length = 20)
+    @Nullable
+    private InterestRateType interestRateType;
+
     @Column(length = 500)
     @Nullable
     private String notes;
@@ -74,6 +79,18 @@ public class Loan extends Transaction {
 
     public void setInterestRate(BigDecimal interestRate) {
         this.interestRate = interestRate;
+    }
+
+    public InterestRateType getInterestRateType() {
+        return checkNotNull(interestRateType);
+    }
+
+    public void setInterestRateType(InterestRateType interestRateType) {
+        this.interestRateType = interestRateType;
+    }
+
+    public @Nullable String getNotes() {
+        return notes;
     }
 
     public void setNotes(String notes) {

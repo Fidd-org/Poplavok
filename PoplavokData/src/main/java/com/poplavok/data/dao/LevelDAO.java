@@ -27,6 +27,16 @@ public class LevelDAO {
         return session.createQuery("from Level", Level.class).list();
     }
 
+    public static List<Level> findAvailableByCurrency(Session session, String currency) {
+        String hql = "select l from Level l join fetch l.poplavok p join fetch p.marketTicker t " +
+                     "join fetch t.base b join fetch t.quote q " +
+                     "where (b.currency = :currency and l.availableAmountBase > 0) " +
+                     "or (q.currency = :currency and l.availableAmountQuote > 0)";
+        return session.createQuery(hql, Level.class)
+                .setParameter("currency", currency)
+                .list();
+    }
+
     public static List<Level> findByPoplavokId(Session session, Long poplavokId, boolean includeClosed) {
         String hql = "from Level l where l.poplavok.id = :poplavokId";
         if (!includeClosed) {

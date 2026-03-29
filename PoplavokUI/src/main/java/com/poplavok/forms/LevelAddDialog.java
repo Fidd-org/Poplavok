@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 public class LevelAddDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(LevelAddDialog.class);
@@ -78,16 +79,16 @@ public class LevelAddDialog extends VBox {
         if (level == null) {
             checkNotNull(addButton).textProperty().set("Add New Level");
             if (price != null) {
-                checkNotNull(priceTextField).textProperty().set(Level.formatAmount(price));
+                checkNotNull(priceTextField).textProperty().set(formatAmount(price));
             }
         } else {
             checkNotNull(addButton).textProperty().set("Update Level");
             levelId = level.getId();
 
-            checkNotNull(priceTextField).textProperty().set(Level.formatAmount(level.getProjectedPrice()));
+            checkNotNull(priceTextField).textProperty().set(formatAmount(level.getProjectedPrice()));
             checkNotNull(notesTextField).textProperty().set(level.getNotes());
-            checkNotNull(quoteAmountTextField).textProperty().set(Level.formatAmount(level.getProjectedAmountQuote()));
-            checkNotNull(baseAmountTextField).textProperty().set(Level.formatAmount(level.getProjectedAmountBase()));
+            checkNotNull(quoteAmountTextField).textProperty().set(formatAmount(level.getProjectedAmountQuote()));
+            checkNotNull(baseAmountTextField).textProperty().set(formatAmount(level.getProjectedAmountBase()));
         }
     }
 
@@ -120,7 +121,7 @@ public class LevelAddDialog extends VBox {
             if (baseAmountTextField == null || quoteAmountTextField == null || priceTextField == null) return;
             BigDecimal base = new BigDecimal(baseAmountTextField.getText().replace(',', '.'));
             BigDecimal price = new BigDecimal(priceTextField.getText().replace(',', '.'));
-            quoteAmountTextField.setText(Level.formatAmount(base.multiply(price)));
+            quoteAmountTextField.setText(formatAmount(base.multiply(price)));
         } catch (Exception e) {
             // ignore parsing errors
         }
@@ -132,7 +133,7 @@ public class LevelAddDialog extends VBox {
             BigDecimal quote = new BigDecimal(quoteAmountTextField.getText().replace(',', '.'));
             BigDecimal price = new BigDecimal(priceTextField.getText().replace(',', '.'));
             if (price.compareTo(BigDecimal.ZERO) != 0) {
-                baseAmountTextField.setText(Level.formatAmount(quote.divide(price, 8, RoundingMode.CEILING)));
+                baseAmountTextField.setText(formatAmount(quote.divide(price, 8, RoundingMode.CEILING)));
             }
         } catch (Exception e) {
             // ignore parsing errors

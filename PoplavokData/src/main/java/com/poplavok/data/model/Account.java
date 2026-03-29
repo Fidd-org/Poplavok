@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 @Entity
 @Table(name = "accounts")
@@ -119,14 +120,16 @@ public class Account {
     }
 
     public String getAvailableAmountStr() {
-        return availableAmount != null ? availableAmount.toPlainString() : "0";
+        return formatAmount(availableAmount);
     }
 
     public String getReservedAmountStr() {
-        return reservedAmount != null ? reservedAmount.toPlainString() : "0";
+        return formatAmount(reservedAmount);
     }
 
     public String getArchivedStatus() {
         return archived ? "Archived" : "Active";
     }
+
+    public @Nullable String getAccountString() { return "#" + getId() + " " + getAccountName(); }
 }

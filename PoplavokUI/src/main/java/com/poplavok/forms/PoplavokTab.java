@@ -3,6 +3,7 @@ package com.poplavok.forms;
 import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
 import com.poplavok.data.dao.RateDAO;
+import com.poplavok.data.model.Currency;
 import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelState;
@@ -41,6 +42,7 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.control.SelectionMode;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 public class PoplavokTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(PoplavokTab.class);
@@ -174,18 +176,18 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             lentQuote = lentQuote.add(lvl.getLentAmountQuote() != null ? lvl.getLentAmountQuote() : BigDecimal.ZERO);
         }
 
-        if (holdingBaseTextField != null) holdingBaseTextField.setText(holdingBase.toPlainString());
-        if (holdingQuoteTextField != null) holdingQuoteTextField.setText(holdingQuote.toPlainString());
-        if (oweBaseTextField != null) oweBaseTextField.setText(oweBase.toPlainString());
-        if (oweQuoteTextField != null) oweQuoteTextField.setText(oweQuote.toPlainString());
-        if (lentBaseTextField != null) lentBaseTextField.setText(lentBase.toPlainString());
-        if (lentQuoteTextField != null) lentQuoteTextField.setText(lentQuote.toPlainString());
+        if (holdingBaseTextField != null) holdingBaseTextField.setText(formatAmount(holdingBase));
+        if (holdingQuoteTextField != null) holdingQuoteTextField.setText(formatAmount(holdingQuote));
+        if (oweBaseTextField != null) oweBaseTextField.setText(formatAmount(oweBase));
+        if (oweQuoteTextField != null) oweQuoteTextField.setText(formatAmount(oweQuote));
+        if (lentBaseTextField != null) lentBaseTextField.setText(formatAmount(lentBase));
+        if (lentQuoteTextField != null) lentQuoteTextField.setText(formatAmount(lentQuote));
 
         BigDecimal totalBase = holdingBase.add(lentBase).subtract(oweBase);
         BigDecimal totalQuote = holdingQuote.add(lentQuote).subtract(oweQuote);
 
-        if (marketValueBaseTextField != null) marketValueBaseTextField.setText(totalBase.toPlainString());
-        if (marketValueQuoteTextField != null) marketValueQuoteTextField.setText(totalQuote.toPlainString());
+        if (marketValueBaseTextField != null) marketValueBaseTextField.setText(formatAmount(totalBase));
+        if (marketValueQuoteTextField != null) marketValueQuoteTextField.setText(formatAmount(totalQuote));
 
         BigDecimal currentPrice = BigDecimal.ZERO;
         if (priceTextField != null && priceTextField.getText() != null && !priceTextField.getText().trim().isEmpty()) {
@@ -196,14 +198,14 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         
         if (currentPrice.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal pnl = totalQuote.add(totalBase.multiply(currentPrice));
-            if (pnlTextField != null) pnlTextField.setText(pnl.toPlainString());
+            if (pnlTextField != null) pnlTextField.setText(formatAmount(pnl));
         } else {
             if (pnlTextField != null) pnlTextField.setText("");
         }
         
         if (totalBase.compareTo(BigDecimal.ZERO) != 0) {
             BigDecimal avgPrice = totalQuote.negate().divide(totalBase, 8, java.math.RoundingMode.HALF_UP);
-            if (averagingPriceTextField != null) averagingPriceTextField.setText(avgPrice.toPlainString());
+            if (averagingPriceTextField != null) averagingPriceTextField.setText(formatAmount(avgPrice));
         } else {
             if (averagingPriceTextField != null) averagingPriceTextField.setText("");
         }
@@ -252,7 +254,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 checkNotNull(directionTextBox).setText(checkNotNull(poplavok.getDirection()).name());
                 Rate rate = RateDAO.getLatestRateForTicker(ticker.getId());
                 if (rate != null && rate.getPrice() != null) {
-                    checkNotNull(priceTextField).setText(rate.getPrice().toPlainString());
+                    checkNotNull(priceTextField).setText(formatAmount(rate.getPrice()));
                 }
             }
             updateLevelsSelection(); // Update stats in case something changed
@@ -381,17 +383,17 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 return;
             }
 
-            String loanCurrency = null;
+            Currency loanCurrency = null;
             BigDecimal defaultAmount = null;
             if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
-                loanCurrency = checkNotNull(poplavok).getTicker().getQuote().getCurrency();
+                loanCurrency = checkNotNull(poplavok).getTicker().getQuote();
                 defaultAmount = lvl.getProjectedAmountQuote();
             } else {
-                loanCurrency = checkNotNull(poplavok).getTicker().getBase().getCurrency();
+                loanCurrency = checkNotNull(poplavok).getTicker().getBase();
                 defaultAmount = lvl.getProjectedAmountBase();
             }
 
-            AllocateFundsDialog allocateFundsDialog = new AllocateFundsDialog(loanCurrency, defaultAmount);
+            AllocateFundsDialog allocateFundsDialog = new AllocateFundsDialog(lvl, loanCurrency, defaultAmount);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { allocateFundsDialog.setStage(stage); return allocateFundsDialog; },
                     "Allocate Funds");

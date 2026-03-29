@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 @Entity
 @Table(name = "levels")
@@ -194,18 +195,6 @@ public class Level {
         this.debtQuote = debtQuote;
     }
 
-    public static String formatAmount(@Nullable BigDecimal amount) {
-        if (amount == null) {
-            return "0.00";
-        }
-        BigDecimal stripped = amount.stripTrailingZeros();
-        if (stripped.scale() < 2) {
-            // only pad with zeros to strictly ensure at least 2 decimal places, no actual rounding occurs
-            stripped = stripped.setScale(2, java.math.RoundingMode.UNNECESSARY);
-        }
-        return stripped.toPlainString();
-    }
-
     public String getProjectedAmount() {
         return formatAmount(projectedAmountBase) + SEPARATOR + formatAmount(projectedAmountQuote);
     }
@@ -261,4 +250,10 @@ public class Level {
     public void setNotes(String notes) {
         this.notes = notes;
     }
+
+    public @Nullable String getLevelString() {
+        return getId() + " " + getNotes();
+    }
+
+    public @Nullable String getPoplavokString() { return getPoplavok().getId() + " " + getPoplavok().getName(); }
 }
