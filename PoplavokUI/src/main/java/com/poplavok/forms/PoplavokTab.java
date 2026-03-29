@@ -267,7 +267,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     public void newLevel() {
         try {
-            LevelAddDialog levelAddDialog = new LevelAddDialog(null, checkNotNull(poplavok).getTicker().getSymbol(), null);
+            BigDecimal price = null;
+            try {
+                price = new BigDecimal(checkNotNull(priceTextField).textProperty().get());
+            } catch (Exception e) {}
+            LevelAddDialog levelAddDialog = new LevelAddDialog(null, checkNotNull(poplavok).getTicker().getSymbol(), price);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { levelAddDialog.setStage(stage); return levelAddDialog; },
                     "New Level");

@@ -54,13 +54,13 @@
                   </TextField>
                </children>
             </GridPane>
-            <TextArea fx:id="detailsTextArea" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <TextArea fx:id="notesTextArea" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </TextArea>
             <Label text="Direction:" GridPane.rowIndex="2" />
-            <Label text="Details:" GridPane.rowIndex="3" />
+            <Label text="Notes:" GridPane.rowIndex="3" />
             <ComboBox fx:id="directionComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets left="10.0" />

@@ -1,19 +1,15 @@
 package com.poplavok.data.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,9 +39,6 @@ public class Loan extends Transaction {
     @Column(length = 500)
     @Nullable
     private String notes;
-
-    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Repayment> repayments = new ArrayList<>();
 
     public Loan() {
     }
@@ -95,17 +88,5 @@ public class Loan extends Transaction {
 
     public void setNotes(String notes) {
         this.notes = notes;
-    }
-
-    public List<Repayment> getRepayments() {
-        return repayments;
-    }
-
-    public void setRepayments(List<Repayment> repayments) {
-        this.repayments = repayments;
-    }
-
-    public void addRepayment(Repayment repayment) {
-        repayments.add(repayment);
     }
 }

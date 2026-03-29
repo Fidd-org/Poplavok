@@ -8,7 +8,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -19,8 +18,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
-import java.util.function.UnaryOperator;
 
+import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
@@ -50,23 +49,15 @@ public class LevelAddDialog extends VBox {
             throw new RuntimeException(exception);
         }
 
-        UnaryOperator<TextFormatter.Change> decimalTextFilter = change -> {
-            String newText = change.getControlNewText();
-            if (newText.matches("\\d*([.,]\\d*)?")) {
-                return change;
-            }
-            return null;
-        };
-
-        checkNotNull(priceTextField).setTextFormatter(new javafx.scene.control.TextFormatter<>(decimalTextFilter));
+        checkNotNull(priceTextField).setTextFormatter(createDecimalTextFormatter());
         if (baseAmountTextField != null) {
-            baseAmountTextField.setTextFormatter(new javafx.scene.control.TextFormatter<>(decimalTextFilter));
+            baseAmountTextField.setTextFormatter(createDecimalTextFormatter());
             baseAmountTextField.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (baseAmountTextField != null && baseAmountTextField.isFocused()) recalculateQuoteFromBase();
             });
         }
         if (quoteAmountTextField != null) {
-            quoteAmountTextField.setTextFormatter(new javafx.scene.control.TextFormatter<>(decimalTextFilter));
+            quoteAmountTextField.setTextFormatter(createDecimalTextFormatter());
             quoteAmountTextField.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (quoteAmountTextField != null && quoteAmountTextField.isFocused()) recalculateBaseFromQuote();
             });

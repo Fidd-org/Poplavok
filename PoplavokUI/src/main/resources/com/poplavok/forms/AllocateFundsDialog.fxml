@@ -9,13 +9,13 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 <fx:root prefHeight="511.0" prefWidth="695.0" type="VBox" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
     <AnchorPane VBox.vgrow="NEVER">
       <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
@@ -58,9 +58,9 @@
                <GridPane.margin>
                   <Insets right="10.0" top="10.0" />
                </GridPane.margin></Label>
-            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <TabPane fx:id="sourceTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowIndex="2">
               <tabs>
-                <Tab text="Account">
+                <Tab fx:id="sourceAccountTab" text="Account">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
@@ -82,7 +82,7 @@
                         </AnchorPane>
                   </content>
                 </Tab>
-                <Tab text="Level">
+                <Tab fx:id="sourceLevelTab" text="Level">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
@@ -96,7 +96,7 @@
                         </AnchorPane>
                   </content>
                 </Tab>
-                  <Tab text="External">
+                  <Tab fx:id="sourceExternalTab" text="External">
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
@@ -112,9 +112,9 @@
                                 </rowConstraints>
                                  <children>
                                     <Label text="Interest rate:" />
-                                    <TextField GridPane.columnIndex="1" />
+                                    <TextField fx:id="interestRateTextField" GridPane.columnIndex="1" />
                                     <Label text="Interest rate type:" GridPane.rowIndex="1" />
-                                    <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <ComboBox fx:id="interestTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                  </children>
                               </GridPane>
                            </children>
@@ -123,7 +123,7 @@
                   </Tab>
               </tabs>
             </TabPane>
-            <TextField GridPane.columnIndex="1" />
+            <TextField fx:id="notesTextField" GridPane.columnIndex="1" />
             <Label text="Notes:">
                <GridPane.margin>
                   <Insets right="10.0" />

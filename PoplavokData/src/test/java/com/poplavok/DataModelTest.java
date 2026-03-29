@@ -106,9 +106,6 @@ public class DataModelTest {
                 new Date(), LoanType.EXTERNAL);
         session.persist(loan);
 
-        Repayment repayment = new Repayment(loan, new BigDecimal("500"), new Date());
-        loan.addRepayment(repayment);
-
         tx.commit();
         session.clear();
 
@@ -117,8 +114,6 @@ public class DataModelTest {
                 .list();
 
         assertEquals(1, loans.size());
-        assertEquals(1, loans.get(0).getRepayments().size());
-        assertEquals(new BigDecimal("500.00000000"), loans.get(0).getRepayments().get(0).getAmount());
     }
 
     @Test

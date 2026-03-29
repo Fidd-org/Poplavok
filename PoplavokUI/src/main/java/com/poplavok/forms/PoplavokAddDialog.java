@@ -38,7 +38,7 @@ public class PoplavokAddDialog extends VBox {
     @FXML @Nullable TextField tickerFilterTextField;
     @FXML @Nullable ComboBox<MarketTicker> tickerComboBox;
     @FXML @Nullable ComboBox<Direction> directionComboBox;
-    @FXML @Nullable TextArea detailsTextArea;
+    @FXML @Nullable TextArea notesTextArea;
     @FXML @Nullable Button addButton;
 
     @Nullable Stage stage;
@@ -95,7 +95,7 @@ public class PoplavokAddDialog extends VBox {
             checkNotNull(directionComboBox).selectionModelProperty().get().select(poplavok.getDirection());
             checkNotNull(directionComboBox).disableProperty().set(true);
             checkNotNull(tickerFilterTextField).disableProperty().set(true);
-            checkNotNull(detailsTextArea).textProperty().set(poplavok.getDetails());
+            checkNotNull(notesTextArea).textProperty().set(poplavok.getNotes());
             checkNotNull(addButton).textProperty().set("Rename Poplavok");
         }
     }
@@ -127,7 +127,7 @@ public class PoplavokAddDialog extends VBox {
             poplavok.setActive(true);
             poplavok.setTicker(checkNotNull(tickerComboBox).getSelectionModel().getSelectedItem());
             poplavok.setName(checkNotNull(poplavokNameTextField).textProperty().get());
-            poplavok.setDetails(checkNotNull(detailsTextArea).textProperty().get());
+            poplavok.setNotes(checkNotNull(notesTextArea).textProperty().get());
             poplavok.setDirection(checkNotNull(directionComboBox).getSelectionModel().getSelectedItem());
 
             returnPoplavok = poplavok;

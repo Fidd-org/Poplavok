@@ -49,7 +49,7 @@ public class Poplavok {
 
     @Column(length = 2000)
     @Nullable
-    private String details;
+    private String notes;
 
     @Column(name = "is_active", nullable = false)
     @Nullable
@@ -116,12 +116,12 @@ public class Poplavok {
     }
 
     @Nullable
-    public String getDetails() {
-        return details;
+    public String getNotes() {
+        return notes;
     }
 
-    public void setDetails(@Nullable String details) {
-        this.details = details;
+    public void setNotes(@Nullable String notes) {
+        this.notes = notes;
     }
 
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)

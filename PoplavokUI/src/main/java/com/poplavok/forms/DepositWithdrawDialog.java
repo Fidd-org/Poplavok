@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DepositWithdrawDialog extends VBox {
@@ -43,13 +44,7 @@ public class DepositWithdrawDialog extends VBox {
             throw new RuntimeException(exception);
         }
 
-        checkNotNull(amountTextField).setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> {
-            String newText = change.getControlNewText();
-            if (newText.matches("\\d*([.,]\\d*)?")) {
-                return change;
-            }
-            return null;
-        }));
+        checkNotNull(amountTextField).setTextFormatter(createDecimalTextFormatter());
 
         this.isDeposit = isDeposit;
         if (isDeposit) {
