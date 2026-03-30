@@ -118,7 +118,7 @@ public class AccountAddDialog extends VBox {
             account.setCurrency(checkNotNull(currencyComboBox).getSelectionModel().getSelectedItem());
             account.setAccountName(checkNotNull(accountNameTextField).textProperty().get());
             account.setAvailableAmount(BigDecimal.ZERO);
-            account.setReservedAmount(BigDecimal.ZERO);
+            account.setLentAmount(BigDecimal.ZERO);
 
             returnAccount = account;
             checkNotNull(stage).close();

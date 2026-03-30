@@ -36,7 +36,7 @@ public class Account {
 
     @Column(nullable = false, precision = 20, scale = 8)
     @Nullable
-    public BigDecimal reservedAmount;
+    public BigDecimal lentAmount;
 
     @Nullable
     public Date creationDate;
@@ -48,10 +48,10 @@ public class Account {
     @Nullable
     private String accountName;
 
-    public Account(Currency currency, BigDecimal availableAmount, BigDecimal reservedAmount) {
+    public Account(Currency currency, BigDecimal availableAmount, BigDecimal lentAmount) {
         this.currency = currency;
         this.availableAmount = availableAmount;
-        this.reservedAmount = reservedAmount;
+        this.lentAmount = lentAmount;
         this.creationDate = new Date();
         this.archived = false;
     }
@@ -82,12 +82,12 @@ public class Account {
         this.availableAmount = availableAmount;
     }
 
-    public @Nullable BigDecimal getReservedAmount() {
-        return reservedAmount != null ? reservedAmount : BigDecimal.ZERO;
+    public @Nullable BigDecimal getLentAmount() {
+        return lentAmount != null ? lentAmount : BigDecimal.ZERO;
     }
 
-    public void setReservedAmount(@Nullable BigDecimal reservedAmount) {
-        this.reservedAmount = reservedAmount;
+    public void setLentAmount(@Nullable BigDecimal lentAmount) {
+        this.lentAmount = lentAmount;
     }
 
     public @Nullable Date getCreationDate() {
@@ -123,8 +123,8 @@ public class Account {
         return formatAmount(availableAmount);
     }
 
-    public String getReservedAmountStr() {
-        return formatAmount(reservedAmount);
+    public String getLentAmountStr() {
+        return formatAmount(lentAmount);
     }
 
     public String getArchivedStatus() {

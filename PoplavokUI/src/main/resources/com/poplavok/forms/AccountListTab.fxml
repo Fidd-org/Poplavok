@@ -47,9 +47,9 @@
                             <PropertyValueFactory property="availableAmountStr" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="ReservedAmount">
+                    <TableColumn text="LentAmount">
                         <cellValueFactory>
-                            <PropertyValueFactory property="reservedAmountStr" />
+                            <PropertyValueFactory property="lentAmountStr" />
                         </cellValueFactory>
                     </TableColumn>
                     <TableColumn text="CreationDate">

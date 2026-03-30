@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.function.Predicate;
 
+import static com.flower.fxutils.JavaFxUtils.showErrorMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class AccountListTab extends AnchorPane implements Refreshable {
@@ -243,7 +244,13 @@ public class AccountListTab extends AnchorPane implements Refreshable {
         try {
             Account account = Preconditions.checkNotNull(accountsTable).getSelectionModel().getSelectedItem();
 
-            // TODO: make sure that account has 0 available or reserved amount before archiving
+            if (!account.isArchived()) {
+                if ((account.getAvailableAmount() != null && account.getAvailableAmount().compareTo(java.math.BigDecimal.ZERO) != 0) ||
+                    (account.getLentAmount() != null && account.getLentAmount().compareTo(java.math.BigDecimal.ZERO) != 0)) {
+                    showErrorMessage("Cannot archive account: available or lent amount is not zero.");
+                    return;
+                }
+            }
 
             DBUtil.connectCommitAndClose(sess -> AccountDAO.setArchived(sess, account.getId(), !account.isArchived()));
             refreshContent();
