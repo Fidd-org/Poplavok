@@ -113,4 +113,19 @@ public class TransactionDAO {
                 .setParameter("accountId", accountId)
                 .list();
     }
+
+    public static List<Transaction> findByLevel(Session session, Long levelId) {
+        return session.createQuery(
+                "select t from Transaction t " +
+                        "left join fetch t.currency " +
+                        "left join fetch t.sourceAccount " +
+                        "left join fetch t.destinationAccount " +
+                        "left join fetch t.sourceLevel " +
+                        "left join fetch t.destinationLevel " +
+                        "where t.sourceLevel.id = :levelId or t.destinationLevel.id = :levelId " +
+                        "order by t.date desc",
+                Transaction.class)
+                .setParameter("levelId", levelId)
+                .list();
+    }
 }

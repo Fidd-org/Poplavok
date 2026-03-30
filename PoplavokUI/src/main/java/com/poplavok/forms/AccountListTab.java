@@ -9,6 +9,7 @@ import com.poplavok.data.dao.TransactionDAO;
 import com.poplavok.data.model.Account;
 import com.poplavok.data.model.ExternalTransaction;
 import com.poplavok.data.utils.DBUtil;
+import com.poplavok.forms.wrapper.AccountTransaction;
 import com.poplavok.kucoin.KucoinTool;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

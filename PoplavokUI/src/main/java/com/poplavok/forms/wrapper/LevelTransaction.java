@@ -1,4 +1,4 @@
-package com.poplavok.forms;
+package com.poplavok.forms.wrapper;
 
 import com.poplavok.data.model.Account;
 import com.poplavok.data.model.ExternalTransaction;
@@ -8,28 +8,25 @@ import com.poplavok.data.model.Repayment;
 import com.poplavok.data.model.Transaction;
 
 import javax.annotation.Nullable;
-
 import java.math.BigDecimal;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class AccountTransaction {
+public class LevelTransaction {
     protected final Transaction transaction;
-    protected final Account account;
+    protected final Level level;
 
-    public AccountTransaction(Transaction transaction, Account account) {
+    public LevelTransaction(Transaction transaction, Level level) {
         this.transaction = transaction;
-        this.account = account;
+        this.level = level;
     }
 
     public Transaction getTransaction() {
         return transaction;
     }
 
-    public Account getAccount() {
-        return account;
-    }
+    public Level getLevel() { return level; }
 
     public String getCurrencyCode() {
         return getTransaction().getCurrency().getCurrency();
@@ -41,9 +38,9 @@ public class AccountTransaction {
             if (name == null) {
                 name += "ID " + checkNotNull(account).getId();
             }
-            return name;
+            return "Acc: " + name;
         } else if (level != null) {
-            return level.getId().toString();
+            return "Lvl: " + level.getId().toString();
         } else {
             return "";
         }
@@ -54,7 +51,7 @@ public class AccountTransaction {
     }
 
     public BigDecimal getAmount() {
-        if (getTransaction().getSourceAccount() != null && getTransaction().getSourceAccount().getId().equals(getAccount().getId())) {
+        if (getTransaction().getSourceLevel() != null && getTransaction().getSourceLevel().getId().equals(getLevel().getId())) {
             return getTransaction().getAmount().negate();
         } else {
             return getTransaction().getAmount();

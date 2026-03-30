@@ -10,6 +10,7 @@ import com.poplavok.data.dao.AccountDAO;
 import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.model.LoanType;
 import com.poplavok.data.utils.DBUtil;
+import com.poplavok.forms.wrapper.LevelWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -38,37 +39,6 @@ import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 public class AllocateFundsDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(AllocateFundsDialog.class);
-
-    public static class LevelWrapper {
-        final Level level;
-        final String currency;
-
-        public LevelWrapper(Level level, String currency) {
-            this.level = level;
-            this.currency = currency;
-        }
-
-        public @Nullable String getPoplavokString() {
-            return level.getPoplavokString();
-        }
-
-        public @Nullable String getLevelString() {
-            return level.getLevelString();
-        }
-
-        public String getAvailableAmountStr() {
-            Currency levelBase = level.getPoplavok().getTicker().getBase();
-            Currency levelQuote = level.getPoplavok().getTicker().getQuote();
-
-            if (levelBase.getCurrency().equals(currency)) {
-                return formatAmount(level.getAvailableAmountBase());
-            } else if (levelQuote.getCurrency().equals(currency)) {
-                return formatAmount(level.getAvailableAmountQuote());
-            } else {
-                return "N/A";
-            }
-        }
-    }
 
     @FXML @Nullable TextField amountTextField;
     @FXML @Nullable TextField notesTextField;
