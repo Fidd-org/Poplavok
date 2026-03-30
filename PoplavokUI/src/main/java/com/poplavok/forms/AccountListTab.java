@@ -243,6 +243,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     public void archiveAccount() {
         try {
             Account account = Preconditions.checkNotNull(accountsTable).getSelectionModel().getSelectedItem();
+            if (account == null) { return; }
 
             if (!account.isArchived()) {
                 if ((account.getAvailableAmount() != null && account.getAvailableAmount().compareTo(java.math.BigDecimal.ZERO) != 0) ||
@@ -264,6 +265,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     public void deposit() {
         try {
             Account account = Preconditions.checkNotNull(accountsTable).getSelectionModel().getSelectedItem();
+            if (account == null) { return; }
 
             DepositWithdrawDialog depositWithdrawDialog = new DepositWithdrawDialog(true);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
@@ -307,8 +309,9 @@ public class AccountListTab extends AnchorPane implements Refreshable {
     public void withdraw() {
         try {
             Account account = Preconditions.checkNotNull(accountsTable).getSelectionModel().getSelectedItem();
+            if (account == null) { return; }
 
-            DepositWithdrawDialog depositWithdrawDialog = new DepositWithdrawDialog(true);
+            DepositWithdrawDialog depositWithdrawDialog = new DepositWithdrawDialog(false);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { depositWithdrawDialog.setStage(stage); return depositWithdrawDialog; },
                     "Withdraw from " + account.getAccountName());
