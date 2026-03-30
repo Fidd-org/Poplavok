@@ -5,6 +5,7 @@ import com.poplavok.data.dao.CurrencyDAO;
 import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Currency;
 import com.poplavok.data.utils.DBUtil;
+import com.poplavok.data.model.TradingAccountType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -37,6 +38,7 @@ public class AccountAddDialog extends VBox {
     @FXML @Nullable TextField accountNameTextField;
     @FXML @Nullable TextField currencyFilterTextField;
     @FXML @Nullable Button addButton;
+    @FXML @Nullable ComboBox<TradingAccountType> tradingAccountTypeComboBox;
 
     @Nullable Stage stage;
 
@@ -68,6 +70,8 @@ public class AccountAddDialog extends VBox {
             }
         });
 
+        checkNotNull(tradingAccountTypeComboBox).itemsProperty().setValue(FXCollections.observableArrayList(TradingAccountType.values()));
+
         //Collections.sort(currencies, (c1, c2) -> c1.getCurrency().compareToIgnoreCase(c2.getCurrency()));
         ObservableList<Currency> masterCurrencies =
                 FXCollections.observableList(DBUtil.connectGetResultAndClose(CurrencyDAO::findAll));
@@ -80,6 +84,7 @@ public class AccountAddDialog extends VBox {
 
         if (account == null) {
             checkNotNull(currencyComboBox).selectionModelProperty().get().selectFirst();
+            checkNotNull(tradingAccountTypeComboBox).selectionModelProperty().get().selectFirst();
             checkNotNull(addButton).textProperty().set("Add New Account");
         } else {
             accountId = account.getId();
@@ -87,6 +92,8 @@ public class AccountAddDialog extends VBox {
             checkNotNull(currencyComboBox).selectionModelProperty().get().select(account.getCurrency());
             checkNotNull(currencyComboBox).disableProperty().set(true);
             checkNotNull(currencyFilterTextField).disableProperty().set(true);
+            checkNotNull(tradingAccountTypeComboBox).selectionModelProperty().get().select(account.getTradingAccountType());
+            checkNotNull(tradingAccountTypeComboBox).disableProperty().set(true);
             checkNotNull(addButton).textProperty().set("Rename Account");
         }
     }
@@ -119,6 +126,7 @@ public class AccountAddDialog extends VBox {
             account.setAccountName(checkNotNull(accountNameTextField).textProperty().get());
             account.setAvailableAmount(BigDecimal.ZERO);
             account.setLentAmount(BigDecimal.ZERO);
+            account.setTradingAccountType(checkNotNull(tradingAccountTypeComboBox).getSelectionModel().getSelectedItem());
 
             returnAccount = account;
             checkNotNull(stage).close();

@@ -2,6 +2,8 @@ package com.poplavok.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -43,6 +45,11 @@ public class Account {
 
     @Column(nullable = false)
     private boolean archived = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trading_account_type", length = 30)
+    @Nullable
+    private TradingAccountType tradingAccountType;
 
     @Column
     @Nullable
@@ -129,6 +136,15 @@ public class Account {
 
     public String getArchivedStatus() {
         return archived ? "Archived" : "Active";
+    }
+
+    @Nullable
+    public TradingAccountType getTradingAccountType() {
+        return tradingAccountType;
+    }
+
+    public void setTradingAccountType(@Nullable TradingAccountType tradingAccountType) {
+        this.tradingAccountType = tradingAccountType;
     }
 
     public @Nullable String getAccountString() { return "#" + getId() + " " + getAccountName(); }

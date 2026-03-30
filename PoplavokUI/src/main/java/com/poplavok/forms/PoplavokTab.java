@@ -438,6 +438,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                     // Remove loan funds from source account
                                     Account sourceAccount = checkNotNull(loan.getSourceAccount());
                                     sourceAccount.setAvailableAmount(loan.getSourceAccount().getAvailableAmount().subtract(loan.getAmount()));
+                                    sourceAccount.setLentAmount(sourceAccount.getLentAmount() != null ? sourceAccount.getLentAmount().add(loan.getAmount()) : loan.getAmount());
 
                                     // save new loan, update level and source account
                                     DBUtil.connectCommitAndClose(sess -> {
@@ -454,8 +455,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
                                     if (loanCurrency.getCurrency().equals(sourceBase.getCurrency())) {
                                         sourceLevel.setAvailableAmountBase(checkNotNull(sourceLevel.getAvailableAmountBase()).subtract(loan.getAmount()));
+                                        sourceLevel.setLentAmountBase(checkNotNull(sourceLevel.getLentAmountBase()).add(loan.getAmount()));
                                     } else if (loanCurrency.getCurrency().equals(sourceQuote.getCurrency())) {
                                         sourceLevel.setAvailableAmountQuote(checkNotNull(sourceLevel.getAvailableAmountQuote()).subtract(loan.getAmount()));
+                                        sourceLevel.setLentAmountQuote(checkNotNull(sourceLevel.getLentAmountQuote()).add(loan.getAmount()));
                                     } else {
                                         showMessage("Source level currency doesn't match loan currency");
                                         return;
