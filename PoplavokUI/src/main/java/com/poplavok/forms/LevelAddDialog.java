@@ -36,6 +36,7 @@ public class LevelAddDialog extends VBox {
     @Nullable Stage stage;
 
     @Nullable Long levelId = null;
+    @Nullable Level level;
     @Nullable volatile Level returnLevel = null;
 
     public LevelAddDialog(@Nullable Level level, String ticker, @Nullable BigDecimal price) {
@@ -73,6 +74,7 @@ public class LevelAddDialog extends VBox {
                 checkNotNull(priceTextField).textProperty().set(formatAmount(price));
             }
         } else {
+            this.level = level;
             checkNotNull(addButton).textProperty().set("Update Level");
             levelId = level.getId();
 
@@ -89,16 +91,25 @@ public class LevelAddDialog extends VBox {
 
     public void okClose() {
         try {
-            Level level = new Level();
-            level.setState(LevelState.INCEPTION);
-            level.setId(levelId);
-            level.setCreationDate(new Date());
-            level.setProjectedPrice(new BigDecimal(checkNotNull(priceTextField).textProperty().get()));
-            level.setProjectedAmountBase(new BigDecimal(checkNotNull(baseAmountTextField).textProperty().get()));
-            level.setProjectedAmountQuote(new BigDecimal(checkNotNull(quoteAmountTextField).textProperty().get()));
-            level.setNotes(checkNotNull(notesTextField).textProperty().get());
+            if (level == null) {
+                Level level = new Level();
+                level.setState(LevelState.INCEPTION);
+                level.setId(levelId);
+                level.setCreationDate(new Date());
+                level.setProjectedPrice(new BigDecimal(checkNotNull(priceTextField).textProperty().get()));
+                level.setProjectedAmountBase(new BigDecimal(checkNotNull(baseAmountTextField).textProperty().get()));
+                level.setProjectedAmountQuote(new BigDecimal(checkNotNull(quoteAmountTextField).textProperty().get()));
+                level.setNotes(checkNotNull(notesTextField).textProperty().get());
 
-            returnLevel = level;
+                returnLevel = level;
+            } else {
+                level.setProjectedPrice(new BigDecimal(checkNotNull(priceTextField).textProperty().get()));
+                level.setProjectedAmountBase(new BigDecimal(checkNotNull(baseAmountTextField).textProperty().get()));
+                level.setProjectedAmountQuote(new BigDecimal(checkNotNull(quoteAmountTextField).textProperty().get()));
+                level.setNotes(checkNotNull(notesTextField).textProperty().get());
+
+                returnLevel = level;
+            }
             checkNotNull(stage).close();
        } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "LevelAddDialog close Error: " + e, ButtonType.OK);

@@ -53,7 +53,7 @@
                </children>
             </GridPane>
             <Label text="Account Type:" GridPane.rowIndex="2" />
-            <ComboBox fx:id="tradingAccountType" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <ComboBox fx:id="tradingAccountTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>

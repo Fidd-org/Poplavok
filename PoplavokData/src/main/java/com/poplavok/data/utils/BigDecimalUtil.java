@@ -4,6 +4,14 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 
 public class BigDecimalUtil {
+    public static BigDecimal nullToZero(@Nullable BigDecimal amount) {
+        if (amount == null) {
+            return BigDecimal.ZERO;
+        } else {
+            return amount;
+        }
+    }
+
     public static String formatAmount(@Nullable BigDecimal amount) {
         if (amount == null) {
             return "0.00";

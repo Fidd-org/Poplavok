@@ -78,8 +78,21 @@
                            <children>
                               <TableView fx:id="levelsTableView" layoutX="63.0" layoutY="97.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columns>
-                                  <TableColumn prefWidth="75.0" text="C1" />
-                                  <TableColumn prefWidth="75.0" text="C2" />
+                                    <TableColumn text="Poplavok">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="poplavokString" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Level">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="levelString" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="AvailableAmount">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="availableAmountStr" />
+                                        </cellValueFactory>
+                                    </TableColumn>
                                 </columns>
                               </TableView>
                            </children>
@@ -105,6 +118,8 @@
                                     <TextField fx:id="interestRateTextField" GridPane.columnIndex="1" />
                                     <Label text="Interest rate type:" GridPane.rowIndex="1" />
                                     <ComboBox fx:id="interestTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Label text="External loan type:" GridPane.rowIndex="2" />
+                                    <ComboBox fx:id="externalLoanTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                  </children>
                               </GridPane>
                            </children>

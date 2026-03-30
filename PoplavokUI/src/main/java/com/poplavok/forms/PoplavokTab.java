@@ -43,6 +43,7 @@ import java.math.BigDecimal;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.SelectionMode;
 
+import static com.flower.fxutils.JavaFxUtils.showErrorMessage;
 import static com.flower.fxutils.JavaFxUtils.showMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.model.LoanType.ACCOUNT_FUNDED;
@@ -50,6 +51,7 @@ import static com.poplavok.data.model.LoanType.EXTERNAL_CROSS_MARGIN;
 import static com.poplavok.data.model.LoanType.EXTERNAL_ISOLATED_MARGIN;
 import static com.poplavok.data.model.LoanType.POPLAVOK_FUNDED;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class PoplavokTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(PoplavokTab.class);
@@ -356,6 +358,16 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             Level lvl = selected.get(0);
             LevelState state = lvl.getState();
 
+            if (nullToZero(lvl.getAvailableAmountBase()).compareTo(BigDecimal.ZERO) != 0 ||
+                nullToZero(lvl.getAvailableAmountQuote()).compareTo(BigDecimal.ZERO) != 0 ||
+                nullToZero(lvl.getLentAmountBase()).compareTo(BigDecimal.ZERO) != 0 ||
+                nullToZero(lvl.getLentAmountQuote()).compareTo(BigDecimal.ZERO) != 0 ||
+                nullToZero(lvl.getDebtBase()).compareTo(BigDecimal.ZERO) != 0 ||
+                nullToZero(lvl.getDebtQuote()).compareTo(BigDecimal.ZERO) != 0) {
+                showErrorMessage("Can't close / delete level with non-zero holding, lent amount or debt.");
+                return;
+            }
+
             if (state == LevelState.INCEPTION || (state == LevelState.FUNDING && isLevelEmpty(lvl))) {
                 DBUtil.connectCommitAndClose(sess -> LevelDAO.delete(sess, lvl));
             } else if (state == LevelState.TRADING && isLevelEmpty(lvl)) {
@@ -432,8 +444,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                 // Add loan funds to our level
                                 if (poplavokDirection == Direction.LONG) {
                                     lvl.setAvailableAmountQuote(lvl.getAvailableAmountQuote() != null ? lvl.getAvailableAmountQuote().add(loan.getAmount()) : loan.getAmount());
+                                    lvl.setDebtQuote(lvl.getDebtQuote() != null ? lvl.getDebtQuote().add(loan.getAmount()) : loan.getAmount());
                                 } else {
-                                    lvl.setAvailableAmountQuote(lvl.getAvailableAmountQuote() != null ? lvl.getAvailableAmountQuote().add(loan.getAmount()) : loan.getAmount());
+                                    lvl.setAvailableAmountBase(lvl.getAvailableAmountBase() != null ? lvl.getAvailableAmountBase().add(loan.getAmount()) : loan.getAmount());
+                                    lvl.setDebtBase(lvl.getDebtBase() != null ? lvl.getDebtBase().add(loan.getAmount()) : loan.getAmount());
                                 }
 
                                 if (loan.getLoanType() == ACCOUNT_FUNDED) {
@@ -457,10 +471,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
                                     if (loanCurrency.getCurrency().equals(sourceBase.getCurrency())) {
                                         sourceLevel.setAvailableAmountBase(checkNotNull(sourceLevel.getAvailableAmountBase()).subtract(loan.getAmount()));
-                                        sourceLevel.setLentAmountBase(checkNotNull(sourceLevel.getLentAmountBase()).add(loan.getAmount()));
+                                        sourceLevel.setLentAmountBase(nullToZero(sourceLevel.getLentAmountBase()).add(loan.getAmount()));
                                     } else if (loanCurrency.getCurrency().equals(sourceQuote.getCurrency())) {
                                         sourceLevel.setAvailableAmountQuote(checkNotNull(sourceLevel.getAvailableAmountQuote()).subtract(loan.getAmount()));
-                                        sourceLevel.setLentAmountQuote(checkNotNull(sourceLevel.getLentAmountQuote()).add(loan.getAmount()));
+                                        sourceLevel.setLentAmountQuote(nullToZero(sourceLevel.getLentAmountQuote()).add(loan.getAmount()));
                                     } else {
                                         showMessage("Source level currency doesn't match loan currency");
                                         return;

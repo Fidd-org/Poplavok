@@ -39,6 +39,37 @@ import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 public class AllocateFundsDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(AllocateFundsDialog.class);
 
+    public static class LevelWrapper {
+        final Level level;
+        final String currency;
+
+        public LevelWrapper(Level level, String currency) {
+            this.level = level;
+            this.currency = currency;
+        }
+
+        public @Nullable String getPoplavokString() {
+            return level.getPoplavokString();
+        }
+
+        public @Nullable String getLevelString() {
+            return level.getLevelString();
+        }
+
+        public String getAvailableAmountStr() {
+            Currency levelBase = level.getPoplavok().getTicker().getBase();
+            Currency levelQuote = level.getPoplavok().getTicker().getQuote();
+
+            if (levelBase.getCurrency().equals(currency)) {
+                return formatAmount(level.getAvailableAmountBase());
+            } else if (levelQuote.getCurrency().equals(currency)) {
+                return formatAmount(level.getAvailableAmountQuote());
+            } else {
+                return "N/A";
+            }
+        }
+    }
+
     @FXML @Nullable TextField amountTextField;
     @FXML @Nullable TextField notesTextField;
     @FXML @Nullable Label currencyLabel;
@@ -48,7 +79,7 @@ public class AllocateFundsDialog extends VBox {
     @FXML @Nullable ComboBox<LoanType> externalLoanTypeComboBox;
 
     @FXML @Nullable TableView<Account> accountsTableView;
-    @FXML @Nullable TableView<Level> levelsTableView;
+    @FXML @Nullable TableView<LevelWrapper> levelsTableView;
 
     @FXML @Nullable TabPane sourceTabPane;
     @FXML @Nullable Tab sourceAccountTab;
@@ -56,7 +87,7 @@ public class AllocateFundsDialog extends VBox {
     @FXML @Nullable Tab sourceExternalTab;
 
     @Nullable FilteredList<Account> accounts;
-    @Nullable FilteredList<Level> levels;
+    @Nullable FilteredList<LevelWrapper> levels;
 
     @Nullable Stage stage;
 
@@ -92,14 +123,14 @@ public class AllocateFundsDialog extends VBox {
         checkNotNull(externalLoanTypeComboBox).getSelectionModel().selectFirst();
 
         ObservableList<Account> observableAccounts = FXCollections.observableArrayList();
-        ObservableList<Level> observableLevels = FXCollections.observableArrayList();
+        ObservableList<LevelWrapper> observableLevels = FXCollections.observableArrayList();
 
         DBUtil.connectCommitAndClose(session -> {
             List<Account> allAccounts = AccountDAO.findAvailableByCurrency(session, currency.getCurrency());
             observableAccounts.addAll(allAccounts);
 
             List<Level> allLevels = LevelDAO.findAvailableByCurrency(session, currency.getCurrency());
-            observableLevels.addAll(allLevels);
+            observableLevels.addAll(allLevels.stream().map(level -> new LevelWrapper(level, currency.getCurrency())).toList());
         });
 
         this.accounts = new FilteredList<>(observableAccounts);
@@ -142,21 +173,21 @@ public class AllocateFundsDialog extends VBox {
                 loan.setLoanType(LoanType.ACCOUNT_FUNDED);
                 loan.setSourceAccount(selectedAccount);
             } else if (selectedTab == sourceLevelTab) {
-                Level selectedLevel = checkNotNull(levelsTableView).getSelectionModel().getSelectedItem();
+                LevelWrapper selectedLevel = checkNotNull(levelsTableView).getSelectionModel().getSelectedItem();
                 if (selectedLevel == null) {
                     JavaFxUtils.showErrorMessage("Source Level not selected");
                     return;
                 }
-                Currency levelBase = selectedLevel.getPoplavok().getTicker().getBase();
-                Currency levelQuote = selectedLevel.getPoplavok().getTicker().getQuote();
+                Currency levelBase = selectedLevel.level.getPoplavok().getTicker().getBase();
+                Currency levelQuote = selectedLevel.level.getPoplavok().getTicker().getQuote();
 
-                if (levelBase.getCurrency().equals(currency.getCurrency())) {
-                    if (selectedLevel.getAvailableAmountQuote() != null && selectedLevel.getAvailableAmountQuote().compareTo(loan.getAmount()) < 0) {
+                if (levelQuote.getCurrency().equals(currency.getCurrency())) {
+                    if (selectedLevel.level.getAvailableAmountQuote() != null && selectedLevel.level.getAvailableAmountQuote().compareTo(loan.getAmount()) < 0) {
                         JavaFxUtils.showErrorMessage("Source Level does not have enough available amount in " + currency.getCurrency());
                         return;
                     }
-                } else if (levelQuote.getCurrency().equals(currency.getCurrency())) {
-                    if (selectedLevel.getAvailableAmountBase() != null && selectedLevel.getAvailableAmountBase().compareTo(loan.getAmount()) < 0) {
+                } else if (levelBase.getCurrency().equals(currency.getCurrency())) {
+                    if (selectedLevel.level.getAvailableAmountBase() != null && selectedLevel.level.getAvailableAmountBase().compareTo(loan.getAmount()) < 0) {
                         JavaFxUtils.showErrorMessage("Source Level does not have enough available amount in " + currency.getCurrency());
                         return;
                     }
@@ -166,7 +197,7 @@ public class AllocateFundsDialog extends VBox {
                 }
 
                 loan.setLoanType(LoanType.POPLAVOK_FUNDED);
-                loan.setSourceLevel(selectedLevel);
+                loan.setSourceLevel(selectedLevel.level);
             } else if (selectedTab == sourceExternalTab) {
                 // External loan, has no source
                 BigDecimal interestRate = new BigDecimal(checkNotNull(interestRateTextField).textProperty().get());
@@ -201,15 +232,15 @@ public class AllocateFundsDialog extends VBox {
                 checkNotNull(amountTextField).textProperty().set(formatAmount(selectedAccount.getAvailableAmount()));
             }
         } else if (selectedTab == sourceLevelTab) {
-            Level selectedLevel = checkNotNull(levelsTableView).getSelectionModel().getSelectedItem();
+            Level selectedLevel = checkNotNull(levelsTableView).getSelectionModel().getSelectedItem().level;
             if (selectedLevel != null) {
                 Currency levelBase = selectedLevel.getPoplavok().getTicker().getBase();
                 Currency levelQuote = selectedLevel.getPoplavok().getTicker().getQuote();
 
                 if (levelBase.getCurrency().equals(currency.getCurrency())) {
-                    checkNotNull(amountTextField).textProperty().set(formatAmount(selectedLevel.getAvailableAmountQuote()));
-                } else if (levelQuote.getCurrency().equals(currency.getCurrency())) {
                     checkNotNull(amountTextField).textProperty().set(formatAmount(selectedLevel.getAvailableAmountBase()));
+                } else if (levelQuote.getCurrency().equals(currency.getCurrency())) {
+                    checkNotNull(amountTextField).textProperty().set(formatAmount(selectedLevel.getAvailableAmountQuote()));
                 }
             }
         }

@@ -117,7 +117,7 @@ public class PoplavokListTab extends AnchorPane implements Refreshable {
             if (poplavok.getTickerSymbol().toLowerCase().contains(lowerCaseFilter)) {
                 return true;
             }
-             if (poplavok.getStrategyStr().toLowerCase().contains(lowerCaseFilter)) {
+            if (poplavok.getStrategyStr().toLowerCase().contains(lowerCaseFilter)) {
                 return true;
             }
             return false;

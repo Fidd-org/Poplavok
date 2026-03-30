@@ -141,30 +141,32 @@
                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                        </rowConstraints>
                         <children>
-                           <Label fx:id="holdingBaseLabel" text="Holding BASE:" />
-                           <Label fx:id="holdingQuoteLabel" text="Holding QUOTE:" GridPane.rowIndex="1" />
-                           <Label fx:id="oweBaseLabel" text="Owe BASE:" GridPane.rowIndex="2" />
-                           <Label fx:id="oweQuoteLabel" text="Owe QUOTE:" GridPane.rowIndex="3" />
-                           <Label fx:id="lentBaseLabel" text="Lent BASE:" GridPane.rowIndex="4" />
-                           <Label fx:id="lentQuoteLabel" text="Lent QUOTE:" GridPane.rowIndex="5" />
-                           <Label fx:id="marketValueBaseLabel" text="Market Value BASE:" GridPane.rowIndex="6" />
-                           <Label fx:id="marketValueQuoteLabel" text="Market Value QUOTE:" GridPane.rowIndex="7" />
-                           <Label fx:id="pnlLabel" text="PNL:" GridPane.rowIndex="8" />
-                           <Label fx:id="averagingPriceLabel" text="Averaging price:" GridPane.rowIndex="9" />
-                           <Label text="Liquidation Price:" GridPane.rowIndex="10" />
-                           <Label text="Margin %:" GridPane.rowIndex="11" />
-                           <TextField fx:id="holdingBaseTextField" editable="false" GridPane.columnIndex="1" />
-                           <TextField fx:id="holdingQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                           <TextField fx:id="oweBaseTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                           <TextField fx:id="oweQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                           <TextField fx:id="lentBaseTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                           <TextField fx:id="lentQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                           <TextField fx:id="marketValueBaseTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                           <TextField fx:id="marketValueQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                           <TextField fx:id="pnlTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                           <TextField fx:id="averagingPriceTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                           <TextField editable="false" text="TODO:" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                           <Label fx:id="holdingBaseLabel" text="Holding BASE:" GridPane.rowIndex="1" />
+                           <Label fx:id="holdingQuoteLabel" text="Holding QUOTE:" GridPane.rowIndex="2" />
+                           <Label fx:id="oweBaseLabel" text="Owe BASE:" GridPane.rowIndex="3" />
+                           <Label fx:id="oweQuoteLabel" text="Owe QUOTE:" GridPane.rowIndex="4" />
+                           <Label fx:id="lentBaseLabel" text="Lent BASE:" GridPane.rowIndex="5" />
+                           <Label fx:id="lentQuoteLabel" text="Lent QUOTE:" GridPane.rowIndex="6" />
+                           <Label fx:id="marketValueBaseLabel" text="Market Value BASE:" GridPane.rowIndex="7" />
+                           <Label fx:id="marketValueQuoteLabel" text="Market Value QUOTE:" GridPane.rowIndex="8" />
+                           <Label fx:id="pnlLabel" text="PNL:" GridPane.rowIndex="9" />
+                           <Label fx:id="averagingPriceLabel" text="Averaging price:" GridPane.rowIndex="10" />
+                           <Label text="Liquidation Price:" GridPane.rowIndex="11" />
+                           <Label text="Margin %:" GridPane.rowIndex="12" />
+                           <TextField fx:id="holdingBaseTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                           <TextField fx:id="holdingQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                           <TextField fx:id="oweBaseTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                           <TextField fx:id="oweQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                           <TextField fx:id="lentBaseTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                           <TextField fx:id="lentQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                           <TextField fx:id="marketValueBaseTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                           <TextField fx:id="marketValueQuoteTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                           <TextField fx:id="pnlTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                           <TextField fx:id="averagingPriceTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="10" />
                            <TextField editable="false" text="TODO:" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                           <TextField editable="false" text="TODO:" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+                           <Label text="Use Projected:" />
+                           <CheckBox mnemonicParsing="false" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
                         </children>
                         <padding>
                            <Insets left="10.0" right="10.0" />

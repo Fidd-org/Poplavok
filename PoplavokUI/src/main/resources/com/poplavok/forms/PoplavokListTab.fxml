@@ -60,9 +60,9 @@
                             <PropertyValueFactory property="closeDate" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Details">
+                    <TableColumn text="Notes">
                         <cellValueFactory>
-                            <PropertyValueFactory property="details" />
+                            <PropertyValueFactory property="notes" />
                         </cellValueFactory>
                     </TableColumn>
                 </columns>
