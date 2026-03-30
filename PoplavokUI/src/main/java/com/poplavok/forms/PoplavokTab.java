@@ -469,6 +469,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                     lvl.setDebtBase(lvl.getDebtBase() != null ? lvl.getDebtBase().add(loan.getAmount()) : loan.getAmount());
                                 }
 
+                                if (lvl.getState() == LevelState.INCEPTION) {
+                                    lvl.setState(LevelState.FUNDING);
+                                }
+
                                 if (loan.getLoanType() == ACCOUNT_FUNDED) {
                                     // Remove loan funds from source account
                                     Account sourceAccount = checkNotNull(loan.getSourceAccount());
