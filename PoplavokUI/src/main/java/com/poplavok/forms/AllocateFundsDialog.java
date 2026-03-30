@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
@@ -107,7 +108,9 @@ public class AllocateFundsDialog extends VBox {
         this.levels = new FilteredList<>(observableLevels);
 
         checkNotNull(accountsTableView).setItems(this.accounts);
+        autoResizeTableColumns(accountsTableView);
         checkNotNull(levelsTableView).setItems(this.levels);
+        autoResizeTableColumns(levelsTableView);
     }
 
     public void setStage(Stage stage) {

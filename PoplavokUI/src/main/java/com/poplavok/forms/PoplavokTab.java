@@ -45,6 +45,7 @@ import java.math.BigDecimal;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.SelectionMode;
 
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.flower.fxutils.JavaFxUtils.showErrorMessage;
 import static com.flower.fxutils.JavaFxUtils.showMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -231,6 +232,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 this.transactions = new FilteredList<>(FXCollections.observableArrayList(
                         levelTransactions.stream().map(t -> new LevelTransaction(t, selectedLevel)).toList()));
                 transactionsTable.setItems(this.transactions);
+                autoResizeTableColumns(transactionsTable);
             } catch (Exception e) {
                 LOGGER.error("Error loading transactions for level", e);
             }
@@ -265,6 +267,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 List<Level> levelList = DBUtil.connectGetResultAndClose(sess -> LevelDAO.findByPoplavokId(sess, poplavokId, showClosed));
                 this.levels = new FilteredList<>(FXCollections.observableArrayList(levelList));
                 checkNotNull(levelsTable).setItems(this.levels);
+                autoResizeTableColumns(levelsTable);
 
                 if (!selectedLevelIds.isEmpty()) {
                     levelsTable.getSelectionModel().clearSelection();

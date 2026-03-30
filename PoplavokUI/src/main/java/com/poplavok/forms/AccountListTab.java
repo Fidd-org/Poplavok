@@ -72,6 +72,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
             } else {
                 if (transactionsTable != null) {
                     transactionsTable.setItems(FXCollections.observableArrayList());
+                    autoResizeTableColumns(transactionsTable);
                 }
             }
         });
