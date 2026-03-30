@@ -288,7 +288,6 @@ public class AccountListTab extends AnchorPane implements Refreshable {
                             DBUtil.connectCommitAndClose(sess -> {
                                 AccountDAO.update(sess, checkNotNull(account));
                                 TransactionDAO.save(sess, checkNotNull(transaction));
-
                             });
                             refreshContent();
                         }
