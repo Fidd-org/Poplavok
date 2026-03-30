@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.function.Predicate;
 
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class PoplavokListTab extends AnchorPane implements Refreshable {
@@ -86,6 +87,7 @@ public class PoplavokListTab extends AnchorPane implements Refreshable {
             Preconditions.checkNotNull(poplavoksTable).itemsProperty().set(sortablePoplavoks);
             sortablePoplavoks.comparatorProperty().bind(poplavoksTable.comparatorProperty());
             poplavoksTable.refresh();
+            autoResizeTableColumns(poplavoksTable);
 
             if (selectedPoplavok != null) {
                 for (Poplavok poplavok : poplavoksTable.getItems()) {

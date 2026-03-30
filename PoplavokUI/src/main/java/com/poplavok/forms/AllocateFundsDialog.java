@@ -45,6 +45,7 @@ public class AllocateFundsDialog extends VBox {
 
     @FXML @Nullable TextField interestRateTextField;
     @FXML @Nullable ComboBox<InterestRateType> interestTypeComboBox;
+    @FXML @Nullable ComboBox<LoanType> externalLoanTypeComboBox;
 
     @FXML @Nullable TableView<Account> accountsTableView;
     @FXML @Nullable TableView<Level> levelsTableView;
@@ -86,6 +87,9 @@ public class AllocateFundsDialog extends VBox {
 
         checkNotNull(interestTypeComboBox).getItems().setAll(InterestRateType.values());
         checkNotNull(interestTypeComboBox).getSelectionModel().selectFirst();
+
+        checkNotNull(externalLoanTypeComboBox).getItems().setAll(LoanType.EXTERNAL_ISOLATED_MARGIN, LoanType.EXTERNAL_CROSS_MARGIN);
+        checkNotNull(externalLoanTypeComboBox).getSelectionModel().selectFirst();
 
         ObservableList<Account> observableAccounts = FXCollections.observableArrayList();
         ObservableList<Level> observableLevels = FXCollections.observableArrayList();
@@ -168,7 +172,7 @@ public class AllocateFundsDialog extends VBox {
                 BigDecimal interestRate = new BigDecimal(checkNotNull(interestRateTextField).textProperty().get());
                 InterestRateType interestRateType = checkNotNull(interestTypeComboBox).getSelectionModel().getSelectedItem();
 
-                loan.setLoanType(LoanType.EXTERNAL);
+                loan.setLoanType(checkNotNull(externalLoanTypeComboBox).getSelectionModel().getSelectedItem());
                 loan.setInterestRate(interestRate);
                 loan.setInterestRateType(interestRateType);
             } else {

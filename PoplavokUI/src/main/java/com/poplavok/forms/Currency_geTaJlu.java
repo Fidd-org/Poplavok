@@ -36,6 +36,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
+
 public class Currency_geTaJlu extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(Currency_geTaJlu.class);
 
@@ -210,5 +212,6 @@ public class Currency_geTaJlu extends AnchorPane implements Refreshable {
         }
         Preconditions.checkNotNull(currencyChainExTable).itemsProperty().set(FXCollections.observableArrayList(currencyChains));
         currencyChainExTable.refresh();
+        autoResizeTableColumns(currencyChainExTable);
     }
 }

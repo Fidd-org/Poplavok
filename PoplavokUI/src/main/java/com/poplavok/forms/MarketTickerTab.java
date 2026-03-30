@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.function.Predicate;
 
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
+
 public class MarketTickerTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(MarketTickerTab.class);
 
@@ -69,6 +71,7 @@ public class MarketTickerTab extends AnchorPane implements Refreshable {
             Preconditions.checkNotNull(marketTickersTable).itemsProperty().set(sortableMarketTickers);
             sortableMarketTickers.comparatorProperty().bind(marketTickersTable.comparatorProperty());
             marketTickersTable.refresh();
+            autoResizeTableColumns(marketTickersTable);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error: " + e, ButtonType.OK);
             LOGGER.error("Error:", e);

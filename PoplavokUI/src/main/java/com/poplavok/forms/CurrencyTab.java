@@ -31,6 +31,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.function.Predicate;
 
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
+
 public class CurrencyTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(CurrencyTab.class);
 
@@ -75,6 +77,7 @@ public class CurrencyTab extends AnchorPane implements Refreshable {
             Preconditions.checkNotNull(currenciesTable).itemsProperty().set(sortableCurrencies);
             sortableCurrencies.comparatorProperty().bind(currenciesTable.comparatorProperty());
             currenciesTable.refresh();
+            autoResizeTableColumns(currenciesTable);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error: " + e, ButtonType.OK);
             LOGGER.error("Error:", e);

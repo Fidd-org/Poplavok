@@ -6,6 +6,7 @@ package com.poplavok.data.model;
 public enum LoanType {
     ACCOUNT_FUNDED,
     POPLAVOK_FUNDED,
-    EXTERNAL
+    EXTERNAL_CROSS_MARGIN,
+    EXTERNAL_ISOLATED_MARGIN
 }
 

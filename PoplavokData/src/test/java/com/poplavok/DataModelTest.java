@@ -103,7 +103,7 @@ public class DataModelTest {
         session.persist(usdt);
 
         Loan loan = new Loan(usdt, new BigDecimal("1000"), null,
-                new Date(), LoanType.EXTERNAL);
+                new Date(), LoanType.EXTERNAL_CROSS_MARGIN);
         session.persist(loan);
 
         tx.commit();

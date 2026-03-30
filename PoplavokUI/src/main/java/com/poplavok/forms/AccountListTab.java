@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.function.Predicate;
 
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.flower.fxutils.JavaFxUtils.showErrorMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -98,6 +99,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
             Preconditions.checkNotNull(accountsTable).itemsProperty().set(sortableAccounts);
             sortableAccounts.comparatorProperty().bind(accountsTable.comparatorProperty());
             accountsTable.refresh();
+            autoResizeTableColumns(accountsTable);
 
             if (selectedAccount != null) {
                 for (Account account : accountsTable.getItems()) {
@@ -136,6 +138,7 @@ public class AccountListTab extends AnchorPane implements Refreshable {
                 transactionsTable.itemsProperty().set(sortableTransactions);
                 sortableTransactions.comparatorProperty().bind(transactionsTable.comparatorProperty());
                 transactionsTable.refresh();
+                autoResizeTableColumns(transactionsTable);
             }
         } catch (Exception e) {
             LOGGER.error("Error refreshing transactions:", e);

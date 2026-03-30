@@ -46,7 +46,8 @@ import javafx.scene.control.SelectionMode;
 import static com.flower.fxutils.JavaFxUtils.showMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.model.LoanType.ACCOUNT_FUNDED;
-import static com.poplavok.data.model.LoanType.EXTERNAL;
+import static com.poplavok.data.model.LoanType.EXTERNAL_CROSS_MARGIN;
+import static com.poplavok.data.model.LoanType.EXTERNAL_ISOLATED_MARGIN;
 import static com.poplavok.data.model.LoanType.POPLAVOK_FUNDED;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
@@ -422,7 +423,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                         try {
                             Loan loan = allocateFundsDialog.getReturnLoan();
                             if (loan != null) {
-                                if (loan.getLoanType() == ACCOUNT_FUNDED && loan.getLoanType() == POPLAVOK_FUNDED && loan.getLoanType() == EXTERNAL) {
+                                if (loan.getLoanType() != ACCOUNT_FUNDED && loan.getLoanType() != POPLAVOK_FUNDED
+                                        && loan.getLoanType() != EXTERNAL_CROSS_MARGIN && loan.getLoanType() != EXTERNAL_ISOLATED_MARGIN) {
                                     showMessage("Unsupported loan type: " + loan.getLoanType());
                                     return;
                                 }
@@ -469,7 +471,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                         LevelDAO.update(sess, lvl);
                                     });
                                 }
-                                if (loan.getLoanType() == EXTERNAL) {
+                                if (loan.getLoanType() == EXTERNAL_CROSS_MARGIN || loan.getLoanType() == EXTERNAL_ISOLATED_MARGIN) {
                                     DBUtil.connectCommitAndClose(sess -> {
                                         LoanDAO.save(sess, loan);
                                         LevelDAO.update(sess, lvl);
