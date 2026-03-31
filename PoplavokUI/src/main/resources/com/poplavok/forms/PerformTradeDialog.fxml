@@ -69,8 +69,8 @@
                                           <Insets right="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="giveQuoteBuyTextField" GridPane.columnIndex="1" />
-                                    <TextField fx:id="getBaseBuyTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <TextField fx:id="giveQuoteBuyTextField" onKeyTyped="#onGiveQuoteBuyChanged" GridPane.columnIndex="1" />
+                                    <TextField fx:id="getBaseBuyTextField" onKeyTyped="#onGetBaseBuyChanged" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Label fx:id="quoteBuyLabel" text="QUOTE" GridPane.columnIndex="2">
                                        <GridPane.margin>
                                           <Insets left="10.0" />
@@ -114,8 +114,8 @@
                                           <Insets right="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="giveBaseSellTextField" GridPane.columnIndex="1" />
-                                    <TextField fx:id="getQuoteSellTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <TextField fx:id="giveBaseSellTextField" onKeyTyped="#onGiveBaseSellChanged" GridPane.columnIndex="1" />
+                                    <TextField fx:id="getQuoteSellTextField" onKeyTyped="#onGetQuoteSellChanged" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Label fx:id="baseSellLabel" text="BASE" GridPane.columnIndex="2">
                                        <GridPane.margin>
                                           <Insets left="10.0" />

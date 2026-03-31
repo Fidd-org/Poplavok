@@ -414,6 +414,47 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     public void closePoplavok() {}
 
+    public void performTrade() {
+        try {
+            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (selected == null || selected.size() != 1) return;
+
+            Level lvl = selected.get(0);
+            LevelState state = lvl.getState();
+
+            if (state != LevelState.TRADING && state != LevelState.FUNDING) {
+                showErrorMessage("Levels in " + state + " state can't perform trades.");
+                return;
+            }
+
+            BigDecimal price = StringUtils.isBlank(checkNotNull(priceTextField).textProperty().get()) ? null : new BigDecimal(checkNotNull(priceTextField).textProperty().get());
+            PerformTradeDialog performTradeDialog = new PerformTradeDialog(lvl, checkNotNull(poplavok).getTicker(), price);
+            Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
+                    stage -> { performTradeDialog.setStage(stage); return performTradeDialog; },
+                    "Perform Trade");
+
+            workspaceStage.setOnHidden(
+                    ev -> {
+                        try {
+                            Trade trade = performTradeDialog.getReturnTrade();
+
+                            // TODO: process
+
+                            refreshContent();
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error allocating funds: " + e, ButtonType.OK);
+                            LOGGER.error("Error allocating funds: ", e);
+                            alert.showAndWait();
+                        }
+                    }
+            );
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error allocating funds: " + e, ButtonType.OK);
+            LOGGER.error("Error allocating funds: ", e);
+            alert.showAndWait();
+        }
+    }
+
     public void allocateFunds() {
         try {
             List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
@@ -533,5 +574,4 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             alert.showAndWait();
         }
     }
-
 }
