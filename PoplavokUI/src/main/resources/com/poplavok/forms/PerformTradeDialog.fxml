@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<fx:root maxHeight="150.0" type="VBox" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+    <AnchorPane VBox.vgrow="NEVER">
+      <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" />
+          <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="150.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="Price:">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin></Label>
+            <Label text="Trade:" GridPane.rowIndex="3" GridPane.valignment="TOP">
+               <GridPane.margin>
+                  <Insets right="10.0" top="10.0" />
+               </GridPane.margin></Label>
+            <TabPane fx:id="tradeTabPane" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowIndex="3">
+              <tabs>
+                <Tab fx:id="buyTab" text="Buy">
+                  <content>
+                    <AnchorPane>
+                           <children>
+                              <GridPane layoutX="123.0" layoutY="95.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="35.0" prefWidth="25.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="GIVE:" GridPane.halignment="RIGHT">
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
+                                       <GridPane.margin>
+                                          <Insets right="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="TO GET:" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="giveQuoteBuyTextField" GridPane.columnIndex="1" />
+                                    <TextField fx:id="getBaseBuyTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Label fx:id="quoteBuyLabel" text="QUOTE" GridPane.columnIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label fx:id="baseBuyLabel" text="BASE" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Button fx:id="buyButton" mnemonicParsing="false" onAction="#buy" text="BUY" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                                 </children>
+                              </GridPane>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab fx:id="sellTab" text="Sell">
+                  <content>
+                    <AnchorPane>
+                           <children>
+                              <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="35.0" prefWidth="25.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label text="GIVE:" GridPane.halignment="RIGHT">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="TO GET:" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets right="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="giveBaseSellTextField" GridPane.columnIndex="1" />
+                                    <TextField fx:id="getQuoteSellTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Label fx:id="baseSellLabel" text="BASE" GridPane.columnIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label fx:id="quoteSellLabel" text="QUOTE" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Button fx:id="sellButton" mnemonicParsing="false" onAction="#sell" text="SELL" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                                 </children>
+                              </GridPane>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+            <ToolBar GridPane.columnIndex="1">
+               <items>
+                  <TextField fx:id="priceTextField" />
+                  <Label fx:id="tickerLabel" text="B/Q">
+                     <padding>
+                        <Insets left="5.0" right="5.0" />
+                     </padding>
+                  </Label>
+                  <Slider blockIncrement="1.0" max="50.0" min="-50.0" />
+               </items>
+            </ToolBar>
+            <Label text="Fee:" GridPane.rowIndex="2" />
+            <Label text="Available:" GridPane.rowIndex="1" />
+            <ToolBar GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <items>
+                  <TextField fx:id="availableQuoteTextField" editable="false" />
+                  <Button fx:id="useAllQuoteButton" mnemonicParsing="false" onAction="#useAllQuote" text="QUOTE" />
+                  <Separator orientation="VERTICAL" />
+                  <TextField fx:id="availableBaseTextField" editable="false" />
+                  <Button fx:id="useAllBaseButton" mnemonicParsing="false" onAction="#useAllBase" text="BASE" />
+               </items>
+            </ToolBar>
+            <ToolBar GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <items>
+                  <TextField fx:id="feeTextField" />
+                  <Separator orientation="VERTICAL" />
+                  <CheckBox fx:id="manualEntryCheckBox" mnemonicParsing="false" text="Manual Amount Entry" />
+               </items>
+            </ToolBar>
+         </children>
+         <padding>
+            <Insets top="10.0" />
+         </padding>
+      </GridPane>
+    </AnchorPane>
+</fx:root>

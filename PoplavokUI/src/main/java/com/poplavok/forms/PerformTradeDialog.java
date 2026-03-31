@@ -1,0 +1,267 @@
+package com.poplavok.forms;
+
+import com.flower.fxutils.JavaFxUtils;
+import com.poplavok.data.model.Level;
+import com.poplavok.data.model.Trade;
+import com.poplavok.data.model.MarketTicker;
+import com.poplavok.data.model.TradeOperation;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Date;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
+
+public class PerformTradeDialog extends VBox {
+    final static Logger LOGGER = LoggerFactory.getLogger(PerformTradeDialog.class);
+
+    @FXML @Nullable TextField priceTextField;
+    @FXML @Nullable Label tickerLabel;
+    @FXML @Nullable TextField availableBaseTextField;
+    @FXML @Nullable TextField availableQuoteTextField;
+    @FXML @Nullable Button useAllBaseButton;
+    @FXML @Nullable Button useAllQuoteButton;
+    @FXML @Nullable TextField feeTextField;
+    @FXML @Nullable Label quoteBuyLabel;
+    @FXML @Nullable Label baseBuyLabel;
+    @FXML @Nullable Label baseSellLabel;
+    @FXML @Nullable Label quoteSellLabel;
+    @FXML @Nullable Button buyButton;
+    @FXML @Nullable Button sellButton;
+
+    @FXML @Nullable CheckBox manualEntryCheckBox;
+    @FXML @Nullable Tab buyTab;
+    @FXML @Nullable Tab sellTab;
+    @FXML @Nullable TextField giveQuoteBuyTextField;
+    @FXML @Nullable TextField getBaseBuyTextField;
+    @FXML @Nullable TextField giveBaseSellTextField;
+    @FXML @Nullable TextField getQuoteSellTextField;
+
+    @FXML @Nullable TabPane tradeTabPane;
+
+    @Nullable Stage stage;
+    @Nullable Trade returnTrade;
+
+    final Level lvl;
+    final MarketTicker ticker;
+
+    public PerformTradeDialog(Level lvl, MarketTicker ticker, @Nullable BigDecimal price, @Nullable BigDecimal fee) {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("AllocateFundsDialog.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
+
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+
+        this.lvl = lvl;
+        this.ticker = ticker;
+
+        checkNotNull(tickerLabel).textProperty().setValue(ticker.getSymbol());
+        checkNotNull(priceTextField).textProperty().setValue(price != null ? price.toPlainString() : "");
+
+        checkNotNull(availableBaseTextField).textProperty().setValue(lvl.getAvailableAmountBase() != null ? lvl.getAvailableAmountBase().toPlainString() : "N/A");
+        checkNotNull(availableQuoteTextField).textProperty().setValue(lvl.getAvailableAmountQuote() != null ? lvl.getAvailableAmountQuote().toPlainString() : "N/A");
+        checkNotNull(useAllBaseButton).textProperty().setValue(ticker.getBase().getCurrency());
+        checkNotNull(useAllQuoteButton).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(feeTextField).textProperty().setValue(fee != null ? fee.toPlainString() : "");
+        checkNotNull(quoteBuyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(baseBuyLabel).textProperty().setValue(ticker.getBase().getCurrency());
+        checkNotNull(baseSellLabel).textProperty().setValue(ticker.getBase().getCurrency());
+        checkNotNull(quoteSellLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(buyButton).textProperty().setValue("BUY " + ticker.getBase().getCurrency());
+        checkNotNull(sellButton).textProperty().setValue("SELL " + ticker.getBase().getCurrency());
+        
+        checkNotNull(priceTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(availableBaseTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(availableQuoteTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(giveQuoteBuyTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(getBaseBuyTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(giveBaseSellTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(getQuoteSellTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        
+        checkNotNull(priceTextField).textProperty().addListener(this::onPriceChanged);
+        checkNotNull(feeTextField).textProperty().addListener(this::onFeeChanged);
+        checkNotNull(giveQuoteBuyTextField).textProperty().addListener(this::onGiveQuoteBuyChanged);
+        checkNotNull(getBaseBuyTextField).textProperty().addListener(this::onGetBaseBuyChanged);
+
+        checkNotNull(priceTextField).textProperty().addListener(this::onPriceChanged);
+        checkNotNull(feeTextField).textProperty().addListener(this::onFeeChanged);
+        checkNotNull(giveQuoteBuyTextField).textProperty().addListener(this::onGiveQuoteBuyChanged);
+        checkNotNull(getBaseBuyTextField).textProperty().addListener(this::onGetBaseBuyChanged);
+        checkNotNull(giveBaseSellTextField).textProperty().addListener(this::onGiveBaseSellChanged);
+        checkNotNull(getQuoteSellTextField).textProperty().addListener(this::onGetQuoteSellChanged);
+
+        checkNotNull(manualEntryCheckBox).selectedProperty().addListener(this::onManualEntryCheckedChanged);
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
+    public void buy() {
+        try {
+            returnTrade = new Trade();
+
+            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
+            BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
+            BigDecimal tradeQuoteAmount = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText());
+            BigDecimal tradeBaseAmount = new BigDecimal(checkNotNull(getBaseBuyTextField).getText());
+            returnTrade.setAmountQuoteIn(tradeQuoteAmount);
+            returnTrade.setAmountBaseOut(tradeBaseAmount);
+            returnTrade.setOperation(TradeOperation.BUY);
+            returnTrade.setDate(new Date());
+
+            returnTrade.setCommissionQuote(tradeQuoteAmount.multiply(fee));
+            returnTrade.setCommissionBase(tradeQuoteAmount.multiply(fee).divide(price));
+
+            checkNotNull(stage).close();
+        } catch (Exception e) {
+            LOGGER.error("Buy Error:", e);
+            JavaFxUtils.showErrorMessage("Buy Error: " + e);
+        }
+    }
+
+    public void sell() {
+        try {
+            returnTrade = new Trade();
+
+            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
+            BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
+
+            BigDecimal tradeBaseAmount = new BigDecimal(checkNotNull(giveBaseSellTextField).getText());
+            BigDecimal tradeQuoteAmount = new BigDecimal(checkNotNull(getQuoteSellTextField).getText());
+            returnTrade.setAmountBaseIn(tradeBaseAmount);
+            returnTrade.setAmountQuoteOut(tradeQuoteAmount);
+            returnTrade.setOperation(TradeOperation.SELL);
+            returnTrade.setDate(new Date());
+
+            returnTrade.setCommissionBase(tradeBaseAmount.multiply(fee));
+            returnTrade.setCommissionQuote(tradeBaseAmount.multiply(fee).multiply(price));
+
+            checkNotNull(stage).close();
+       } catch (Exception e) {
+            LOGGER.error("Sell Error:", e);
+            JavaFxUtils.showErrorMessage("Sell Error: " + e);
+        }
+    }
+
+    public void onPriceChanged(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+        priceFeeUpdate();
+    }
+
+    public void onFeeChanged(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+        priceFeeUpdate();
+    }
+
+    public void onManualEntryCheckedChanged(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+        priceFeeUpdate();
+    }
+
+    /** Update quote sell, base buy, if manual input is not checked */
+    protected void priceFeeUpdate() {
+        try {
+            boolean manualInput = checkNotNull(manualEntryCheckBox).isSelected();
+            if (!manualInput) {
+                if (StringUtils.isBlank(checkNotNull(priceTextField).getText())) { return; }
+                if (StringUtils.isBlank(checkNotNull(feeTextField).getText())) { return; }
+                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
+                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
+
+                // Update GET BASE BUY amount
+                if (!StringUtils.isBlank(checkNotNull(giveQuoteBuyTextField).getText())) {
+                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText());
+                    BigDecimal getBaseBuy =
+                            giveQuoteBuy
+                                    .multiply(BigDecimal.ONE.subtract(fee))
+                                    .divide(price, RoundingMode.DOWN);
+                    checkNotNull(getBaseBuyTextField).setText(formatAmount(getBaseBuy));
+                }
+
+                // Update GET QUOTE SELL amount
+                if (!StringUtils.isBlank(checkNotNull(giveBaseSellTextField).getText())) {
+                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText());
+                    BigDecimal getQuoteSell =
+                            giveBaseSell
+                                    .multiply(price)
+                                    .multiply(BigDecimal.ONE.subtract(fee));
+                    checkNotNull(getQuoteSellTextField).setText(formatAmount(getQuoteSell));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error on Recalc:", e);
+            JavaFxUtils.showErrorMessage("Error on Recalc: " + e);
+        }
+    }
+
+    public void useAllBase() {
+        try {
+            if (!checkNotNull(tradeTabPane).getSelectionModel().getSelectedItem().equals(sellTab)) {
+                JavaFxUtils.showErrorMessage("Select Sell tab to use all BASE");
+                return;
+            }
+
+            if (!StringUtils.isBlank(checkNotNull(availableBaseTextField).getText())) {
+                BigDecimal availableBase = new BigDecimal(checkNotNull(availableBaseTextField).getText());
+                checkNotNull(giveBaseSellTextField).textProperty().setValue(formatAmount(availableBase));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error on useAllBase:", e);
+            JavaFxUtils.showErrorMessage("Error on useAllBase: " + e);
+        }
+    }
+
+    public void useAllQuote() {
+        try {
+            if (!checkNotNull(tradeTabPane).getSelectionModel().getSelectedItem().equals(buyTab)) {
+                JavaFxUtils.showErrorMessage("Select Buy tab to use all QUOTE");
+                return;
+            }
+
+            if (!StringUtils.isBlank(checkNotNull(availableQuoteTextField).getText())) {
+                BigDecimal availableQuote = new BigDecimal(checkNotNull(availableQuoteTextField).getText());
+                checkNotNull(giveQuoteBuyTextField).textProperty().setValue(formatAmount(availableQuote));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error on useAllQuote:", e);
+            JavaFxUtils.showErrorMessage("Error on useAllQuote: " + e);
+        }
+    }
+
+    public void onGiveQuoteBuyChanged(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+    }
+
+    public void onGetBaseBuyChanged(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+    }
+
+    public void onGiveBaseSellChanged(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+    }
+
+    public void onGetQuoteSellChanged(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+    }
+
+    @Nullable
+    public Trade getReturnTrade() {
+        return returnTrade;
+    }
+
+}
