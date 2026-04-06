@@ -1,6 +1,5 @@
 package com.poplavok.data.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,14 +7,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -60,9 +56,6 @@ public class Trade {
     @Column(nullable = false)
     @Nullable
     private Date date;
-
-    @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LevelTrade> levelTrades = new ArrayList<>();
 
     public Trade() {
     }
@@ -133,14 +126,5 @@ public class Trade {
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public List<LevelTrade> getLevelTrades() {
-        return levelTrades;
-    }
-
-    public void addLevelTrade(LevelTrade levelTrade) {
-        levelTrades.add(levelTrade);
-        levelTrade.setTrade(this);
     }
 }

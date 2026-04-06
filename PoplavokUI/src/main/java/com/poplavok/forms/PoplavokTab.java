@@ -10,6 +10,7 @@ import com.poplavok.data.model.Currency;
 import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelState;
+import com.poplavok.data.model.LevelTrade;
 import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
@@ -437,20 +438,56 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                     ev -> {
                         try {
                             Trade trade = performTradeDialog.getReturnTrade();
+                            if (trade != null) {
+                                BigDecimal baseIn = nullToZero(trade.getAmountBaseIn());
+                                BigDecimal quoteIn = nullToZero(trade.getAmountQuoteIn());
+                                BigDecimal baseOut = nullToZero(trade.getAmountBaseOut());
+                                BigDecimal quoteOut = nullToZero(trade.getAmountQuoteOut());
+                                BigDecimal baseCommission = nullToZero(trade.getCommissionBase());
+                                BigDecimal quoteCommission = nullToZero(trade.getCommissionQuote());
 
-                            // TODO: process
+                                BigDecimal lvlBase = nullToZero(lvl.getAvailableAmountBase());
+                                BigDecimal lvlQuote = nullToZero(lvl.getAvailableAmountQuote());
 
-                            refreshContent();
+                                if (lvlBase.compareTo(baseOut) < 0) {
+                                    throw new RuntimeException("Not enough Base available in level for this trade");
+                                }
+
+                                if (lvlQuote.compareTo(quoteOut) < 0) {
+                                    throw new RuntimeException("Not enough Quote available in level for this trade");
+                                }
+
+                                BigDecimal baseDelta = baseIn.subtract(baseCommission).subtract(baseOut);
+                                BigDecimal quoteDelta = quoteIn.subtract(quoteCommission).subtract(quoteOut);
+
+                                lvlBase = lvlBase.add(baseDelta);
+                                lvlQuote = lvlQuote.add(quoteDelta);
+
+                                lvl.setAvailableAmountBase(lvlBase);
+                                lvl.setAvailableAmountQuote(lvlQuote);
+
+                                LevelTrade levelTrade = new LevelTrade();
+                                levelTrade.setLevel(lvl);
+                                levelTrade.setTrade(trade);
+
+                                DBUtil.connectCommitAndClose(sess -> {
+                                    sess.persist(trade);
+                                    sess.persist(levelTrade);
+                                    LevelDAO.update(sess, lvl);
+                                });
+
+                                refreshContent();
+                            }
                         } catch (Exception e) {
-                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error allocating funds: " + e, ButtonType.OK);
-                            LOGGER.error("Error allocating funds: ", e);
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error performing trade: " + e, ButtonType.OK);
+                            LOGGER.error("Error performing trade: ", e);
                             alert.showAndWait();
                         }
                     }
             );
         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Error allocating funds: " + e, ButtonType.OK);
-            LOGGER.error("Error allocating funds: ", e);
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error performing trade: " + e, ButtonType.OK);
+            LOGGER.error("Error performing trade: ", e);
             alert.showAndWait();
         }
     }
@@ -458,14 +495,21 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     public void allocateFunds() {
         try {
             List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
-            if (selected == null || selected.size() != 1) return;
+            if (selected == null || selected.isEmpty()) {
+                showMessage("Choose a level to allocate funds.");
+                return;
+            }
+
+            if (selected.size() != 1) {
+                showMessage("Choose one level to allocate funds (not many levels)");
+                return;
+            }
 
             Level lvl = selected.get(0);
             LevelState state = lvl.getState();
 
             if (state == LevelState.CLOSED) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Funds can't be allocated for CLOSED levels.");
-                alert.showAndWait();
+                showMessage("Funds can't be allocated for CLOSED levels.");
                 return;
             }
 

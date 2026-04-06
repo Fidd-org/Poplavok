@@ -58,6 +58,12 @@ public class PerformTradeDialog extends VBox {
 
     @FXML @Nullable TabPane tradeTabPane;
 
+    @FXML @Nullable TextField commissionQuoteBuyTextField;
+    @FXML @Nullable Label quoteBuyCommissionLabel;
+
+    @FXML @Nullable TextField commissionsBaseSellTextField;
+    @FXML @Nullable Label quoteSellCommissionLabel;
+
     @Nullable Stage stage;
     @Nullable Trade returnTrade;
 
@@ -88,8 +94,10 @@ public class PerformTradeDialog extends VBox {
         BigDecimal fee = new BigDecimal(checkNotNull(ticker.getMakerFeeRate())).multiply(new BigDecimal(checkNotNull(ticker.getMakerCoefficient())));
         checkNotNull(feeTextField).textProperty().setValue(formatAmount(fee));
         checkNotNull(quoteBuyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(quoteBuyCommissionLabel).textProperty().setValue(ticker.getQuote().getCurrency());
         checkNotNull(baseBuyLabel).textProperty().setValue(ticker.getBase().getCurrency());
         checkNotNull(baseSellLabel).textProperty().setValue(ticker.getBase().getCurrency());
+        checkNotNull(quoteSellCommissionLabel).textProperty().setValue(ticker.getQuote().getCurrency());
         checkNotNull(quoteSellLabel).textProperty().setValue(ticker.getQuote().getCurrency());
         checkNotNull(buyButton).textProperty().setValue("BUY " + ticker.getBase().getCurrency());
         checkNotNull(sellButton).textProperty().setValue("SELL " + ticker.getBase().getCurrency());
@@ -171,44 +179,6 @@ public class PerformTradeDialog extends VBox {
         priceFeeUpdate(true, true);
     }
 
-    /** Update quote sell, base buy, if manual input is not checked */
-    protected void priceFeeUpdate(boolean updateBaseBuy, boolean updateQuoteSell) {
-        try {
-            boolean manualInput = checkNotNull(manualEntryCheckBox).isSelected();
-            if (!manualInput) {
-                if (StringUtils.isBlank(checkNotNull(priceTextField).getText())) { return; }
-                if (StringUtils.isBlank(checkNotNull(feeTextField).getText())) { return; }
-                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText()).setScale(SCALE);
-                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText()).setScale(SCALE);
-
-                if (price.compareTo(BigDecimal.ZERO) == 0) { return; }
-
-                // Update GET BASE BUY amount
-                if (updateBaseBuy && !StringUtils.isBlank(checkNotNull(giveQuoteBuyTextField).getText())) {
-                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText()).setScale(SCALE);
-                    BigDecimal getBaseBuy =
-                            giveQuoteBuy
-                                    .multiply(BigDecimal.ONE.subtract(fee))
-                                    .divide(price, RoundingMode.DOWN);
-                    checkNotNull(getBaseBuyTextField).setText(formatAmount(getBaseBuy));
-                }
-
-                // Update GET QUOTE SELL amount
-                if (updateQuoteSell && !StringUtils.isBlank(checkNotNull(giveBaseSellTextField).getText())) {
-                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText()).setScale(SCALE);
-                    BigDecimal getQuoteSell =
-                            giveBaseSell
-                                    .multiply(price)
-                                    .multiply(BigDecimal.ONE.subtract(fee));
-                    checkNotNull(getQuoteSellTextField).setText(formatAmount(getQuoteSell));
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error on Recalc:", e);
-            JavaFxUtils.showErrorMessage("Error on Recalc: " + e);
-        }
-    }
-
     public void useAllBase() {
         try {
             if (!checkNotNull(tradeTabPane).getSelectionModel().getSelectedItem().equals(sellTab)) {
@@ -273,6 +243,51 @@ public class PerformTradeDialog extends VBox {
         reversePriceFeeUpdate(false, true);
     }
 
+    // TODO: move `priceFeeUpdate`, `reversePriceFeeUpdate` to a separate service class
+
+    /** Update quote sell, base buy, if manual input is not checked */
+    protected void priceFeeUpdate(boolean updateBaseBuy, boolean updateQuoteSell) {
+        try {
+            boolean manualInput = checkNotNull(manualEntryCheckBox).isSelected();
+            if (!manualInput) {
+                if (StringUtils.isBlank(checkNotNull(priceTextField).getText())) { return; }
+                if (StringUtils.isBlank(checkNotNull(feeTextField).getText())) { return; }
+                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText()).setScale(SCALE);
+                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText()).setScale(SCALE);
+
+                if (price.compareTo(BigDecimal.ZERO) == 0) { return; }
+
+                // Update GET BASE BUY amount
+                if (updateBaseBuy && !StringUtils.isBlank(checkNotNull(giveQuoteBuyTextField).getText())) {
+                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText()).setScale(SCALE);
+                    BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
+
+                    BigDecimal getBaseBuy = giveQuoteBuy
+                                                .subtract(commissionQuote)
+                                                .divide(price, RoundingMode.DOWN);
+                    checkNotNull(getBaseBuyTextField).setText(formatAmount(getBaseBuy));
+                    checkNotNull(commissionQuoteBuyTextField).setText(formatAmount(commissionQuote));
+                }
+
+                // Update GET QUOTE SELL amount
+                if (updateQuoteSell && !StringUtils.isBlank(checkNotNull(giveBaseSellTextField).getText())) {
+                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText()).setScale(SCALE);
+
+                    BigDecimal getQuoteSell = giveBaseSell.multiply(price);
+                    BigDecimal commissionQuote = getQuoteSell.multiply(fee);
+                    getQuoteSell = getQuoteSell.subtract(commissionQuote);
+
+                    checkNotNull(getQuoteSellTextField).setText(formatAmount(getQuoteSell));
+                    checkNotNull(commissionsBaseSellTextField).setText(formatAmount(commissionQuote));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error on Recalc:", e);
+            JavaFxUtils.showErrorMessage("Error on Recalc: " + e);
+        }
+    }
+
+    /** Update quote buy, base sell, if manual input is not checked */
     protected void reversePriceFeeUpdate(boolean updateQuoteBuy, boolean updateBaseSell) {
         try {
             boolean manualInput = checkNotNull(manualEntryCheckBox).isSelected();
@@ -285,22 +300,25 @@ public class PerformTradeDialog extends VBox {
                 // Update GET BASE BUY amount
                 if (updateQuoteBuy && !StringUtils.isBlank(checkNotNull(getBaseBuyTextField).getText())) {
                     BigDecimal getBaseBuy = new BigDecimal(checkNotNull(getBaseBuyTextField).getText()).setScale(SCALE);
-                    BigDecimal giveQuoteBuy =
-                            getBaseBuy
-                                    .multiply(price)
-                                    .divide(BigDecimal.ONE.subtract(fee), RoundingMode.UP);
+
+                    BigDecimal giveQuoteBuy = getBaseBuy.multiply(price);
+                    BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
+                    giveQuoteBuy = giveQuoteBuy.subtract(commissionQuote);
+
                     checkNotNull(giveQuoteBuyTextField).setText(formatAmount(giveQuoteBuy ));
+                    checkNotNull(commissionQuoteBuyTextField).setText(formatAmount(commissionQuote));
                 }
 
                 // Update GET QUOTE SELL amount
                 if (updateBaseSell && !StringUtils.isBlank(checkNotNull(getQuoteSellTextField).getText())) {
                     BigDecimal getQuoteSell = new BigDecimal(checkNotNull(getQuoteSellTextField).getText()).setScale(SCALE);
+                    BigDecimal commissionQuote = getQuoteSell.multiply(fee);
+
                     BigDecimal giveBaseSell =
-                            getQuoteSell
-                                    .divide(
-                                    BigDecimal.ONE.subtract(fee)
-                                        .multiply(price), RoundingMode.UP);
+                            getQuoteSell.subtract(commissionQuote)
+                                    .divide(price, RoundingMode.UP);
                     checkNotNull(giveBaseSellTextField).setText(formatAmount(giveBaseSell));
+                    checkNotNull(commissionsBaseSellTextField).setText(formatAmount(commissionQuote));
                 }
             }
         } catch (Exception e) {
