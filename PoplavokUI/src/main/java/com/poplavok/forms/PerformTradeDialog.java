@@ -259,7 +259,7 @@ public class PerformTradeDialog extends VBox {
 
                 // Update GET BASE BUY amount
                 if (updateBaseBuy && !StringUtils.isBlank(checkNotNull(giveQuoteBuyTextField).getText())) {
-                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText()).setScale(SCALE);
+                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText()).setScale(SCALE, RoundingMode.CEILING);
                     BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
 
                     BigDecimal getBaseBuy = giveQuoteBuy
@@ -271,7 +271,7 @@ public class PerformTradeDialog extends VBox {
 
                 // Update GET QUOTE SELL amount
                 if (updateQuoteSell && !StringUtils.isBlank(checkNotNull(giveBaseSellTextField).getText())) {
-                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText()).setScale(SCALE);
+                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText()).setScale(SCALE, RoundingMode.CEILING);
 
                     BigDecimal getQuoteSell = giveBaseSell.multiply(price);
                     BigDecimal commissionQuote = getQuoteSell.multiply(fee);

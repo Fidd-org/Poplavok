@@ -16,6 +16,7 @@ import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Rate;
 import com.poplavok.data.model.Trade;
+import com.poplavok.data.model.TradeOperation;
 import com.poplavok.data.model.Transaction;
 import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.PoplavokDAO;
@@ -449,19 +450,18 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                 BigDecimal lvlBase = nullToZero(lvl.getAvailableAmountBase());
                                 BigDecimal lvlQuote = nullToZero(lvl.getAvailableAmountQuote());
 
-                                if (lvlBase.compareTo(baseOut) < 0) {
+                                if (lvlBase.compareTo(baseIn) < 0) {
                                     throw new RuntimeException("Not enough Base available in level for this trade");
                                 }
 
-                                if (lvlQuote.compareTo(quoteOut) < 0) {
+                                if (lvlQuote.compareTo(quoteIn) < 0) {
                                     throw new RuntimeException("Not enough Quote available in level for this trade");
                                 }
 
-                                BigDecimal baseDelta = baseIn.subtract(baseCommission).subtract(baseOut);
-                                BigDecimal quoteDelta = quoteIn.subtract(quoteCommission).subtract(quoteOut);
+                                lvl.setState(LevelState.TRADING);
 
-                                lvlBase = lvlBase.add(baseDelta);
-                                lvlQuote = lvlQuote.add(quoteDelta);
+                                lvlBase = lvlBase.subtract(baseIn).add(baseOut);
+                                lvlQuote = lvlQuote.subtract(quoteIn).add(quoteOut);
 
                                 lvl.setAvailableAmountBase(lvlBase);
                                 lvl.setAvailableAmountQuote(lvlQuote);
