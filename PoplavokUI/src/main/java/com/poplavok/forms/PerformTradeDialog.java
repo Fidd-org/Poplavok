@@ -5,6 +5,8 @@ import com.poplavok.data.model.Level;
 import com.poplavok.data.model.Trade;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.TradeOperation;
+import com.poplavok.data.utils.AmountAndCommission;
+import com.poplavok.data.utils.LongShortCalculator;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -32,7 +34,6 @@ import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 public class PerformTradeDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(PerformTradeDialog.class);
-    final static int SCALE = 6;
 
     @FXML @Nullable TextField priceTextField;
     @FXML @Nullable Label tickerLabel;
@@ -220,7 +221,7 @@ public class PerformTradeDialog extends VBox {
             return false;
         }
         char c = event.getCharacter().charAt(0);
-        return !(c >= '0' && c <= '9' || c == '.' || c == '\b' || c == '\u007F');
+        return !(c >= '0' && c <= '9' || c == '.' || c == '\b' || c == '\u007F' || c == '\u0016');
     }
 
     public void onGiveQuoteBuyChanged(@Nullable KeyEvent event) {
@@ -252,33 +253,29 @@ public class PerformTradeDialog extends VBox {
             if (!manualInput) {
                 if (StringUtils.isBlank(checkNotNull(priceTextField).getText())) { return; }
                 if (StringUtils.isBlank(checkNotNull(feeTextField).getText())) { return; }
-                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText()).setScale(SCALE);
-                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText()).setScale(SCALE);
+                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
+                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
 
                 if (price.compareTo(BigDecimal.ZERO) == 0) { return; }
 
                 // Update GET BASE BUY amount
                 if (updateBaseBuy && !StringUtils.isBlank(checkNotNull(giveQuoteBuyTextField).getText())) {
-                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText()).setScale(SCALE, RoundingMode.CEILING);
-                    BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
+                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText());
 
-                    BigDecimal getBaseBuy = giveQuoteBuy
-                                                .subtract(commissionQuote)
-                                                .divide(price, RoundingMode.DOWN);
-                    checkNotNull(getBaseBuyTextField).setText(formatAmount(getBaseBuy));
-                    checkNotNull(commissionQuoteBuyTextField).setText(formatAmount(commissionQuote));
+                    AmountAndCommission getBaseBuy = LongShortCalculator.calculateBaseAmountToGetLong(giveQuoteBuy, price, fee);
+
+                    checkNotNull(getBaseBuyTextField).setText(formatAmount(getBaseBuy.amount));
+                    checkNotNull(commissionQuoteBuyTextField).setText(formatAmount(getBaseBuy.commissionQuote));
                 }
 
                 // Update GET QUOTE SELL amount
                 if (updateQuoteSell && !StringUtils.isBlank(checkNotNull(giveBaseSellTextField).getText())) {
-                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText()).setScale(SCALE, RoundingMode.CEILING);
+                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText());
 
-                    BigDecimal getQuoteSell = giveBaseSell.multiply(price);
-                    BigDecimal commissionQuote = getQuoteSell.multiply(fee);
-                    getQuoteSell = getQuoteSell.subtract(commissionQuote);
+                    AmountAndCommission getQuoteSell = LongShortCalculator.calculateQuoteAmountToGetShort(giveBaseSell, price, fee);
 
-                    checkNotNull(getQuoteSellTextField).setText(formatAmount(getQuoteSell));
-                    checkNotNull(commissionsBaseSellTextField).setText(formatAmount(commissionQuote));
+                    checkNotNull(getQuoteSellTextField).setText(formatAmount(getQuoteSell.amount));
+                    checkNotNull(commissionsBaseSellTextField).setText(formatAmount(getQuoteSell.commissionQuote));
                 }
             }
         } catch (Exception e) {
@@ -294,31 +291,27 @@ public class PerformTradeDialog extends VBox {
             if (!manualInput) {
                 if (StringUtils.isBlank(checkNotNull(priceTextField).getText())) { return; }
                 if (StringUtils.isBlank(checkNotNull(feeTextField).getText())) { return; }
-                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText()).setScale(SCALE);
-                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText()).setScale(SCALE);
+                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
+                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
 
-                // Update GET BASE BUY amount
+                // Update GIVE QUOTE BUY amount
                 if (updateQuoteBuy && !StringUtils.isBlank(checkNotNull(getBaseBuyTextField).getText())) {
-                    BigDecimal getBaseBuy = new BigDecimal(checkNotNull(getBaseBuyTextField).getText()).setScale(SCALE);
+                    BigDecimal getBaseBuy = new BigDecimal(checkNotNull(getBaseBuyTextField).getText());
 
-                    BigDecimal giveQuoteBuy = getBaseBuy.multiply(price);
-                    BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
-                    giveQuoteBuy = giveQuoteBuy.subtract(commissionQuote);
+                    AmountAndCommission giveQuoteBuy = LongShortCalculator.calculateQuoteAmountToGiveLong(getBaseBuy, price, fee);
 
-                    checkNotNull(giveQuoteBuyTextField).setText(formatAmount(giveQuoteBuy ));
-                    checkNotNull(commissionQuoteBuyTextField).setText(formatAmount(commissionQuote));
+                    checkNotNull(giveQuoteBuyTextField).setText(formatAmount(giveQuoteBuy.amount));
+                    checkNotNull(commissionQuoteBuyTextField).setText(formatAmount(giveQuoteBuy.commissionQuote));
                 }
 
-                // Update GET QUOTE SELL amount
+                // Update GIVE BASE SELL amount
                 if (updateBaseSell && !StringUtils.isBlank(checkNotNull(getQuoteSellTextField).getText())) {
-                    BigDecimal getQuoteSell = new BigDecimal(checkNotNull(getQuoteSellTextField).getText()).setScale(SCALE);
-                    BigDecimal commissionQuote = getQuoteSell.multiply(fee);
+                    BigDecimal getQuoteSell = new BigDecimal(checkNotNull(getQuoteSellTextField).getText());
 
-                    BigDecimal giveBaseSell =
-                            getQuoteSell.subtract(commissionQuote)
-                                    .divide(price, RoundingMode.UP);
-                    checkNotNull(giveBaseSellTextField).setText(formatAmount(giveBaseSell));
-                    checkNotNull(commissionsBaseSellTextField).setText(formatAmount(commissionQuote));
+                    AmountAndCommission giveBaseSell = LongShortCalculator.calculateBaseAmountToGiveShort(getQuoteSell, price, fee);
+
+                    checkNotNull(giveBaseSellTextField).setText(formatAmount(giveBaseSell.amount));
+                    checkNotNull(commissionsBaseSellTextField).setText(formatAmount(giveBaseSell.commissionQuote));
                 }
             }
         } catch (Exception e) {

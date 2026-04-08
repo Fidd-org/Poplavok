@@ -1,7 +1,11 @@
 package com.poplavok.data.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class BigDecimalUtil {
     public static BigDecimal nullToZero(@Nullable BigDecimal amount) {
@@ -10,6 +14,10 @@ public class BigDecimalUtil {
         } else {
             return amount;
         }
+    }
+
+    public static @Nullable BigDecimal fromString(@Nullable String amountTxt) {
+        return StringUtils.isBlank(amountTxt) ? null : new BigDecimal(checkNotNull(amountTxt));
     }
 
     public static String formatAmount(@Nullable BigDecimal amount) {

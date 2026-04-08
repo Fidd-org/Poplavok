@@ -16,11 +16,11 @@ import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Rate;
 import com.poplavok.data.model.Trade;
-import com.poplavok.data.model.TradeOperation;
 import com.poplavok.data.model.Transaction;
 import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.PoplavokDAO;
 import com.poplavok.data.dao.LoanDAO;
+import com.poplavok.data.utils.BigDecimalUtil;
 import com.poplavok.data.utils.DBUtil;
 import com.poplavok.forms.wrapper.LevelTransaction;
 import javafx.collections.FXCollections;
@@ -429,7 +429,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 return;
             }
 
-            BigDecimal price = StringUtils.isBlank(checkNotNull(priceTextField).textProperty().get()) ? null : new BigDecimal(checkNotNull(priceTextField).textProperty().get());
+            BigDecimal price = BigDecimalUtil.fromString(checkNotNull(priceTextField).textProperty().get());
+            price = price == null ? lvl.getProjectedPrice() : price;
             PerformTradeDialog performTradeDialog = new PerformTradeDialog(lvl, checkNotNull(poplavok).getTicker(), price);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { performTradeDialog.setStage(stage); return performTradeDialog; },
@@ -520,15 +521,27 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 loanCurrency = checkNotNull(poplavok).getTicker().getQuote();
                 defaultAmount = lvl.getProjectedAmountQuote();
                 defaultAmount = defaultAmount == null ? BigDecimal.ZERO : defaultAmount;
-                if (lvl.getAvailableAmountQuote() != null) {
-                    defaultAmount = defaultAmount.subtract(lvl.getAvailableAmountQuote());
+
+                // Debt assumes funds already allocated
+                if (lvl.getDebtQuote() != null) {
+                    if (defaultAmount.compareTo(lvl.getDebtQuote()) > 0) {
+                        defaultAmount = defaultAmount.subtract(lvl.getDebtQuote());
+                    } else {
+                        defaultAmount = BigDecimal.ZERO;
+                    }
                 }
             } else {
                 loanCurrency = checkNotNull(poplavok).getTicker().getBase();
                 defaultAmount = lvl.getProjectedAmountBase();
                 defaultAmount = defaultAmount == null ? BigDecimal.ZERO : defaultAmount;
-                if (lvl.getAvailableAmountBase() != null) {
-                    defaultAmount = defaultAmount.subtract(lvl.getAvailableAmountBase());
+
+                // Debt assumes funds already allocated
+                if (lvl.getDebtBase() != null) {
+                    if (defaultAmount.compareTo(lvl.getDebtBase()) > 0) {
+                        defaultAmount = defaultAmount.subtract(lvl.getDebtBase());
+                    } else {
+                        defaultAmount = BigDecimal.ZERO;
+                    }
                 }
             }
 
