@@ -50,28 +50,28 @@ class LongShortCalculatorTest {
 
     @Test
     void testCalculateBaseAmountToGiveShort() {
-        BigDecimal getQuoteSell = new BigDecimal("100");
+        BigDecimal getQuoteSell = new BigDecimal("99");
         BigDecimal price = new BigDecimal("10");
         BigDecimal fee = new BigDecimal("0.01");
 
         // commission = 1
         // giveBaseSell = 101 / 10 = 10.9
         AmountAndCommission result = LongShortCalculator.calculateBaseAmountToGiveShort(getQuoteSell, price, fee);
-        assertEquals(new BigDecimal("10.1").setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
+        assertEquals(new BigDecimal("10").setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
         assertEquals(new BigDecimal("1").setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
     }
 
 
     @Test
     void testCalculateQuoteAmountToGiveLong() {
-        BigDecimal getBaseSell = new BigDecimal("10");
+        BigDecimal getBaseSell = new BigDecimal("9.9");
         BigDecimal price = new BigDecimal("10");
         BigDecimal fee = new BigDecimal("0.01");
 
         // commission = 1
         // giveBaseSell = 101 / 10 = 10.9
         AmountAndCommission result = LongShortCalculator.calculateQuoteAmountToGiveLong(getBaseSell, price, fee);
-        assertEquals(new BigDecimal("101").setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
+        assertEquals(new BigDecimal("100").setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
         assertEquals(new BigDecimal("1").setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
     }
 

@@ -3,6 +3,8 @@ package com.poplavok.data.utils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
+
 public class LongShortCalculator {
 
     // --------------- BASE CALCULATIONS ---------------
@@ -11,32 +13,31 @@ public class LongShortCalculator {
         BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
         BigDecimal getBaseBuy = giveQuoteBuy
                 .subtract(commissionQuote)
-                .divide(price, RoundingMode.DOWN);
+                .divide(price, SCALE, RoundingMode.FLOOR);
         return new AmountAndCommission(commissionQuote, getBaseBuy);
     }
 
     public static AmountAndCommission calculateBaseAmountToGiveShort(BigDecimal getQuoteSell, BigDecimal price, BigDecimal fee) {
-        BigDecimal commissionQuote = getQuoteSell.multiply(fee);
-
-        BigDecimal giveBaseSell =
-                getQuoteSell.add(commissionQuote)
-                .divide(price, RoundingMode.UP);
+        BigDecimal withoutCommission = BigDecimal.ONE.subtract(fee);
+        BigDecimal giveBaseSell = getQuoteSell.divide(
+                price.multiply(withoutCommission), SCALE, RoundingMode.CEILING);
+        BigDecimal commissionQuote = giveBaseSell.multiply(price).multiply(fee);
         return new AmountAndCommission(commissionQuote, giveBaseSell);
     }
 
     // --------------- QUOTE CALCULATIONS ---------------
 
     public static AmountAndCommission calculateQuoteAmountToGiveLong(BigDecimal getBaseBuy, BigDecimal price, BigDecimal fee) {
-        BigDecimal giveQuoteBuy = getBaseBuy.multiply(price);
+        BigDecimal withoutCommission = BigDecimal.ONE.subtract(fee);
+        BigDecimal giveQuoteBuy = getBaseBuy.multiply(price).divide(withoutCommission, SCALE, RoundingMode.CEILING);
         BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
-        giveQuoteBuy = giveQuoteBuy.add(commissionQuote);
 
         return new AmountAndCommission(commissionQuote, giveQuoteBuy);
     }
 
     public static AmountAndCommission calculateQuoteAmountToGetShort(BigDecimal giveBaseSell, BigDecimal price, BigDecimal fee) {
         BigDecimal getQuoteSell = giveBaseSell.multiply(price);
-        BigDecimal commissionQuote = getQuoteSell.multiply(fee);
+        BigDecimal commissionQuote = giveBaseSell.multiply(fee).multiply(price);
         getQuoteSell = getQuoteSell.subtract(commissionQuote);
 
         return new AmountAndCommission(commissionQuote, getQuoteSell);

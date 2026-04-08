@@ -30,6 +30,7 @@ import java.math.RoundingMode;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 
 public class PerformTradeDialog extends VBox {
@@ -135,7 +136,7 @@ public class PerformTradeDialog extends VBox {
             returnTrade.setDate(new Date());
 
             returnTrade.setCommissionQuote(tradeQuoteAmount.multiply(fee));
-            returnTrade.setCommissionBase(tradeQuoteAmount.multiply(fee).divide(price, RoundingMode.UP));
+            returnTrade.setCommissionBase(tradeQuoteAmount.multiply(fee).divide(price, SCALE, RoundingMode.CEILING));
 
             checkNotNull(stage).close();
         } catch (Exception e) {

@@ -304,7 +304,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             try {
                 price = new BigDecimal(checkNotNull(priceTextField).textProperty().get());
             } catch (Exception e) {}
-            LevelAddDialog levelAddDialog = new LevelAddDialog(null, checkNotNull(poplavok).getTicker().getSymbol(), price);
+            BigDecimal fee = null;
+            try {
+                fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+            } catch (Exception e) {}
+            LevelAddDialog levelAddDialog = new LevelAddDialog(null, checkNotNull(poplavok).getTicker().getSymbol(), price, fee, checkNotNull(poplavok.getDirection()));
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { levelAddDialog.setStage(stage); return levelAddDialog; },
                     "New Level");
@@ -346,7 +350,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 return;
             }
 
-            LevelAddDialog levelAddDialog = new LevelAddDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(), lvl.getProjectedPrice());
+            BigDecimal fee = null;
+            try {
+                fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+            } catch (Exception e) {}
+            LevelAddDialog levelAddDialog = new LevelAddDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(), lvl.getProjectedPrice(), fee, checkNotNull(poplavok.getDirection()));
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                 stage -> { levelAddDialog.setStage(stage); return levelAddDialog; },
                 "Edit Level " + StringUtils.defaultIfBlank(lvl.getNotes(), "#" + lvl.getId()));

@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class BigDecimalUtil {
+    public static final int SCALE = 8;
+
     public static BigDecimal nullToZero(@Nullable BigDecimal amount) {
         if (amount == null) {
             return BigDecimal.ZERO;

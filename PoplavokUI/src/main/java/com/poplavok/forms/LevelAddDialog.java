@@ -1,7 +1,10 @@
 package com.poplavok.forms;
 
+import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelState;
+import com.poplavok.data.utils.AmountAndCommission;
+import com.poplavok.data.utils.LongShortCalculator;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -16,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
@@ -26,11 +28,14 @@ import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 public class LevelAddDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(LevelAddDialog.class);
 
+    @FXML @Nullable TextField feeTextField;
+    @FXML @Nullable TextField directionTextField;
     @FXML @Nullable TextField tickerTextField;
     @FXML @Nullable TextField priceTextField;
     @FXML @Nullable TextField notesTextField;
     @FXML @Nullable TextField quoteAmountTextField;
     @FXML @Nullable TextField baseAmountTextField;
+    @FXML @Nullable TextField commissionTextField;
     @FXML @Nullable Button addButton;
 
     @Nullable Stage stage;
@@ -38,8 +43,9 @@ public class LevelAddDialog extends VBox {
     @Nullable Long levelId = null;
     @Nullable Level level;
     @Nullable volatile Level returnLevel = null;
+    final Direction tradeDirection;
 
-    public LevelAddDialog(@Nullable Level level, String ticker, @Nullable BigDecimal price) {
+    public LevelAddDialog(@Nullable Level level, String ticker, @Nullable BigDecimal price, @Nullable BigDecimal fee, Direction tradeDirection) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("LevelAddDialog.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -50,6 +56,10 @@ public class LevelAddDialog extends VBox {
             throw new RuntimeException(exception);
         }
 
+        this.tradeDirection = tradeDirection;
+        checkNotNull(directionTextField).textProperty().setValue(tradeDirection.name());
+
+        checkNotNull(feeTextField).setTextFormatter(createDecimalTextFormatter());
         checkNotNull(priceTextField).setTextFormatter(createDecimalTextFormatter());
         if (baseAmountTextField != null) {
             baseAmountTextField.setTextFormatter(createDecimalTextFormatter());
@@ -67,6 +77,9 @@ public class LevelAddDialog extends VBox {
             if (priceTextField != null && priceTextField.isFocused()) recalculateBaseFromQuote();
         });
 
+        if (fee != null) {
+            checkNotNull(feeTextField).textProperty().setValue(formatAmount(fee));
+        }
         checkNotNull(tickerTextField).textProperty().set(ticker);
         if (level == null) {
             checkNotNull(addButton).textProperty().set("Add New Level");
@@ -120,10 +133,21 @@ public class LevelAddDialog extends VBox {
 
     private void recalculateQuoteFromBase() {
         try {
-            if (baseAmountTextField == null || quoteAmountTextField == null || priceTextField == null) return;
-            BigDecimal base = new BigDecimal(baseAmountTextField.getText().replace(',', '.'));
-            BigDecimal price = new BigDecimal(priceTextField.getText().replace(',', '.'));
-            quoteAmountTextField.setText(formatAmount(base.multiply(price)));
+            BigDecimal base = new BigDecimal(checkNotNull(baseAmountTextField).getText().replace(',', '.'));
+            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText().replace(',', '.'));
+            BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText().replace(',', '.'));
+
+            if (price.compareTo(BigDecimal.ZERO) <= 0) { return; }
+
+            AmountAndCommission quote;
+            if (tradeDirection == Direction.LONG) {
+                quote = LongShortCalculator.calculateQuoteAmountToGiveLong(base, price, fee);
+            } else {
+                quote = LongShortCalculator.calculateQuoteAmountToGetShort(base, price, fee);
+            }
+
+            checkNotNull(quoteAmountTextField).setText(formatAmount(quote.amount));
+            checkNotNull(commissionTextField).setText(formatAmount(quote.commissionQuote));
         } catch (Exception e) {
             // ignore parsing errors
         }
@@ -131,12 +155,21 @@ public class LevelAddDialog extends VBox {
 
     private void recalculateBaseFromQuote() {
         try {
-            if (baseAmountTextField == null || quoteAmountTextField == null || priceTextField == null) return;
-            BigDecimal quote = new BigDecimal(quoteAmountTextField.getText().replace(',', '.'));
-            BigDecimal price = new BigDecimal(priceTextField.getText().replace(',', '.'));
-            if (price.compareTo(BigDecimal.ZERO) != 0) {
-                baseAmountTextField.setText(formatAmount(quote.divide(price, 8, RoundingMode.CEILING)));
+            BigDecimal quote = new BigDecimal(checkNotNull(quoteAmountTextField).getText().replace(',', '.'));
+            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText().replace(',', '.'));
+            BigDecimal fee = new BigDecimal(checkNotNull(checkNotNull(feeTextField)).getText().replace(',', '.'));
+
+            if (price.compareTo(BigDecimal.ZERO) <= 0) { return; }
+
+            AmountAndCommission base;
+            if (tradeDirection == Direction.LONG) {
+                base = LongShortCalculator.calculateBaseAmountToGetLong(quote, price, fee);
+            } else {
+                base = LongShortCalculator.calculateBaseAmountToGiveShort(quote, price, fee);
             }
+
+            checkNotNull(baseAmountTextField).setText(formatAmount(base.amount));
+            checkNotNull(commissionTextField).setText(formatAmount(base.commissionQuote));
         } catch (Exception e) {
             // ignore parsing errors
         }
