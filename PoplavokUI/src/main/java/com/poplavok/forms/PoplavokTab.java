@@ -31,6 +31,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -86,6 +89,29 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable TextField pnlTextField;
     @FXML @Nullable TextField averagingPriceTextField;
 
+    @FXML @Nullable RadioButton commsRadioButton;
+    @FXML @Nullable RadioButton percentRadioButton;
+    @FXML @Nullable TextField commsCountTextField;
+    @FXML @Nullable Slider commsCountSlider;
+    @FXML @Nullable TextField percentTextField;
+
+    @FXML @Nullable TextField toSellTextField;
+    @FXML @Nullable TextField sellPriceTextField;
+    @FXML @Nullable TextField proceedsTextField;
+    @FXML @Nullable TextField commissionTextField;
+    @FXML @Nullable TextField profitTextField;
+    @FXML @Nullable TextField profitPercentTextField;
+
+    @FXML @Nullable Label debtCurrencyLabel;
+    @FXML @Nullable Label availableCurrencyLabel;
+    @FXML @Nullable Label toRepayCurrencyLabel;
+    @FXML @Nullable Label holdingCurrencyLabel;
+
+    @FXML @Nullable TextField debtTextField;
+    @FXML @Nullable TextField availableTextField;
+    @FXML @Nullable TextField toRepayTextField;
+    @FXML @Nullable TextField holdingTextField;
+
     @FXML @Nullable Button closeLevelButton;
     @FXML @Nullable CheckBox showClosedLevelsCheckBox;
 
@@ -115,6 +141,35 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             refreshContent();
         });
 
+        checkNotNull(commsRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                checkNotNull(commsCountTextField).setDisable(false);
+                checkNotNull(commsCountSlider).setDisable(false);
+                checkNotNull(percentTextField).setDisable(true);
+            }
+        });
+        checkNotNull(percentRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                checkNotNull(percentTextField).setDisable(false);
+                checkNotNull(commsCountTextField).setDisable(true);
+                checkNotNull(commsCountSlider).setDisable(true);
+            }
+        });
+
+        if (checkNotNull(commsRadioButton).isSelected()) {
+            checkNotNull(commsCountTextField).setDisable(false);
+            checkNotNull(commsCountSlider).setDisable(false);
+            checkNotNull(percentTextField).setDisable(true);
+        } else if (checkNotNull(percentRadioButton).isSelected()) {
+            checkNotNull(percentTextField).setDisable(false);
+            checkNotNull(commsCountTextField).setDisable(true);
+            checkNotNull(commsCountSlider).setDisable(true);
+        }
+
+        checkNotNull(commsCountSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
+            checkNotNull(commsCountTextField).setText(String.valueOf(newValue.intValue()));
+        });
+
         refreshContent();
     }
 
@@ -129,6 +184,58 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 isEmpty(lvl.getDebtQuote()) &&
                 isEmpty(lvl.getLentAmountBase()) &&
                 isEmpty(lvl.getLentAmountQuote());
+    }
+
+    protected void updateAverageTab(List<Level> selected) {
+        if (selected == null || selected.isEmpty()) {
+            return;
+        }
+
+        BigDecimal debt = BigDecimal.ZERO;
+        BigDecimal available = BigDecimal.ZERO;
+        BigDecimal holding = BigDecimal.ZERO;
+
+        for (Level lvl : selected) {
+            if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
+                debt = debt.add(nullToZero(lvl.getDebtQuote()));
+                available = available.add(nullToZero(lvl.getAvailableAmountQuote()));
+                holding = holding.add(nullToZero(lvl.getAvailableAmountBase()));
+            } else {
+                debt = debt.add(nullToZero(lvl.getDebtBase()));
+                available = available.add(nullToZero(lvl.getAvailableAmountBase()));
+                holding = holding.add(nullToZero(lvl.getAvailableAmountQuote()));
+            }
+        }
+        BigDecimal toRepay = debt.subtract(available);
+
+        checkNotNull(debtTextField).setText(formatAmount(debt));
+        checkNotNull(availableTextField).setText(formatAmount(available));
+        checkNotNull(toRepayTextField).setText(formatAmount(toRepay));
+        checkNotNull(holdingTextField).setText(formatAmount(holding));
+
+        // ------------------------
+
+        BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+        BigDecimal profitPercent;
+
+        if (checkNotNull(commsRadioButton).selectedProperty().get()) {
+            BigDecimal commsNumber = new BigDecimal(checkNotNull(commsCountTextField).textProperty().get());
+            profitPercent = fee.multiply(commsNumber);
+        } else if (checkNotNull(percentRadioButton).selectedProperty().get()) {
+            profitPercent = new BigDecimal(checkNotNull(percentTextField).textProperty().get());
+        } else {
+            throw new RuntimeException("Unknown Profit Mode Selection");
+        }
+
+        checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+
+        BigDecimal
+
+        @FXML @Nullable TextField sellPriceTextField;
+        @FXML @Nullable TextField proceedsTextField;
+        @FXML @Nullable TextField commissionTextField;
+        @FXML @Nullable TextField profitTextField;
+        @FXML @Nullable TextField profitPercentTextField;
     }
 
     protected void updateLevelsSelection() {
@@ -152,6 +259,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             return;
         }
 
+        updateAverageTab(selected);
         if (closeLevelButton != null) {
             if (selected.size() != 1) {
                 closeLevelButton.setDisable(true);
@@ -264,19 +372,27 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 this.poplavok.getTicker().getSymbol();
             });
 
-            if (poplavok != null) {
-                boolean showClosed = checkNotNull(showClosedLevelsCheckBox).isSelected();
-                List<Level> levelList = DBUtil.connectGetResultAndClose(sess -> LevelDAO.findByPoplavokId(sess, poplavokId, showClosed));
-                this.levels = new FilteredList<>(FXCollections.observableArrayList(levelList));
-                checkNotNull(levelsTable).setItems(this.levels);
-                autoResizeTableColumns(levelsTable);
+            String debtCurrency = checkNotNull(poplavok).getDirection() == Direction.LONG
+                    ? poplavok.getTicker().getQuote().getCurrency() : poplavok.getTicker().getBase().getCurrency();
+            String holdCurrency = checkNotNull(poplavok).getDirection() == Direction.LONG
+                    ? poplavok.getTicker().getBase().getCurrency() : poplavok.getTicker().getQuote().getCurrency();
 
-                if (!selectedLevelIds.isEmpty()) {
-                    levelsTable.getSelectionModel().clearSelection();
-                    for (Level l : this.levels) {
-                        if (l != null && l.getId() != null && selectedLevelIds.contains(l.getId())) {
-                            levelsTable.getSelectionModel().select(l);
-                        }
+            checkNotNull(debtCurrencyLabel).textProperty().setValue(debtCurrency);
+            checkNotNull(availableCurrencyLabel).textProperty().setValue(debtCurrency);
+            checkNotNull(toRepayCurrencyLabel).textProperty().setValue(debtCurrency);
+            checkNotNull(holdingCurrencyLabel).textProperty().setValue(holdCurrency);
+
+            boolean showClosed = checkNotNull(showClosedLevelsCheckBox).isSelected();
+            List<Level> levelList = DBUtil.connectGetResultAndClose(sess -> LevelDAO.findByPoplavokId(sess, poplavokId, showClosed));
+            this.levels = new FilteredList<>(FXCollections.observableArrayList(levelList));
+            checkNotNull(levelsTable).setItems(this.levels);
+            autoResizeTableColumns(levelsTable);
+
+            if (!selectedLevelIds.isEmpty()) {
+                levelsTable.getSelectionModel().clearSelection();
+                for (Level l : this.levels) {
+                    if (l != null && l.getId() != null && selectedLevelIds.contains(l.getId())) {
+                        levelsTable.getSelectionModel().select(l);
                     }
                 }
             }
