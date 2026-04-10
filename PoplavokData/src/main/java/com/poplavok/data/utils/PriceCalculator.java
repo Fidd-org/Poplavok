@@ -11,10 +11,10 @@ public class PriceCalculator {
     /**
      * KuCoin cmomission mechanics: Selling
      *   - When we sell, commission is applied to the proceeds in QUOTE.
-     *   - Thus, if we sale BASE worth $1000 at current price, it will first be converted to QUOTE, and then
+     *   - Thus, if we sell BASE worth $1000 at current price, it will first be converted to QUOTE, and then
      *      the commission will be applied to the proceeds.
-     *    - In this case Seller will get $1000 - $1 = $999 ith fe at 0.001.
-     *   - Sell commission is charged in QUOTE after operation.
+     *     - In this case Seller will get $1000 - $1 = $999 with fee at 0.001.
+     *   - I.e. Sell commission is charged in QUOTE _after_ operation.
      */
     public static PriceAndCommission calculateSellPrice(BigDecimal giveBaseSell, BigDecimal getQuoteSell, BigDecimal fee) {
         BigDecimal withoutCommission = BigDecimal.ONE.subtract(fee);
@@ -30,7 +30,7 @@ public class PriceCalculator {
      *   - When we buy, KuCoin applies commission on top of entered QUOTE amount.
      *   - Thus, if we buy $1000 worth of BASE with a fee at 0.001, it will actually withdraw $1001,
      *      even though we specifically entered $1000.
-     *   - Buy commission is charged in QUOTE before operation.
+     *   - I.e. Buy commission is charged in QUOTE _before_ operation.
      */
     public static PriceAndCommission calculateBuyPrice(BigDecimal giveQuoteBuy, BigDecimal getBaseBuy, BigDecimal fee) {
         BigDecimal withCommission = BigDecimal.ONE.add(fee);
