@@ -102,6 +102,13 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable TextField profitTextField;
     @FXML @Nullable TextField profitPercentTextField;
 
+    @FXML @Nullable CheckBox reserveCurrencyCheckBox;
+    @FXML @Nullable CheckBox removeCommissionCheckBox;
+    @FXML @Nullable CheckBox debtCurrencyCheckBox;
+    @FXML @Nullable CheckBox holdingCurrencyCheckBox;
+    @FXML @Nullable TextField debtCurrencyTextField;
+    @FXML @Nullable TextField holdingCurrencyTextField;
+
     @FXML @Nullable Label debtCurrencyLabel;
     @FXML @Nullable Label availableCurrencyLabel;
     @FXML @Nullable Label toRepayCurrencyLabel;
@@ -229,13 +236,28 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
         checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
 
-        BigDecimal
+        if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
+            //
+        } else {
+            //
+        }
 
-        @FXML @Nullable TextField sellPriceTextField;
+        /*
         @FXML @Nullable TextField proceedsTextField;
         @FXML @Nullable TextField commissionTextField;
         @FXML @Nullable TextField profitTextField;
         @FXML @Nullable TextField profitPercentTextField;
+        */
+
+        /*
+        @FXML @Nullable CheckBox reserveCurrencyCheckBox;
+        @FXML @Nullable CheckBox removeCommissionCheckBox;
+        @FXML @Nullable CheckBox debtCurrencyCheckBox;
+        @FXML @Nullable CheckBox holdingCurrencyCheckBox;
+        @FXML @Nullable TextField debtCurrencyTextField;
+        @FXML @Nullable TextField holdingCurrencyTextField;
+        */
+
     }
 
     protected void updateLevelsSelection() {
