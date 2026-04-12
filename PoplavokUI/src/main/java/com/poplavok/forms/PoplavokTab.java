@@ -24,6 +24,7 @@ import com.poplavok.data.utils.BigDecimalUtil;
 import com.poplavok.data.utils.BuyPriceInfo;
 import com.poplavok.data.utils.DBUtil;
 import com.poplavok.data.utils.PriceCalculator;
+import com.poplavok.data.utils.PriceInfo;
 import com.poplavok.forms.wrapper.LevelTransaction;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
@@ -289,6 +290,37 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
             // LONG
 
+            if (profitInBase) {
+                // LONG - Take Profit in BASE
+                BigDecimal profitBase = holding.multiply(profitRate);
+                BigDecimal holdingWithoutProfit = holding.subtract(profitBase);
+
+                PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, debt, fee);
+
+                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
+                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+            } else if (profitInQuote) {
+                // LONG - Take Profit in QUOTE
+
+                BigDecimal profitQuote = debt.multiply(profitRate);
+                BigDecimal proceedsQuote = debt.add(profitQuote);
+
+                PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holding, proceedsQuote, fee);
+
+                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsQuote));
+                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
+                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holding));
+            } else {
+                throw new RuntimeException("Please select to take profit in base or quote");
+            }
+
             // tradeResult = PriceCalculator.calculateSellPrice(holding, proceeds, fee);
         } else {
             // SHORT
@@ -301,7 +333,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
                 BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, fee);
 
-                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
                 checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
                 checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
                 checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
@@ -324,17 +356,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             } else {
                 throw new RuntimeException("Please select to take profit in base or quote");
             }
-
-            /*
-            checkNotNull(profitInQuoteRadioButton).selectedProperty();
-            checkNotNull(profitInBaseRadioButton);*/
         }
-
-        // TODO:
-
-        /*
-        @FXML @Nullable TextField profitPercentTextField;
-        */
 
         /*
         @FXML @Nullable CheckBox reserveCurrencyCheckBox;
