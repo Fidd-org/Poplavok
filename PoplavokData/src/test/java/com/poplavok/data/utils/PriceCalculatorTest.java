@@ -15,7 +15,7 @@ class PriceCalculatorTest {
         BigDecimal getQuoteSell = new BigDecimal("99");
         BigDecimal fee = new BigDecimal("0.01");
 
-        PriceAndCommission result = PriceCalculator.calculateSellPrice(giveBaseSell, getQuoteSell, fee);
+        PriceInfo result = PriceCalculator.calculateSellPrice(giveBaseSell, getQuoteSell, fee);
 
         assertEquals(new BigDecimal("10").setScale(result.price.scale(), RoundingMode.HALF_UP), result.price);
         assertEquals(new BigDecimal("1").setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
@@ -27,7 +27,7 @@ class PriceCalculatorTest {
         BigDecimal getQuoteSell = new BigDecimal("95");
         BigDecimal fee = new BigDecimal("0.05");
 
-        PriceAndCommission result = PriceCalculator.calculateSellPrice(giveBaseSell, getQuoteSell, fee);
+        PriceInfo result = PriceCalculator.calculateSellPrice(giveBaseSell, getQuoteSell, fee);
 
         assertEquals(new BigDecimal("10").setScale(result.price.scale(), RoundingMode.HALF_UP), result.price);
         assertEquals(new BigDecimal("5").setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
@@ -39,7 +39,7 @@ class PriceCalculatorTest {
         BigDecimal getBaseBuy = new BigDecimal("10");
         BigDecimal fee = new BigDecimal("0.01");
 
-        PriceAndCommission result = PriceCalculator.calculateBuyPrice(giveQuoteBuy, getBaseBuy, fee);
+        BuyPriceInfo result = PriceCalculator.calculateBuyPriceForEntry(giveQuoteBuy, getBaseBuy, fee);
 
         assertEquals(new BigDecimal("10").setScale(result.price.scale(), RoundingMode.HALF_UP), result.price);
         assertEquals(new BigDecimal("1").setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
@@ -51,7 +51,7 @@ class PriceCalculatorTest {
         BigDecimal getBaseBuy = new BigDecimal("200");
         BigDecimal fee = new BigDecimal("0.001");
 
-        PriceAndCommission result = PriceCalculator.calculateBuyPrice(giveQuoteBuy, getBaseBuy, fee);
+        BuyPriceInfo result = PriceCalculator.calculateBuyPriceForEntry(giveQuoteBuy, getBaseBuy, fee);
 
         assertEquals(new BigDecimal("10").setScale(result.price.scale(), RoundingMode.HALF_UP), result.price);
         assertEquals(new BigDecimal("2").setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
@@ -63,7 +63,7 @@ class PriceCalculatorTest {
         BigDecimal getBaseBuy = new BigDecimal("10");
         BigDecimal fee = new BigDecimal("0.05");
 
-        PriceAndCommission result = PriceCalculator.calculateBuyPrice(giveQuoteBuy, getBaseBuy, fee);
+        BuyPriceInfo result = PriceCalculator.calculateBuyPriceForEntry(giveQuoteBuy, getBaseBuy, fee);
 
         assertEquals(new BigDecimal("10").setScale(result.price.scale(), RoundingMode.HALF_UP), result.price);
         assertEquals(new BigDecimal("5").setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);

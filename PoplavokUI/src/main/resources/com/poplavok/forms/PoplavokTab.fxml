@@ -23,7 +23,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<fx:root type="AnchorPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="756.0" prefWidth="1020.0" type="AnchorPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
     <SplitPane dividerPositions="0.0, 0.0, 0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
         <AnchorPane maxHeight="40.0" minHeight="40.0" prefHeight="40.0" SplitPane.resizableWithParent="false">
             <ToolBar AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -188,7 +188,7 @@
                            <children>
                               <SplitPane dividerPositions="0.0, 0.0" layoutX="180.0" layoutY="51.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <items>
-                                  <AnchorPane maxWidth="350.0" minHeight="0.0" minWidth="350.0" prefHeight="160.0" prefWidth="350.0">
+                                  <AnchorPane maxWidth="350.0" minWidth="350.0" prefWidth="350.0">
                                        <children>
                                           <GridPane layoutX="76.0" layoutY="65.0" maxWidth="300.0" minWidth="300.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <columnConstraints>
@@ -251,15 +251,18 @@
                                           </GridPane>
                                        </children>
                                     </AnchorPane>
-                                  <AnchorPane minHeight="0.0" minWidth="300.0" prefHeight="160.0" prefWidth="100.0">
+                                  <AnchorPane maxWidth="375.0" minWidth="375.0" prefWidth="375.0">
                                        <children>
                                           <GridPane layoutX="69.0" layoutY="53.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <columnConstraints>
                                               <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
                                               <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
                                             </columnConstraints>
                                             <rowConstraints>
                                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -282,27 +285,27 @@
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
                                                 </RadioButton>
-                                                <Label text="To Sell:" GridPane.rowIndex="2">
+                                                <Label text="To Trade:" GridPane.rowIndex="3">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <Label text="Sale Price:" GridPane.rowIndex="3">
+                                                <Label text="Trade Price:" GridPane.rowIndex="6">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <Label text="Proceeds:" GridPane.rowIndex="4">
+                                                <Label text="Proceeds:" GridPane.rowIndex="7">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <Label text="Profit:" GridPane.rowIndex="6">
+                                                <Label text="Profit:" GridPane.rowIndex="8">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <Label text="Profit%:" GridPane.rowIndex="7">
+                                                <Label text="Profit%:" GridPane.rowIndex="9">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
@@ -312,27 +315,27 @@
                                                       <Insets left="10.0" right="10.0" />
                                                    </GridPane.margin>
                                                 </TextField>
-                                                <TextField fx:id="toSellTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                <TextField fx:id="toSellTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" right="10.0" />
                                                    </GridPane.margin>
                                                 </TextField>
-                                                <TextField fx:id="sellPriceTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                                <TextField fx:id="sellPriceTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="6">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" right="10.0" />
                                                    </GridPane.margin>
                                                 </TextField>
-                                                <TextField fx:id="proceedsTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                                <TextField fx:id="proceedsTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="7">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" right="10.0" />
                                                    </GridPane.margin>
                                                 </TextField>
-                                                <TextField fx:id="profitPercentTextField" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                                <TextField fx:id="profitTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="8">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" right="10.0" />
                                                    </GridPane.margin>
                                                 </TextField>
-                                                <TextField GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                                <TextField fx:id="profitPercentTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="9">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" right="10.0" />
                                                    </GridPane.margin>
@@ -354,21 +357,66 @@
                                                       </Slider>
                                                    </children>
                                                 </GridPane>
-                                                <Label text="Commission:" GridPane.rowIndex="5">
+                                                <Label text="Commission:" GridPane.rowIndex="4">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
                                                 </Label>
-                                                <TextField fx:id="commissionTextField" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                                <TextField fx:id="commissionTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" right="10.0" />
                                                    </GridPane.margin>
                                                 </TextField>
+                                                <Label fx:id="toTradeCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                <Label fx:id="tradePriceLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                                <Label fx:id="proceedsCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                                <Label fx:id="commissionCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                                <Label fx:id="profitCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                                                <Label text="Profit in:" GridPane.rowIndex="2">
+                                                   <GridPane.margin>
+                                                      <Insets left="10.0" />
+                                                   </GridPane.margin>
+                                                </Label>
+                                                <GridPane GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                  <columnConstraints>
+                                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                  </columnConstraints>
+                                                  <rowConstraints>
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                  </rowConstraints>
+                                                   <children>
+                                                      <RadioButton fx:id="profitInQuoteRadioButton" mnemonicParsing="false" selected="true" text="QUOTE">
+                                                         <toggleGroup>
+                                                            <ToggleGroup fx:id="profitIn" />
+                                                         </toggleGroup>
+                                                         <GridPane.margin>
+                                                            <Insets left="10.0" />
+                                                         </GridPane.margin>
+                                                      </RadioButton>
+                                                      <RadioButton fx:id="profitInBaseRadioButton" mnemonicParsing="false" text="BASE" toggleGroup="$profitIn" GridPane.columnIndex="1">
+                                                         <GridPane.margin>
+                                                            <Insets left="5.0" />
+                                                         </GridPane.margin>
+                                                      </RadioButton>
+                                                   </children>
+                                                </GridPane>
+                                                <Label text="FX UI Entry:" GridPane.rowIndex="5">
+                                                   <GridPane.margin>
+                                                      <Insets left="10.0" />
+                                                   </GridPane.margin>
+                                                </Label>
+                                                <TextField fx:id="fxUiEntryTextField" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                                   <GridPane.margin>
+                                                      <Insets left="10.0" right="10.0" />
+                                                   </GridPane.margin>
+                                                </TextField>
+                                                <Label fx:id="fxUiEntryCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="5" />
                                              </children>
                                           </GridPane>
                                        </children>
                                     </AnchorPane>
-                                    <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                    <AnchorPane>
                                        <children>
                                           <GridPane layoutX="14.0" layoutY="58.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <columnConstraints>
@@ -394,23 +442,38 @@
                                                    <GridPane.margin>
                                                       <Insets right="10.0" />
                                                    </GridPane.margin></TextField>
-                                                <CheckBox fx:id="debtCurrencyCheckBox" disable="true" mnemonicParsing="false" selected="true" text="Currency" GridPane.rowIndex="2">
-                                                   <GridPane.margin>
-                                                      <Insets left="10.0" />
-                                                   </GridPane.margin>
-                                                </CheckBox>
-                                                <CheckBox fx:id="holdingCurrencyCheckBox" disable="true" mnemonicParsing="false" text="Currency" GridPane.rowIndex="3">
-                                                   <GridPane.margin>
-                                                      <Insets left="10.0" />
-                                                   </GridPane.margin>
-                                                </CheckBox>
                                                 <CheckBox fx:id="removeCommissionCheckBox" disable="true" mnemonicParsing="false" selected="true" text="Pay commission" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                <CheckBox fx:id="reserveCurrencyCheckBox" mnemonicParsing="false" text="Retain Currency" GridPane.columnIndex="1" />
-                                                <Label text="Commission" GridPane.rowIndex="4">
+                                                <CheckBox fx:id="reserveCurrencyCheckBox" mnemonicParsing="false" text="Retain Holdings" GridPane.columnIndex="1" />
+                                                <Label disable="true" text="Retaining:" GridPane.rowIndex="4">
                                                    <GridPane.margin>
                                                       <Insets left="10.0" />
                                                    </GridPane.margin>
                                                 </Label>
+                                                <Label disable="true" text="Commission:" GridPane.rowIndex="5">
+                                                   <GridPane.margin>
+                                                      <Insets left="10.0" />
+                                                   </GridPane.margin>
+                                                </Label>
+                                                <TextField disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                                   <GridPane.margin>
+                                                      <Insets right="10.0" />
+                                                   </GridPane.margin>
+                                                </TextField>
+                                                <TextField disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                                   <GridPane.margin>
+                                                      <Insets right="10.0" />
+                                                   </GridPane.margin>
+                                                </TextField>
+                                                <RadioButton disable="true" mnemonicParsing="false" selected="true" text="Currency" GridPane.rowIndex="2">
+                                                   <GridPane.margin>
+                                                      <Insets left="5.0" />
+                                                   </GridPane.margin>
+                                                </RadioButton>
+                                                <RadioButton disable="true" mnemonicParsing="false" text="Currency" GridPane.rowIndex="3">
+                                                   <GridPane.margin>
+                                                      <Insets left="5.0" />
+                                                   </GridPane.margin>
+                                                </RadioButton>
                                              </children>
                                           </GridPane>
                                        </children>

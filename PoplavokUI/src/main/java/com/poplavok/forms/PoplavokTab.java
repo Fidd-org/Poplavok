@@ -21,7 +21,9 @@ import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.PoplavokDAO;
 import com.poplavok.data.dao.LoanDAO;
 import com.poplavok.data.utils.BigDecimalUtil;
+import com.poplavok.data.utils.BuyPriceInfo;
 import com.poplavok.data.utils.DBUtil;
+import com.poplavok.data.utils.PriceCalculator;
 import com.poplavok.forms.wrapper.LevelTransaction;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
@@ -44,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.ArrayList;
 import java.math.BigDecimal;
@@ -58,11 +61,14 @@ import static com.poplavok.data.model.LoanType.ACCOUNT_FUNDED;
 import static com.poplavok.data.model.LoanType.EXTERNAL_CROSS_MARGIN;
 import static com.poplavok.data.model.LoanType.EXTERNAL_ISOLATED_MARGIN;
 import static com.poplavok.data.model.LoanType.POPLAVOK_FUNDED;
+import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class PoplavokTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(PoplavokTab.class);
+
+    public static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
     @Nullable Poplavok poplavok;
     @Nullable FilteredList<Level> levels;
@@ -108,6 +114,18 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable CheckBox holdingCurrencyCheckBox;
     @FXML @Nullable TextField debtCurrencyTextField;
     @FXML @Nullable TextField holdingCurrencyTextField;
+
+    @FXML @Nullable RadioButton profitInQuoteRadioButton;
+    @FXML @Nullable RadioButton profitInBaseRadioButton;
+
+    @FXML @Nullable Label fxUiEntryCurrencyLabel;
+    @FXML @Nullable TextField fxUiEntryTextField;
+
+    @FXML @Nullable Label toTradeCurrencyLabel;
+    @FXML @Nullable Label tradePriceLabel;
+    @FXML @Nullable Label proceedsCurrencyLabel;
+    @FXML @Nullable Label commissionCurrencyLabel;
+    @FXML @Nullable Label profitCurrencyLabel;
 
     @FXML @Nullable Label debtCurrencyLabel;
     @FXML @Nullable Label availableCurrencyLabel;
@@ -163,6 +181,25 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             }
         });
 
+        checkNotNull(profitInQuoteRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue && poplavok != null) {
+                checkNotNull(profitCurrencyLabel).textProperty().setValue(poplavok.getTicker().getQuote().getCurrency());
+                updateAverageTab();
+            }
+        });
+        checkNotNull(profitInBaseRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue && poplavok != null) {
+                checkNotNull(profitCurrencyLabel).textProperty().setValue(poplavok.getTicker().getBase().getCurrency());
+                updateAverageTab();
+            }
+        });
+        checkNotNull(commsRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) { updateAverageTab(); }
+        });
+        checkNotNull(percentRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) { updateAverageTab(); }
+        });
+
         if (checkNotNull(commsRadioButton).isSelected()) {
             checkNotNull(commsCountTextField).setDisable(false);
             checkNotNull(commsCountSlider).setDisable(false);
@@ -175,6 +212,14 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
         checkNotNull(commsCountSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
             checkNotNull(commsCountTextField).setText(String.valueOf(newValue.intValue()));
+        });
+
+        checkNotNull(commsCountTextField).textProperty().addListener((observable, oldValue, newValue) -> {
+            updateAverageTab();
+        });
+
+        checkNotNull(percentTextField).textProperty().addListener((observable, oldValue, newValue) -> {
+            updateAverageTab();
         });
 
         refreshContent();
@@ -191,6 +236,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 isEmpty(lvl.getDebtQuote()) &&
                 isEmpty(lvl.getLentAmountBase()) &&
                 isEmpty(lvl.getLentAmountQuote());
+    }
+
+    protected void updateAverageTab() {
+        updateAverageTab(checkNotNull(levelsTable).getSelectionModel().getSelectedItems());
     }
 
     protected void updateAverageTab(List<Level> selected) {
@@ -223,29 +272,67 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         // ------------------------
 
         BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
-        BigDecimal profitPercent;
+        BigDecimal profitRate;
 
         if (checkNotNull(commsRadioButton).selectedProperty().get()) {
             BigDecimal commsNumber = new BigDecimal(checkNotNull(commsCountTextField).textProperty().get());
-            profitPercent = fee.multiply(commsNumber);
+            profitRate = fee.multiply(commsNumber);
         } else if (checkNotNull(percentRadioButton).selectedProperty().get()) {
-            profitPercent = new BigDecimal(checkNotNull(percentTextField).textProperty().get());
+            profitRate = new BigDecimal(checkNotNull(percentTextField).textProperty().get()).divide(ONE_HUNDRED, SCALE, RoundingMode.CEILING);
         } else {
             throw new RuntimeException("Unknown Profit Mode Selection");
         }
 
-        checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+        boolean profitInQuote = checkNotNull(profitInQuoteRadioButton).selectedProperty().get();
+        boolean profitInBase = checkNotNull(profitInBaseRadioButton).selectedProperty().get();
 
         if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
-            //
+            // LONG
+
+            // tradeResult = PriceCalculator.calculateSellPrice(holding, proceeds, fee);
         } else {
-            //
+            // SHORT
+
+            if (profitInQuote) {
+                // SHORT - Take Profit in QUOTE
+
+                BigDecimal profitQuote = holding.multiply(profitRate);
+                BigDecimal holdingWithoutProfit = holding.subtract(profitQuote);
+
+                BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, fee);
+
+                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
+                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+            } else if (profitInBase) {
+                // SHORT - Take Profit in BASE
+
+                BigDecimal profitBase = debt.multiply(profitRate);
+                BigDecimal proceedsBase = debt.add(profitBase);
+
+                BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holding, proceedsBase, fee);
+
+                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsBase));
+                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
+                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+            } else {
+                throw new RuntimeException("Please select to take profit in base or quote");
+            }
+
+            /*
+            checkNotNull(profitInQuoteRadioButton).selectedProperty();
+            checkNotNull(profitInBaseRadioButton);*/
         }
 
+        // TODO:
+
         /*
-        @FXML @Nullable TextField proceedsTextField;
-        @FXML @Nullable TextField commissionTextField;
-        @FXML @Nullable TextField profitTextField;
         @FXML @Nullable TextField profitPercentTextField;
         */
 
@@ -257,7 +344,6 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         @FXML @Nullable TextField debtCurrencyTextField;
         @FXML @Nullable TextField holdingCurrencyTextField;
         */
-
     }
 
     protected void updateLevelsSelection() {
@@ -394,15 +480,25 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 this.poplavok.getTicker().getSymbol();
             });
 
+            String quoteCurrency = checkNotNull(poplavok).getTicker().getQuote().getCurrency();
             String debtCurrency = checkNotNull(poplavok).getDirection() == Direction.LONG
                     ? poplavok.getTicker().getQuote().getCurrency() : poplavok.getTicker().getBase().getCurrency();
             String holdCurrency = checkNotNull(poplavok).getDirection() == Direction.LONG
                     ? poplavok.getTicker().getBase().getCurrency() : poplavok.getTicker().getQuote().getCurrency();
 
+            // Commission is always in QUOTE currency
+            checkNotNull(commissionCurrencyLabel).textProperty().setValue(quoteCurrency);
             checkNotNull(debtCurrencyLabel).textProperty().setValue(debtCurrency);
             checkNotNull(availableCurrencyLabel).textProperty().setValue(debtCurrency);
             checkNotNull(toRepayCurrencyLabel).textProperty().setValue(debtCurrency);
+            checkNotNull(fxUiEntryCurrencyLabel).setText(holdCurrency);
             checkNotNull(holdingCurrencyLabel).textProperty().setValue(holdCurrency);
+
+            checkNotNull(toTradeCurrencyLabel).textProperty().setValue(holdCurrency);
+            checkNotNull(tradePriceLabel).textProperty().setValue(poplavok.getTicker().getSymbol());
+            checkNotNull(proceedsCurrencyLabel).textProperty().setValue(debtCurrency);
+            // Default: take profit in quote
+            checkNotNull(profitCurrencyLabel).textProperty().setValue(quoteCurrency);
 
             boolean showClosed = checkNotNull(showClosedLevelsCheckBox).isSelected();
             List<Level> levelList = DBUtil.connectGetResultAndClose(sess -> LevelDAO.findByPoplavokId(sess, poplavokId, showClosed));
@@ -446,6 +542,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             try {
                 fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
             } catch (Exception e) {}
+
             LevelAddDialog levelAddDialog = new LevelAddDialog(null, checkNotNull(poplavok).getTicker().getSymbol(), price, fee, checkNotNull(poplavok.getDirection()));
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { levelAddDialog.setStage(stage); return levelAddDialog; },
@@ -492,6 +589,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             try {
                 fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
             } catch (Exception e) {}
+
             LevelAddDialog levelAddDialog = new LevelAddDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(), lvl.getProjectedPrice(), fee, checkNotNull(poplavok.getDirection()));
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                 stage -> { levelAddDialog.setStage(stage); return levelAddDialog; },

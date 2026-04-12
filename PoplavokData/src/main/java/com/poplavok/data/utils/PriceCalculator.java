@@ -16,28 +16,37 @@ public class PriceCalculator {
      *     - In this case Seller will get $1000 - $1 = $999 with fee at 0.001.
      *   - I.e. Sell commission is charged in QUOTE _after_ operation.
      */
-    public static PriceAndCommission calculateSellPrice(BigDecimal giveBaseSell, BigDecimal getQuoteSell, BigDecimal fee) {
+    public static PriceInfo calculateSellPrice(BigDecimal giveBaseSell, BigDecimal getQuoteSell, BigDecimal fee) {
         BigDecimal withoutCommission = BigDecimal.ONE.subtract(fee);
         BigDecimal price = getQuoteSell.divide(giveBaseSell.multiply(withoutCommission), SCALE, RoundingMode.CEILING);
         BigDecimal cleanQuote = giveBaseSell.multiply(price);
         BigDecimal commission = cleanQuote.multiply(fee);
 
-        return new PriceAndCommission(commission, price);
+        return new PriceInfo(commission, price);
     }
 
     /**
-     * KuCoin commission mechanics: Buying
+     * KuCoin amount entry mechanics: Buying
      *   - When we buy, KuCoin applies commission on top of entered QUOTE amount.
      *   - Thus, if we buy $1000 worth of BASE with a fee at 0.001, it will actually withdraw $1001,
      *      even though we specifically entered $1000.
      *   - I.e. Buy commission is charged in QUOTE _before_ operation.
      */
-    public static PriceAndCommission calculateBuyPrice(BigDecimal giveQuoteBuy, BigDecimal getBaseBuy, BigDecimal fee) {
+    public static BuyPriceInfo calculateBuyPriceForEntry(BigDecimal giveEntryQuoteBuy, BigDecimal getBaseBuy, BigDecimal fee) {
         BigDecimal withCommission = BigDecimal.ONE.add(fee);
-        BigDecimal cleanQuote = giveQuoteBuy.divide(withCommission, SCALE, RoundingMode.FLOOR);
+        BigDecimal cleanQuote = giveEntryQuoteBuy.divide(withCommission, SCALE, RoundingMode.FLOOR);
         BigDecimal price = cleanQuote.divide(getBaseBuy, SCALE, RoundingMode.CEILING);
         BigDecimal commission = cleanQuote.multiply(fee);
 
-        return new PriceAndCommission(commission, price);
+        return new BuyPriceInfo(cleanQuote, giveEntryQuoteBuy, commission, price);
+    }
+
+    public static BuyPriceInfo calculateBuyPriceExact(BigDecimal giveQuoteBuy, BigDecimal getBaseBuy, BigDecimal fee) {
+        BigDecimal withCommission = BigDecimal.ONE.add(fee);
+        BigDecimal cleanQuote = giveQuoteBuy.divide(withCommission, SCALE, RoundingMode.FLOOR);
+        BigDecimal commission = cleanQuote.multiply(fee);
+        BigDecimal price = cleanQuote.divide(getBaseBuy, SCALE, RoundingMode.CEILING);
+
+        return new BuyPriceInfo(giveQuoteBuy, cleanQuote, commission, price);
     }
 }
