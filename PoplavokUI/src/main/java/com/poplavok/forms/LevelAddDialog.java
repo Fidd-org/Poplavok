@@ -5,6 +5,7 @@ import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelState;
 import com.poplavok.data.utils.AmountAndCommission;
 import com.poplavok.data.utils.LongShortCalculator;
+import com.poplavok.data.utils.PriceCalculator;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -37,6 +38,8 @@ public class LevelAddDialog extends VBox {
     @FXML @Nullable TextField baseAmountTextField;
     @FXML @Nullable TextField commissionTextField;
     @FXML @Nullable Button addButton;
+
+    @FXML @Nullable TextField fxAmountTextField;
 
     @Nullable Stage stage;
 
@@ -73,6 +76,13 @@ public class LevelAddDialog extends VBox {
                 if (quoteAmountTextField != null && quoteAmountTextField.isFocused()) recalculateBaseFromQuote();
             });
         }
+        if (fxAmountTextField != null) {
+            fxAmountTextField.setTextFormatter(createDecimalTextFormatter());
+            fxAmountTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+                if (fxAmountTextField != null && fxAmountTextField.isFocused()) recalculateBaseFromFxQuote();
+            });
+        }
+
         checkNotNull(priceTextField).textProperty().addListener((observable, oldValue, newValue) -> {
             if (priceTextField != null && priceTextField.isFocused()) recalculateBaseFromQuote();
         });
@@ -146,8 +156,10 @@ public class LevelAddDialog extends VBox {
                 quote = LongShortCalculator.calculateQuoteAmountToGetShort(base, price, fee);
             }
 
+            BigDecimal fxEntryAmount = PriceCalculator.calculateFxEntryAmount(quote.amount, fee);
             checkNotNull(quoteAmountTextField).setText(formatAmount(quote.amount));
-            checkNotNull(commissionTextField).setText(formatAmount(quote.commissionQuote));
+            checkNotNull(commissionTextField).setText(formatAmount(fxEntryAmount.multiply(fee)));
+            checkNotNull(fxAmountTextField).setText(formatAmount(fxEntryAmount));
         } catch (Exception e) {
             // ignore parsing errors
         }
@@ -158,6 +170,7 @@ public class LevelAddDialog extends VBox {
             BigDecimal quote = new BigDecimal(checkNotNull(quoteAmountTextField).getText().replace(',', '.'));
             BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText().replace(',', '.'));
             BigDecimal fee = new BigDecimal(checkNotNull(checkNotNull(feeTextField)).getText().replace(',', '.'));
+            BigDecimal fxEntryAmount = PriceCalculator.calculateFxEntryAmount(quote, fee);
 
             if (price.compareTo(BigDecimal.ZERO) <= 0) { return; }
 
@@ -169,7 +182,33 @@ public class LevelAddDialog extends VBox {
             }
 
             checkNotNull(baseAmountTextField).setText(formatAmount(base.amount));
-            checkNotNull(commissionTextField).setText(formatAmount(base.commissionQuote));
+//            checkNotNull(commissionTextField).setText(formatAmount(base.commissionQuote));
+            checkNotNull(commissionTextField).setText(formatAmount(fxEntryAmount.multiply(fee)));
+            checkNotNull(fxAmountTextField).setText(formatAmount(fxEntryAmount));
+        } catch (Exception e) {
+            // ignore parsing errors
+        }
+    }
+
+    private void recalculateBaseFromFxQuote() {
+        try {
+            BigDecimal fxQuoteAmount = new BigDecimal(checkNotNull(fxAmountTextField).getText().replace(',', '.'));
+            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText().replace(',', '.'));
+            BigDecimal fee = new BigDecimal(checkNotNull(checkNotNull(feeTextField)).getText().replace(',', '.'));
+            BigDecimal quote = PriceCalculator.calculateAmountFromFxEntry(fxQuoteAmount, fee);
+
+            if (price.compareTo(BigDecimal.ZERO) <= 0) { return; }
+
+            AmountAndCommission base;
+            if (tradeDirection == Direction.LONG) {
+                base = LongShortCalculator.calculateBaseAmountToGetLong(quote, price, fee);
+            } else {
+                base = LongShortCalculator.calculateBaseAmountToGiveShort(quote, price, fee);
+            }
+
+            checkNotNull(baseAmountTextField).setText(formatAmount(base.amount));
+            checkNotNull(quoteAmountTextField).setText(formatAmount(quote));
+            checkNotNull(commissionTextField).setText(formatAmount(fxQuoteAmount.multiply(fee)));
         } catch (Exception e) {
             // ignore parsing errors
         }

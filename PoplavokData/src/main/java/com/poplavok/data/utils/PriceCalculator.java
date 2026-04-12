@@ -49,4 +49,14 @@ public class PriceCalculator {
 
         return new BuyPriceInfo(giveQuoteBuy, cleanQuote, commission, price);
     }
+
+    public static BigDecimal calculateFxEntryAmount(BigDecimal amount, BigDecimal fee) {
+        BigDecimal withCommission = BigDecimal.ONE.add(fee);
+        return amount.divide(withCommission, SCALE, RoundingMode.FLOOR);
+    }
+
+    public static BigDecimal calculateAmountFromFxEntry(BigDecimal fxEntryAmount, BigDecimal fee) {
+        BigDecimal withCommission = BigDecimal.ONE.add(fee);
+        return fxEntryAmount.multiply(withCommission);
+    }
 }
