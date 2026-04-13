@@ -141,6 +141,13 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable Button closeLevelButton;
     @FXML @Nullable CheckBox showClosedLevelsCheckBox;
 
+    @FXML @Nullable Label poplavokDirectionLabel;
+    @FXML @Nullable Label poplavokTickerLabel;
+    @FXML @Nullable Label averagingActionLabel;
+    @FXML @Nullable Label averagingCurrencyLabel;
+
+    @FXML @Nullable CheckBox includeLentAmountsCheckBox;
+
     protected final MainForm mainApp;
     protected final Long poplavokId;
 
@@ -200,6 +207,9 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         checkNotNull(percentRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) { updateAverageTab(); }
         });
+        checkNotNull(includeLentAmountsCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            updateAverageTab();
+        });
 
         if (checkNotNull(commsRadioButton).isSelected()) {
             checkNotNull(commsCountTextField).setDisable(false);
@@ -248,6 +258,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             return;
         }
 
+        boolean includeLentAmounts = checkNotNull(includeLentAmountsCheckBox).selectedProperty().get();
+
         BigDecimal debt = BigDecimal.ZERO;
         BigDecimal available = BigDecimal.ZERO;
         BigDecimal holding = BigDecimal.ZERO;
@@ -257,10 +269,16 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 debt = debt.add(nullToZero(lvl.getDebtQuote()));
                 available = available.add(nullToZero(lvl.getAvailableAmountQuote()));
                 holding = holding.add(nullToZero(lvl.getAvailableAmountBase()));
+                if (includeLentAmounts) {
+                    holding = holding.add(nullToZero(lvl.getLentAmountBase()));
+                }
             } else {
                 debt = debt.add(nullToZero(lvl.getDebtBase()));
                 available = available.add(nullToZero(lvl.getAvailableAmountBase()));
                 holding = holding.add(nullToZero(lvl.getAvailableAmountQuote()));
+                if (includeLentAmounts) {
+                    holding = holding.add(nullToZero(lvl.getLentAmountQuote()));
+                }
             }
         }
         BigDecimal toRepay = debt.subtract(available);
@@ -517,6 +535,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             String holdCurrency = checkNotNull(poplavok).getDirection() == Direction.LONG
                     ? poplavok.getTicker().getBase().getCurrency() : poplavok.getTicker().getQuote().getCurrency();
 
+            checkNotNull(poplavokDirectionLabel).textProperty().setValue(checkNotNull(checkNotNull(poplavok).getDirection()).name());
+            checkNotNull(poplavokTickerLabel).textProperty().setValue(checkNotNull(poplavok).getTicker().getSymbol());
+            checkNotNull(averagingActionLabel).textProperty().setValue(checkNotNull(poplavok).getDirection() == Direction.LONG ? "SELL" : "BUY");
+            checkNotNull(averagingCurrencyLabel).textProperty().setValue(poplavok.getTicker().getBase().getCurrency());
+
             // Commission is always in QUOTE currency
             checkNotNull(commissionCurrencyLabel).textProperty().setValue(quoteCurrency);
             checkNotNull(debtCurrencyLabel).textProperty().setValue(debtCurrency);
@@ -621,7 +644,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
             } catch (Exception e) {}
 
-            LevelAddDialog levelAddDialog = new LevelAddDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(), lvl.getProjectedPrice(), fee, checkNotNull(poplavok.getDirection()));
+            LevelAddDialog levelAddDialog = new LevelAddDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(),
+                    lvl.getProjectedPrice(), fee, checkNotNull(poplavok.getDirection()));
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                 stage -> { levelAddDialog.setStage(stage); return levelAddDialog; },
                 "Edit Level " + StringUtils.defaultIfBlank(lvl.getNotes(), "#" + lvl.getId()));
@@ -706,7 +730,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
             BigDecimal price = BigDecimalUtil.fromString(checkNotNull(priceTextField).textProperty().get());
             price = price == null ? lvl.getProjectedPrice() : price;
-            PerformTradeDialog performTradeDialog = new PerformTradeDialog(lvl, checkNotNull(poplavok).getTicker(), price);
+            PerformTradeDialog performTradeDialog = new PerformTradeDialog(lvl, checkNotNull(poplavok).getTicker(),
+                    checkNotNull(checkNotNull(poplavok).getDirection()), price);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { performTradeDialog.setStage(stage); return performTradeDialog; },
                     "Perform Trade");

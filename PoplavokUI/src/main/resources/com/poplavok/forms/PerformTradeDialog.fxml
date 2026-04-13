@@ -5,7 +5,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
@@ -24,8 +23,8 @@
           <ColumnConstraints hgrow="ALWAYS" />
         </columnConstraints>
         <rowConstraints>
-            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="170.0" vgrow="SOMETIMES" />
         </rowConstraints>
@@ -165,7 +164,6 @@
                         <Insets left="5.0" right="5.0" />
                      </padding>
                   </Label>
-                  <Slider blockIncrement="1.0" max="50.0" min="-50.0" />
                </items>
             </ToolBar>
             <Label text="Fee:" GridPane.rowIndex="2" />

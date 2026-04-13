@@ -1,6 +1,7 @@
 package com.poplavok.forms;
 
 import com.flower.fxutils.JavaFxUtils;
+import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.Trade;
 import com.poplavok.data.model.MarketTicker;
@@ -72,7 +73,7 @@ public class PerformTradeDialog extends VBox {
     final Level lvl;
     final MarketTicker ticker;
 
-    public PerformTradeDialog(Level lvl, MarketTicker ticker, @Nullable BigDecimal price) {
+    public PerformTradeDialog(Level lvl, MarketTicker ticker, Direction direction, @Nullable BigDecimal price) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PerformTradeDialog.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -116,6 +117,16 @@ public class PerformTradeDialog extends VBox {
         checkNotNull(feeTextField).textProperty().addListener(this::onFeeChanged);
 
         checkNotNull(manualEntryCheckBox).selectedProperty().addListener(this::onManualEntryCheckedChanged);
+
+        switch (direction) {
+            case LONG:
+                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(buyTab));
+                break;
+            case SHORT:
+                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(sellTab));
+                break;
+            default: throw new IllegalStateException("Unknown direction: " + direction);
+        }
     }
 
     public void setStage(Stage stage) {
