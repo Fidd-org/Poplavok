@@ -287,75 +287,84 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         boolean profitInQuote = checkNotNull(profitInQuoteRadioButton).selectedProperty().get();
         boolean profitInBase = checkNotNull(profitInBaseRadioButton).selectedProperty().get();
 
-        if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
-            // LONG
+        if (holding.compareTo(BigDecimal.ZERO) != 0) {
+            if (checkNotNull(poplavok).getDirection() == Direction.LONG) {
+                // LONG
 
-            if (profitInBase) {
-                // LONG - Take Profit in BASE
-                BigDecimal profitBase = holding.multiply(profitRate);
-                BigDecimal holdingWithoutProfit = holding.subtract(profitBase);
+                if (profitInBase) {
+                    // LONG - Take Profit in BASE
+                    BigDecimal profitBase = holding.multiply(profitRate);
+                    BigDecimal holdingWithoutProfit = holding.subtract(profitBase);
 
-                PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, debt, fee);
+                    PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, debt, fee);
 
-                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
-                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
-                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
-                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
-            } else if (profitInQuote) {
-                // LONG - Take Profit in QUOTE
+                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
+                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+                } else if (profitInQuote) {
+                    // LONG - Take Profit in QUOTE
 
-                BigDecimal profitQuote = debt.multiply(profitRate);
-                BigDecimal proceedsQuote = debt.add(profitQuote);
+                    BigDecimal profitQuote = debt.multiply(profitRate);
+                    BigDecimal proceedsQuote = debt.add(profitQuote);
 
-                PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holding, proceedsQuote, fee);
+                    PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holding, proceedsQuote, fee);
 
-                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
-                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsQuote));
-                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
-                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holding));
+                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsQuote));
+                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
+                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holding));
+                } else {
+                    throw new RuntimeException("Please select to take profit in base or quote");
+                }
+
+                // tradeResult = PriceCalculator.calculateSellPrice(holding, proceeds, fee);
             } else {
-                throw new RuntimeException("Please select to take profit in base or quote");
-            }
+                // SHORT
 
-            // tradeResult = PriceCalculator.calculateSellPrice(holding, proceeds, fee);
+                if (profitInQuote) {
+                    // SHORT - Take Profit in QUOTE
+
+                    BigDecimal profitQuote = holding.multiply(profitRate);
+                    BigDecimal holdingWithoutProfit = holding.subtract(profitQuote);
+
+                    BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, fee);
+
+                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
+                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+                } else if (profitInBase) {
+                    // SHORT - Take Profit in BASE
+
+                    BigDecimal profitBase = debt.multiply(profitRate);
+                    BigDecimal proceedsBase = debt.add(profitBase);
+
+                    BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holding, proceedsBase, fee);
+
+                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsBase));
+                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
+                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+                } else {
+                    throw new RuntimeException("Please select to take profit in base or quote");
+                }
+            }
         } else {
-            // SHORT
-
-            if (profitInQuote) {
-                // SHORT - Take Profit in QUOTE
-
-                BigDecimal profitQuote = holding.multiply(profitRate);
-                BigDecimal holdingWithoutProfit = holding.subtract(profitQuote);
-
-                BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, fee);
-
-                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
-                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
-                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
-                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
-            } else if (profitInBase) {
-                // SHORT - Take Profit in BASE
-
-                BigDecimal profitBase = debt.multiply(profitRate);
-                BigDecimal proceedsBase = debt.add(profitBase);
-
-                BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holding, proceedsBase, fee);
-
-                checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
-                checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsBase));
-                checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
-                checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
-            } else {
-                throw new RuntimeException("Please select to take profit in base or quote");
-            }
+            checkNotNull(toSellTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
+            checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
+            checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
+            checkNotNull(commissionTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
+            checkNotNull(profitTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
+            checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
         }
 
         /*
