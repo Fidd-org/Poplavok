@@ -15,6 +15,7 @@ import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Rate;
+import com.poplavok.data.model.Repayment;
 import com.poplavok.data.model.Trade;
 import com.poplavok.data.model.Transaction;
 import com.poplavok.data.dao.LevelDAO;
@@ -665,6 +666,55 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                         alert.showAndWait();
                     }
                 }
+            );
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error updating level: " + e, ButtonType.OK);
+            LOGGER.error("Error updating level: ", e);
+            alert.showAndWait();
+        }
+    }
+
+    public void repay() {
+        try {
+            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (selected == null || selected.size() != 1) return;
+
+            Level lvl = selected.get(0);
+            LevelState state = lvl.getState();
+
+            if (state == LevelState.CLOSED) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Level CLOSED.");
+                alert.showAndWait();
+                return;
+            }
+
+            BigDecimal fee = null;
+            try {
+                fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+            } catch (Exception e) {}
+
+            RepaySettleDebtDialog repaySettleDebtDialog = new RepaySettleDebtDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(),
+                    lvl.getProjectedPrice(), fee, checkNotNull(poplavok.getDirection()));
+            Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
+                    stage -> { repaySettleDebtDialog.setStage(stage); return repaySettleDebtDialog; },
+                    "Repay Level " + StringUtils.defaultIfBlank(lvl.getNotes(), "#" + lvl.getId()));
+
+            workspaceStage.setOnHidden(
+                    ev -> {
+                        try {
+                            Repayment repayment = repaySettleDebtDialog.getReturnRepayment();
+                            if (repayment != null) {
+                                // TODO: implement
+                                /*repayment.setPoplavok(checkNotNull(poplavok));
+                                DBUtil.connectCommitAndClose(sess -> LevelDAO.update(sess, checkNotNull(repayment)));*/
+                                refreshContent();
+                            }
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating level: " + e, ButtonType.OK);
+                            LOGGER.error("Error creating level: ", e);
+                            alert.showAndWait();
+                        }
+                    }
             );
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error updating level: " + e, ButtonType.OK);

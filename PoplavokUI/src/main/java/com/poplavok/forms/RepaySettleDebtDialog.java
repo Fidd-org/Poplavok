@@ -2,6 +2,7 @@ package com.poplavok.forms;
 
 import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
+import com.poplavok.data.model.Repayment;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -31,11 +32,11 @@ public class RepaySettleDebtDialog extends VBox {
 
     @Nullable Long levelId = null;
     @Nullable Level level;
-    @Nullable volatile Level returnLevel = null;
     final Direction tradeDirection;
+    @Nullable volatile Repayment returnRepayment = null;
 
     public RepaySettleDebtDialog(@Nullable Level level, String ticker, @Nullable BigDecimal price, @Nullable BigDecimal fee, Direction tradeDirection) {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("LevelAddDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("RepaySettleDebtDialog.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 
@@ -67,7 +68,16 @@ public class RepaySettleDebtDialog extends VBox {
         //
     }
 
+    public void okClose() {
+        //
+    }
+
     public void setStage(Stage stage) {
         this.stage = stage;
+    }
+
+    @Nullable
+    public Repayment getReturnRepayment() {
+        return returnRepayment;
     }
 }

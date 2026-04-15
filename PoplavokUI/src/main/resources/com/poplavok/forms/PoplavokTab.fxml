@@ -53,7 +53,7 @@
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                 <Button mnemonicParsing="false" onAction="#allocateFunds" text="[ Allocate funds ]" />
                   <Button mnemonicParsing="false" onAction="#performTrade" text="[ Perform trade ]" />
-                  <Button mnemonicParsing="false" text="[ Repay ]" />
+                  <Button mnemonicParsing="false" onAction="#repay" text="[ Repay ]" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <CheckBox fx:id="showClosedLevelsCheckBox" mnemonicParsing="false" text="Show closed" />
               </items>
