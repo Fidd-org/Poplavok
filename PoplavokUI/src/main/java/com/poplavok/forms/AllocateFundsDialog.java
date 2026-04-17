@@ -37,6 +37,8 @@ import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class AllocateFundsDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(AllocateFundsDialog.class);
@@ -121,7 +123,7 @@ public class AllocateFundsDialog extends VBox {
         try {
             Loan loan = new Loan();
 
-            loan.setAmount(new BigDecimal(checkNotNull(amountTextField).textProperty().get()));
+            loan.setAmount(nullToZero(fromString(checkNotNull(amountTextField).textProperty().get())));
             loan.setDate(new Date());
             loan.setCurrency(currency);
 
@@ -173,7 +175,7 @@ public class AllocateFundsDialog extends VBox {
                 loan.setSourceLevel(selectedLevel.level);
             } else if (selectedTab == sourceExternalTab) {
                 // External loan, has no source
-                BigDecimal interestRate = new BigDecimal(checkNotNull(interestRateTextField).textProperty().get());
+                BigDecimal interestRate = nullToZero(fromString(checkNotNull(interestRateTextField).textProperty().get()));
                 InterestRateType interestRateType = checkNotNull(interestTypeComboBox).getSelectionModel().getSelectedItem();
 
                 loan.setLoanType(checkNotNull(externalLoanTypeComboBox).getSelectionModel().getSelectedItem());

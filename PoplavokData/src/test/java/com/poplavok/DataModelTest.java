@@ -20,6 +20,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -102,7 +104,7 @@ public class DataModelTest {
         Currency usdt = new Currency("USDT");
         session.persist(usdt);
 
-        Loan loan = new Loan(usdt, new BigDecimal("1000"), null,
+        Loan loan = new Loan(usdt, nullToZero(fromString("1000")), null,
                 new Date(), LoanType.EXTERNAL_CROSS_MARGIN);
         session.persist(loan);
 
@@ -123,7 +125,7 @@ public class DataModelTest {
         Currency btc = new Currency("BTC");
         session.persist(btc);
 
-        Account account = new Account(btc, new BigDecimal("10"), BigDecimal.ZERO);
+        Account account = new Account(btc, nullToZero(fromString("10")), BigDecimal.ZERO);
         session.persist(account);
 
         tx.commit();

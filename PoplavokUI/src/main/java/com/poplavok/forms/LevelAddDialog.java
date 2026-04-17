@@ -25,6 +25,8 @@ import java.util.Date;
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class LevelAddDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(LevelAddDialog.class);
@@ -119,16 +121,16 @@ public class LevelAddDialog extends VBox {
                 level.setState(LevelState.INCEPTION);
                 level.setId(levelId);
                 level.setCreationDate(new Date());
-                level.setProjectedPrice(new BigDecimal(checkNotNull(priceTextField).textProperty().get()));
-                level.setProjectedAmountBase(new BigDecimal(checkNotNull(baseAmountTextField).textProperty().get()));
-                level.setProjectedAmountQuote(new BigDecimal(checkNotNull(quoteAmountTextField).textProperty().get()));
+                level.setProjectedPrice(nullToZero(fromString(checkNotNull(priceTextField).textProperty().get())));
+                level.setProjectedAmountBase(nullToZero(fromString(checkNotNull(baseAmountTextField).textProperty().get())));
+                level.setProjectedAmountQuote(nullToZero(fromString(checkNotNull(quoteAmountTextField).textProperty().get())));
                 level.setNotes(checkNotNull(notesTextField).textProperty().get());
 
                 returnLevel = level;
             } else {
-                level.setProjectedPrice(new BigDecimal(checkNotNull(priceTextField).textProperty().get()));
-                level.setProjectedAmountBase(new BigDecimal(checkNotNull(baseAmountTextField).textProperty().get()));
-                level.setProjectedAmountQuote(new BigDecimal(checkNotNull(quoteAmountTextField).textProperty().get()));
+                level.setProjectedPrice(nullToZero(fromString(checkNotNull(priceTextField).textProperty().get())));
+                level.setProjectedAmountBase(nullToZero(fromString(checkNotNull(baseAmountTextField).textProperty().get())));
+                level.setProjectedAmountQuote(nullToZero(fromString(checkNotNull(quoteAmountTextField).textProperty().get())));
                 level.setNotes(checkNotNull(notesTextField).textProperty().get());
 
                 returnLevel = level;
@@ -143,9 +145,9 @@ public class LevelAddDialog extends VBox {
 
     private void recalculateQuoteFromBase() {
         try {
-            BigDecimal base = new BigDecimal(checkNotNull(baseAmountTextField).getText().replace(',', '.'));
-            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText().replace(',', '.'));
-            BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText().replace(',', '.'));
+            BigDecimal base = nullToZero(fromString(checkNotNull(baseAmountTextField).getText().replace(',', '.')));
+            BigDecimal price = nullToZero(fromString(checkNotNull(priceTextField).getText().replace(',', '.')));
+            BigDecimal fee = nullToZero(fromString(checkNotNull(feeTextField).getText().replace(',', '.')));
 
             if (price.compareTo(BigDecimal.ZERO) <= 0) { return; }
 
@@ -167,9 +169,9 @@ public class LevelAddDialog extends VBox {
 
     private void recalculateBaseFromQuote() {
         try {
-            BigDecimal quote = new BigDecimal(checkNotNull(quoteAmountTextField).getText().replace(',', '.'));
-            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText().replace(',', '.'));
-            BigDecimal fee = new BigDecimal(checkNotNull(checkNotNull(feeTextField)).getText().replace(',', '.'));
+            BigDecimal quote = nullToZero(fromString(checkNotNull(quoteAmountTextField).getText().replace(',', '.')));
+            BigDecimal price = nullToZero(fromString(checkNotNull(priceTextField).getText().replace(',', '.')));
+            BigDecimal fee = nullToZero(fromString(checkNotNull(checkNotNull(feeTextField)).getText().replace(',', '.')));
             BigDecimal fxEntryAmount = PriceCalculator.calculateFxEntryAmount(quote, fee);
 
             if (price.compareTo(BigDecimal.ZERO) <= 0) { return; }
@@ -192,9 +194,9 @@ public class LevelAddDialog extends VBox {
 
     private void recalculateBaseFromFxQuote() {
         try {
-            BigDecimal fxQuoteAmount = new BigDecimal(checkNotNull(fxAmountTextField).getText().replace(',', '.'));
-            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText().replace(',', '.'));
-            BigDecimal fee = new BigDecimal(checkNotNull(checkNotNull(feeTextField)).getText().replace(',', '.'));
+            BigDecimal fxQuoteAmount = nullToZero(fromString(checkNotNull(fxAmountTextField).getText().replace(',', '.')));
+            BigDecimal price = nullToZero(fromString(checkNotNull(priceTextField).getText().replace(',', '.')));
+            BigDecimal fee = nullToZero(fromString(checkNotNull(checkNotNull(feeTextField)).getText().replace(',', '.')));
             BigDecimal quote = PriceCalculator.calculateAmountFromFxEntry(fxQuoteAmount, fee);
 
             if (price.compareTo(BigDecimal.ZERO) <= 0) { return; }

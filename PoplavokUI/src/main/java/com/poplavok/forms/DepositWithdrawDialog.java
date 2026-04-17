@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class DepositWithdrawDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(DepositWithdrawDialog.class);
@@ -66,7 +68,7 @@ public class DepositWithdrawDialog extends VBox {
             }
             amountStr = amountStr.replace(',', '.');
             String details = checkNotNull(detailsTextArea).getText();
-            BigDecimal amount = new BigDecimal(amountStr);
+            BigDecimal amount = nullToZero(fromString(amountStr));
 
             ExternalTransaction transaction = new ExternalTransaction();
             transaction.setDetails(details);

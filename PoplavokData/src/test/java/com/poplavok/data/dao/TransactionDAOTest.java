@@ -13,10 +13,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,12 +60,12 @@ public class TransactionDAOTest {
         Currency usd = session.find(Currency.class, "USD");
 
         // Create Loan
-        Loan loan = new Loan(usd, new BigDecimal("1000.00"), null,  DateUtils.addDays(new Date(), -10), LoanType.POPLAVOK_FUNDED);
-        loan.setInterestRate(new BigDecimal("0.05"));
+        Loan loan = new Loan(usd, nullToZero(fromString("1000.00")), null,  DateUtils.addDays(new Date(), -10), LoanType.POPLAVOK_FUNDED);
+        loan.setInterestRate(nullToZero(fromString("0.05")));
         TransactionDAO.save(session, loan);
 
         // Create Repayment
-        Repayment repayment = new Repayment(loan, new BigDecimal("500.00"), new Date());
+        Repayment repayment = new Repayment(loan, nullToZero(fromString("500.00")), new Date());
         repayment.setNotes("Partial repayment");
         TransactionDAO.save(session, repayment);
 
@@ -85,7 +86,7 @@ public class TransactionDAOTest {
         assertInstanceOf(Loan.class, t1);
         Loan fetchedLoan = (Loan) t1;
         // BigDecimal equality can be tricky with scale, use compareTo
-        assertEquals(0, new BigDecimal("0.05").compareTo(fetchedLoan.getInterestRate()));
+        assertEquals(0, nullToZero(fromString("0.05")).compareTo(fetchedLoan.getInterestRate()));
 
         // Verify Repayment
         Transaction t2 = allTransactions.stream()

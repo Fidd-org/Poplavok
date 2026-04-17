@@ -66,11 +66,12 @@ import static com.poplavok.data.model.LoanType.POPLAVOK_FUNDED;
 import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
 
 public class PoplavokTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(PoplavokTab.class);
 
-    public static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+    public static final BigDecimal ONE_HUNDRED = nullToZero(fromString("100"));
 
     @Nullable Poplavok poplavok;
     @Nullable FilteredList<Level> levels;
@@ -291,14 +292,14 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
         // ------------------------
 
-        BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+        BigDecimal fee = nullToZero(fromString(checkNotNull(feeTextField).textProperty().get()));
         BigDecimal profitRate;
 
         if (checkNotNull(commsRadioButton).selectedProperty().get()) {
-            BigDecimal commsNumber = new BigDecimal(checkNotNull(commsCountTextField).textProperty().get());
+            BigDecimal commsNumber = nullToZero(fromString(checkNotNull(commsCountTextField).textProperty().get()));
             profitRate = fee.multiply(commsNumber);
         } else if (checkNotNull(percentRadioButton).selectedProperty().get()) {
-            profitRate = new BigDecimal(checkNotNull(percentTextField).textProperty().get()).divide(ONE_HUNDRED, SCALE, RoundingMode.CEILING);
+            profitRate = nullToZero(fromString(checkNotNull(percentTextField).textProperty().get())).divide(ONE_HUNDRED, SCALE, RoundingMode.CEILING);
         } else {
             throw new RuntimeException("Unknown Profit Mode Selection");
         }
@@ -473,7 +474,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         BigDecimal currentPrice = BigDecimal.ZERO;
         if (priceTextField != null && priceTextField.getText() != null && !priceTextField.getText().trim().isEmpty()) {
             try {
-                currentPrice = new BigDecimal(priceTextField.getText().trim());
+                currentPrice = nullToZero(fromString(priceTextField.getText().trim()));
             } catch (Exception e) {}
         }
         
@@ -591,11 +592,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         try {
             BigDecimal price = null;
             try {
-                price = new BigDecimal(checkNotNull(priceTextField).textProperty().get());
+                price = nullToZero(fromString(checkNotNull(priceTextField).textProperty().get()));
             } catch (Exception e) {}
             BigDecimal fee = null;
             try {
-                fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+                fee = nullToZero(fromString(checkNotNull(feeTextField).textProperty().get()));
             } catch (Exception e) {}
 
             LevelAddDialog levelAddDialog = new LevelAddDialog(null, checkNotNull(poplavok).getTicker().getSymbol(), price, fee, checkNotNull(poplavok.getDirection()));
@@ -642,7 +643,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
             BigDecimal fee = null;
             try {
-                fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+                fee = nullToZero(fromString(checkNotNull(feeTextField).textProperty().get()));
             } catch (Exception e) {}
 
             LevelAddDialog levelAddDialog = new LevelAddDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(),
@@ -690,7 +691,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
             BigDecimal fee = null;
             try {
-                fee = new BigDecimal(checkNotNull(feeTextField).textProperty().get());
+                fee = nullToZero(fromString(checkNotNull(feeTextField).textProperty().get()));
             } catch (Exception e) {}
 
             RepaySettleDebtDialog repaySettleDebtDialog = new RepaySettleDebtDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(),

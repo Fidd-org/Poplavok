@@ -14,6 +14,9 @@ import java.util.Date;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
+
 public class DemoApp {
     public static void main(String[] args) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -32,8 +35,8 @@ public class DemoApp {
         session.persist(btcUsdt);
 
         // Create accounts
-        Account btcAccount = new Account(btc, new BigDecimal("1.5"), BigDecimal.ZERO);
-        Account usdtAccount = new Account(usdt, new BigDecimal("10000"), BigDecimal.ZERO);
+        Account btcAccount = new Account(btc, nullToZero(fromString("1.5")), BigDecimal.ZERO);
+        Account usdtAccount = new Account(usdt, nullToZero(fromString("10000")), BigDecimal.ZERO);
         session.persist(btcAccount);
         session.persist(usdtAccount);
 

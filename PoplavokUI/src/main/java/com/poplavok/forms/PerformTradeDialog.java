@@ -33,6 +33,8 @@ import java.util.Date;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class PerformTradeDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(PerformTradeDialog.class);
@@ -94,7 +96,7 @@ public class PerformTradeDialog extends VBox {
         checkNotNull(availableQuoteTextField).textProperty().setValue(formatAmount(lvl.getAvailableAmountQuote()));
         checkNotNull(useAllBaseButton).textProperty().setValue(ticker.getBase().getCurrency());
         checkNotNull(useAllQuoteButton).textProperty().setValue(ticker.getQuote().getCurrency());
-        BigDecimal fee = new BigDecimal(checkNotNull(ticker.getMakerFeeRate())).multiply(new BigDecimal(checkNotNull(ticker.getMakerCoefficient())));
+        BigDecimal fee = nullToZero(fromString(checkNotNull(ticker.getMakerFeeRate()))).multiply(nullToZero(fromString((checkNotNull(ticker.getMakerCoefficient())))));
         checkNotNull(feeTextField).textProperty().setValue(formatAmount(fee));
         checkNotNull(quoteBuyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
         checkNotNull(quoteBuyCommissionLabel).textProperty().setValue(ticker.getQuote().getCurrency());
@@ -137,10 +139,10 @@ public class PerformTradeDialog extends VBox {
         try {
             returnTrade = new Trade();
 
-            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
-            BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
-            BigDecimal tradeQuoteAmount = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText());
-            BigDecimal tradeBaseAmount = new BigDecimal(checkNotNull(getBaseBuyTextField).getText());
+            BigDecimal price = nullToZero(fromString((checkNotNull(priceTextField).getText())));
+            BigDecimal fee = nullToZero(fromString(checkNotNull(feeTextField).getText()));
+            BigDecimal tradeQuoteAmount = nullToZero(fromString(checkNotNull(giveQuoteBuyTextField).getText()));
+            BigDecimal tradeBaseAmount = nullToZero(fromString(checkNotNull(getBaseBuyTextField).getText()));
             returnTrade.setAmountQuoteIn(tradeQuoteAmount);
             returnTrade.setAmountBaseOut(tradeBaseAmount);
             returnTrade.setOperation(TradeOperation.BUY);
@@ -160,11 +162,11 @@ public class PerformTradeDialog extends VBox {
         try {
             returnTrade = new Trade();
 
-            BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
-            BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
+            BigDecimal price = nullToZero(fromString(checkNotNull(priceTextField).getText()));
+            BigDecimal fee = nullToZero(fromString(checkNotNull(feeTextField).getText()));
 
-            BigDecimal tradeBaseAmount = new BigDecimal(checkNotNull(giveBaseSellTextField).getText());
-            BigDecimal tradeQuoteAmount = new BigDecimal(checkNotNull(getQuoteSellTextField).getText());
+            BigDecimal tradeBaseAmount = nullToZero(fromString(checkNotNull(giveBaseSellTextField).getText()));
+            BigDecimal tradeQuoteAmount = nullToZero(fromString(checkNotNull(getQuoteSellTextField).getText()));
             returnTrade.setAmountBaseIn(tradeBaseAmount);
             returnTrade.setAmountQuoteOut(tradeQuoteAmount);
             returnTrade.setOperation(TradeOperation.SELL);
@@ -200,7 +202,7 @@ public class PerformTradeDialog extends VBox {
             }
 
             if (!StringUtils.isBlank(checkNotNull(availableBaseTextField).getText())) {
-                BigDecimal availableBase = new BigDecimal(checkNotNull(availableBaseTextField).getText());
+                BigDecimal availableBase = nullToZero(fromString(checkNotNull(availableBaseTextField).getText()));
                 checkNotNull(giveBaseSellTextField).textProperty().setValue(formatAmount(availableBase));
                 onGiveBaseSellChanged(null);
             }
@@ -218,7 +220,7 @@ public class PerformTradeDialog extends VBox {
             }
 
             if (!StringUtils.isBlank(checkNotNull(availableQuoteTextField).getText())) {
-                BigDecimal availableQuote = new BigDecimal(checkNotNull(availableQuoteTextField).getText());
+                BigDecimal availableQuote = nullToZero(fromString(checkNotNull(availableQuoteTextField).getText()));
                 checkNotNull(giveQuoteBuyTextField).textProperty().setValue(formatAmount(availableQuote));
                 onGiveQuoteBuyChanged(null);
             }
@@ -265,14 +267,14 @@ public class PerformTradeDialog extends VBox {
             if (!manualInput) {
                 if (StringUtils.isBlank(checkNotNull(priceTextField).getText())) { return; }
                 if (StringUtils.isBlank(checkNotNull(feeTextField).getText())) { return; }
-                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
-                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
+                BigDecimal price = nullToZero(fromString(checkNotNull(priceTextField).getText()));
+                BigDecimal fee = nullToZero(fromString(checkNotNull(feeTextField).getText()));
 
                 if (price.compareTo(BigDecimal.ZERO) == 0) { return; }
 
                 // Update GET BASE BUY amount
                 if (updateBaseBuy && !StringUtils.isBlank(checkNotNull(giveQuoteBuyTextField).getText())) {
-                    BigDecimal giveQuoteBuy = new BigDecimal(checkNotNull(giveQuoteBuyTextField).getText());
+                    BigDecimal giveQuoteBuy = nullToZero(fromString(checkNotNull(giveQuoteBuyTextField).getText()));
 
                     AmountAndCommission getBaseBuy = LongShortCalculator.calculateBaseAmountToGetLong(giveQuoteBuy, price, fee);
 
@@ -282,7 +284,7 @@ public class PerformTradeDialog extends VBox {
 
                 // Update GET QUOTE SELL amount
                 if (updateQuoteSell && !StringUtils.isBlank(checkNotNull(giveBaseSellTextField).getText())) {
-                    BigDecimal giveBaseSell = new BigDecimal(checkNotNull(giveBaseSellTextField).getText());
+                    BigDecimal giveBaseSell = nullToZero(fromString(checkNotNull(giveBaseSellTextField).getText()));
 
                     AmountAndCommission getQuoteSell = LongShortCalculator.calculateQuoteAmountToGetShort(giveBaseSell, price, fee);
 
@@ -303,12 +305,12 @@ public class PerformTradeDialog extends VBox {
             if (!manualInput) {
                 if (StringUtils.isBlank(checkNotNull(priceTextField).getText())) { return; }
                 if (StringUtils.isBlank(checkNotNull(feeTextField).getText())) { return; }
-                BigDecimal price = new BigDecimal(checkNotNull(priceTextField).getText());
-                BigDecimal fee = new BigDecimal(checkNotNull(feeTextField).getText());
+                BigDecimal price = nullToZero(fromString(checkNotNull(priceTextField).getText()));
+                BigDecimal fee = nullToZero(fromString(checkNotNull(feeTextField).getText()));
 
                 // Update GIVE QUOTE BUY amount
                 if (updateQuoteBuy && !StringUtils.isBlank(checkNotNull(getBaseBuyTextField).getText())) {
-                    BigDecimal getBaseBuy = new BigDecimal(checkNotNull(getBaseBuyTextField).getText());
+                    BigDecimal getBaseBuy = nullToZero(fromString(checkNotNull(getBaseBuyTextField).getText()));
 
                     AmountAndCommission giveQuoteBuy = LongShortCalculator.calculateQuoteAmountToGiveLong(getBaseBuy, price, fee);
 
@@ -318,7 +320,7 @@ public class PerformTradeDialog extends VBox {
 
                 // Update GIVE BASE SELL amount
                 if (updateBaseSell && !StringUtils.isBlank(checkNotNull(getQuoteSellTextField).getText())) {
-                    BigDecimal getQuoteSell = new BigDecimal(checkNotNull(getQuoteSellTextField).getText());
+                    BigDecimal getQuoteSell = nullToZero(fromString(checkNotNull(getQuoteSellTextField).getText()));
 
                     AmountAndCommission giveBaseSell = LongShortCalculator.calculateBaseAmountToGiveShort(getQuoteSell, price, fee);
 
