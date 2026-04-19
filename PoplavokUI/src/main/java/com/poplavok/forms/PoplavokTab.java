@@ -694,7 +694,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 fee = nullToZero(fromString(checkNotNull(feeTextField).textProperty().get()));
             } catch (Exception e) {}
 
-            RepaySettleDebtDialog repaySettleDebtDialog = new RepaySettleDebtDialog(lvl, checkNotNull(poplavok).getTicker().getSymbol(),
+            RepaySettleDebtDialog repaySettleDebtDialog = new RepaySettleDebtDialog(lvl, checkNotNull(poplavok).getTicker(),
                     lvl.getProjectedPrice(), fee, checkNotNull(poplavok.getDirection()));
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { repaySettleDebtDialog.setStage(stage); return repaySettleDebtDialog; },

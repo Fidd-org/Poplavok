@@ -8,12 +8,16 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class LoanInfo {
-    final Loan loan;
-    final List<Repayment> repayments;
+    public final Loan loan;
+    public final List<Repayment> repayments;
 
     public LoanInfo(Loan loan, List<Repayment> repayments) {
         this.loan = loan;
         this.repayments = repayments;
+    }
+
+    public Long getLoanId() {
+        return loan.getId();
     }
 
     public @Nullable String getSource() {
