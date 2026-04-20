@@ -3,12 +3,14 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -17,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<fx:root prefHeight="500.0" prefWidth="550.0" type="TabPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="500.0" prefWidth="550.0" tabClosingPolicy="UNAVAILABLE" type="TabPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
      <tabs>
        <Tab text="Repay">
          <content>
@@ -129,318 +131,137 @@
                </AnchorPane>
          </content>
        </Tab>
-         <Tab text="Take Profit">
-            <content>
-               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                  <children>
-                     <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <children>
-                           <AnchorPane VBox.vgrow="NEVER">
-                              <children>
-                                 <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
-                                    <columnConstraints>
-                                       <ColumnConstraints hgrow="SOMETIMES" />
-                                       <ColumnConstraints hgrow="ALWAYS" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
-                                    <children>
-                                       <Label text="Projected price:" GridPane.rowIndex="1" />
-                                       <Label text="Level Notes:" GridPane.rowIndex="5" />
-                                       <TextField fx:id="notesTextField11" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                                          <GridPane.margin>
-                                             <Insets left="10.0" />
-                                          </GridPane.margin>
-                                       </TextField>
-                                       <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                          <columnConstraints>
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                          </columnConstraints>
-                                          <rowConstraints>
-                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          </rowConstraints>
-                                          <children>
-                                             <TextField fx:id="priceTextField11" promptText="Price">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                             <TextField fx:id="tickerTextField11" editable="false" GridPane.columnIndex="1">
-                                                <opaqueInsets>
-                                                   <Insets />
-                                                </opaqueInsets>
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                          </children>
-                                       </GridPane>
-                                       <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
-                                          <columnConstraints>
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                          </columnConstraints>
-                                          <rowConstraints>
-                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          </rowConstraints>
-                                          <children>
-                                             <Label text="Quote:">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <Label text="Base:" GridPane.columnIndex="2">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <TextField fx:id="quoteAmountTextField11" GridPane.columnIndex="1">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                             <TextField fx:id="baseAmountTextField11" GridPane.columnIndex="3">
-                                                <opaqueInsets>
-                                                   <Insets />
-                                                </opaqueInsets>
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                          </children>
-                                       </GridPane>
-                                       <Label text="Projected amounts:" GridPane.rowIndex="3" />
-                                       <GridPane GridPane.columnIndex="1">
-                                          <columnConstraints>
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                          </columnConstraints>
-                                          <rowConstraints>
-                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          </rowConstraints>
-                                          <children>
-                                             <Label text="Fee:">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <Label text="Direction:" GridPane.columnIndex="2">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <TextField fx:id="feeTextField11" GridPane.columnIndex="1">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                             <TextField fx:id="directionTextField11" editable="false" GridPane.columnIndex="3">
-                                                <opaqueInsets>
-                                                   <Insets />
-                                                </opaqueInsets>
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                          </children>
-                                       </GridPane>
-                                       <Label text="Commisison Quote:" GridPane.rowIndex="4" />
-                                       <TextField fx:id="commissionTextField11" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                                          <GridPane.margin>
-                                             <Insets left="10.0" />
-                                          </GridPane.margin>
-                                       </TextField>
-                                       <TextField fx:id="fxAmountTextField11" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                          <GridPane.margin>
-                                             <Insets left="10.0" />
-                                          </GridPane.margin>
-                                       </TextField>
-                                       <Label text="FX UI Entry:" GridPane.rowIndex="2" />
-                                    </children>
-                                    <padding>
-                                       <Insets top="10.0" />
-                                    </padding>
-                                 </GridPane>
-                              </children>
-                           </AnchorPane>
-                           <AnchorPane prefHeight="35.0" prefWidth="242.0">
-                              <children>
-                                 <Button fx:id="addButton11" layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#okClose" text="Settle Debt" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="0.0" />
-                              </children>
-                           </AnchorPane>
-                        </children>
-                     </VBox>
-                  </children>
-               </AnchorPane>
-            </content>
-         </Tab>
-         <Tab text="Take Loss">
-            <content>
-               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                  <children>
-                     <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <children>
-                           <AnchorPane VBox.vgrow="NEVER">
-                              <children>
-                                 <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
-                                    <columnConstraints>
-                                       <ColumnConstraints hgrow="SOMETIMES" />
-                                       <ColumnConstraints hgrow="ALWAYS" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
-                                    <children>
-                                       <Label text="Projected price:" GridPane.rowIndex="1" />
-                                       <Label text="Level Notes:" GridPane.rowIndex="5" />
-                                       <TextField fx:id="notesTextField111" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                                          <GridPane.margin>
-                                             <Insets left="10.0" />
-                                          </GridPane.margin>
-                                       </TextField>
-                                       <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                          <columnConstraints>
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                          </columnConstraints>
-                                          <rowConstraints>
-                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          </rowConstraints>
-                                          <children>
-                                             <TextField fx:id="priceTextField111" promptText="Price">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                             <TextField fx:id="tickerTextField111" editable="false" GridPane.columnIndex="1">
-                                                <opaqueInsets>
-                                                   <Insets />
-                                                </opaqueInsets>
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                          </children>
-                                       </GridPane>
-                                       <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
-                                          <columnConstraints>
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                          </columnConstraints>
-                                          <rowConstraints>
-                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          </rowConstraints>
-                                          <children>
-                                             <Label text="Quote:">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <Label text="Base:" GridPane.columnIndex="2">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <TextField fx:id="quoteAmountTextField111" GridPane.columnIndex="1">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                             <TextField fx:id="baseAmountTextField111" GridPane.columnIndex="3">
-                                                <opaqueInsets>
-                                                   <Insets />
-                                                </opaqueInsets>
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                          </children>
-                                       </GridPane>
-                                       <Label text="Projected amounts:" GridPane.rowIndex="3" />
-                                       <GridPane GridPane.columnIndex="1">
-                                          <columnConstraints>
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                             <ColumnConstraints hgrow="SOMETIMES" />
-                                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                          </columnConstraints>
-                                          <rowConstraints>
-                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          </rowConstraints>
-                                          <children>
-                                             <Label text="Fee:">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <Label text="Direction:" GridPane.columnIndex="2">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </Label>
-                                             <TextField fx:id="feeTextField111" GridPane.columnIndex="1">
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                             <TextField fx:id="directionTextField111" editable="false" GridPane.columnIndex="3">
-                                                <opaqueInsets>
-                                                   <Insets />
-                                                </opaqueInsets>
-                                                <GridPane.margin>
-                                                   <Insets left="10.0" />
-                                                </GridPane.margin>
-                                             </TextField>
-                                          </children>
-                                       </GridPane>
-                                       <Label text="Commisison Quote:" GridPane.rowIndex="4" />
-                                       <TextField fx:id="commissionTextField111" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                                          <GridPane.margin>
-                                             <Insets left="10.0" />
-                                          </GridPane.margin>
-                                       </TextField>
-                                       <TextField fx:id="fxAmountTextField111" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                          <GridPane.margin>
-                                             <Insets left="10.0" />
-                                          </GridPane.margin>
-                                       </TextField>
-                                       <Label text="FX UI Entry:" GridPane.rowIndex="2" />
-                                    </children>
-                                    <padding>
-                                       <Insets top="10.0" />
-                                    </padding>
-                                 </GridPane>
-                              </children>
-                           </AnchorPane>
-                           <AnchorPane prefHeight="35.0" prefWidth="242.0">
-                              <children>
-                                 <Button fx:id="addButton111" layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#okClose" text="Settle Debt" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="0.0" />
-                              </children>
-                           </AnchorPane>
-                        </children>
-                     </VBox>
-                  </children>
-               </AnchorPane>
-            </content>
-         </Tab>
+      <Tab text="Take Profit / Loss">
+         <content>
+            <AnchorPane prefWidth="550.0">
+               <children>
+                  <SplitPane dividerPositions="0.5, 1.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <items>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                              <TableView fx:id="accountsTableView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <columns>
+                                    <TableColumn text="Id">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="id" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Account Name">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="accountName" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Currency">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="currencyStr" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="AvailableAmount">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="availableAmountStr" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="LentAmount">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="lentAmountStr" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="CreationDate">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="creationDate" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Is Archived?">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="archivedStatus" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane maxHeight="75.0" minHeight="100.0" prefHeight="75.0">
+                           <children>
+                              <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" />
+                                    <ColumnConstraints hgrow="ALWAYS" />
+                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label fx:id="takeLabel" text="Take:" GridPane.rowIndex="2">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="takeTextField" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <TextField fx:id="takeAmountTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <Button fx:id="takeAmountCurrencyButton" mnemonicParsing="false" onAction="#moveAmountToTake" text="Button" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="5.0" />
+                                       </GridPane.margin>
+                                    </Button>
+                                    <Label fx:id="takeCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="5.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label fx:id="takeAmountLabel" text="Amount:" GridPane.rowIndex="1" />
+                                    <GridPane GridPane.columnIndex="1">
+                                      <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                      </rowConstraints>
+                                       <children>
+                                          <RadioButton fx:id="takeQuoteRadioButton" mnemonicParsing="false" selected="true" text="QUOTE">
+                                             <GridPane.margin>
+                                                <Insets left="10.0" />
+                                             </GridPane.margin>
+                                             <toggleGroup>
+                                                <ToggleGroup fx:id="takeProfit" />
+                                             </toggleGroup>
+                                          </RadioButton>
+                                          <RadioButton fx:id="takeBaseRadioButton" mnemonicParsing="false" text="BASE" toggleGroup="$takeProfit" GridPane.columnIndex="1">
+                                             <GridPane.margin>
+                                                <Insets left="5.0" />
+                                             </GridPane.margin>
+                                          </RadioButton>
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </padding>
+                              </GridPane>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane prefHeight="50.0" prefWidth="242.0">
+                           <children>
+                              <Button fx:id="takeProfitLossButton" layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#takeProfitLoss" text="Take Profit / Loss" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="10.0" />
+                           </children>
+                        </AnchorPane>
+                     </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
          <Tab text="Settle">
             <content>
                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

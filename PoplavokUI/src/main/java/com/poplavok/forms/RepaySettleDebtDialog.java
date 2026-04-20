@@ -1,8 +1,10 @@
 package com.poplavok.forms;
 
 import com.flower.fxutils.JavaFxUtils;
+import com.poplavok.data.dao.AccountDAO;
 import com.poplavok.data.dao.LoanDAO;
 import com.poplavok.data.dao.LoanInfo;
+import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.Loan;
@@ -15,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -49,6 +52,21 @@ public class RepaySettleDebtDialog extends TabPane {
     @Nullable FilteredList<LoanInfo> loans;
     @FXML @Nullable TableView<LoanInfo> loansTableView;
 
+
+    @Nullable FilteredList<Account> accounts;
+    @FXML @Nullable TableView<Account> accountsTableView;
+    @FXML @Nullable Label takeAmountLabel;
+    @FXML @Nullable Label takeLabel;
+    @FXML @Nullable TextField takeAmountTextField;
+    @FXML @Nullable TextField takeTextField;
+    @FXML @Nullable Button takeAmountCurrencyButton;
+    @FXML @Nullable Label takeCurrencyLabel;
+    @FXML @Nullable Button takeProfitLossButton;
+
+    @FXML @Nullable RadioButton takeQuoteRadioButton;
+    @FXML @Nullable RadioButton takeBaseRadioButton;
+
+
     @Nullable Stage stage;
 
     @Nullable Long levelId = null;
@@ -80,6 +98,7 @@ public class RepaySettleDebtDialog extends TabPane {
         autoResizeTableColumns(loansTableView);
 
         checkNotNull(toRepayTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(takeTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
 
         String currency;
         if (tradeDirection == Direction.LONG) {
@@ -127,6 +146,73 @@ public class RepaySettleDebtDialog extends TabPane {
         if (this.loans != null && !this.loans.isEmpty()) {
             // Select the first loan by default
             checkNotNull(loansTableView).getSelectionModel().selectFirst();
+        }
+
+        // ------------------------------------------------------
+
+        List<Account> accountList = DBUtil.connectGetResultAndClose(
+                sess -> AccountDAO.findByCurrencies(sess, List.of(ticker.getQuote().getCurrency(), ticker.getBase().getCurrency())));
+        this.accounts = new FilteredList<>(FXCollections.observableArrayList(accountList));
+
+        checkNotNull(takeQuoteRadioButton).selectedProperty().addListener((obs, oldVal, newVal) -> updateAccountsFilter(ticker));
+        checkNotNull(takeBaseRadioButton).selectedProperty().addListener((obs, oldVal, newVal) -> updateAccountsFilter(ticker));
+        updateAccountsFilter(ticker);
+
+        checkNotNull(accountsTableView).setItems(this.accounts);
+        autoResizeTableColumns(accountsTableView);
+    }
+
+    private void updateAccountsFilter(MarketTicker ticker) {
+        if (accounts != null) {
+            accounts.setPredicate(acc -> {
+                if (checkNotNull(takeQuoteRadioButton).isSelected()) {
+                    BigDecimal amountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+
+                    checkNotNull(takeCurrencyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+                    checkNotNull(takeAmountCurrencyButton).textProperty().setValue(ticker.getQuote().getCurrency());
+
+                    if (amountQuote.compareTo(BigDecimal.ZERO) >= 0) {
+                        // Take profit
+                        checkNotNull(takeAmountLabel).textProperty().setValue("Available");
+                        checkNotNull(takeLabel).textProperty().setValue("Take Profit");
+                        checkNotNull(takeProfitLossButton).textProperty().setValue("Take Profit");
+                    } else {
+                        // Take loss
+                        checkNotNull(takeAmountLabel).textProperty().setValue("Owed Amount");
+                        checkNotNull(takeLabel).textProperty().setValue("Take Loss");
+                        checkNotNull(takeProfitLossButton).textProperty().setValue("Take Loss");
+                    }
+
+                    checkNotNull(takeAmountTextField).setText(formatAmount(amountQuote));
+                    checkNotNull(takeTextField).setText(formatAmount(BigDecimal.ZERO));
+
+                    return acc.getCurrency().getCurrency().equals(ticker.getQuote().getCurrency());
+                } else if (checkNotNull(takeBaseRadioButton).isSelected()) {
+                    BigDecimal amountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+
+                    checkNotNull(takeCurrencyLabel).textProperty().setValue(ticker.getBase().getCurrency());
+                    checkNotNull(takeAmountCurrencyButton).textProperty().setValue(ticker.getBase().getCurrency());
+
+                    if (amountBase.compareTo(BigDecimal.ZERO) >= 0) {
+                        // Take profit
+                        checkNotNull(takeAmountLabel).textProperty().setValue("Available");
+                        checkNotNull(takeLabel).textProperty().setValue("Take Profit");
+                        checkNotNull(takeProfitLossButton).textProperty().setValue("Take Profit");
+                    } else {
+                        // Take loss
+                        checkNotNull(takeAmountLabel).textProperty().setValue("Owed Amount");
+                        checkNotNull(takeLabel).textProperty().setValue("Take Loss");
+                        checkNotNull(takeProfitLossButton).textProperty().setValue("Take Loss");
+                    }
+
+                    checkNotNull(takeAmountTextField).setText(formatAmount(amountBase));
+                    checkNotNull(takeTextField).setText(formatAmount(BigDecimal.ZERO));
+
+                    return acc.getCurrency().getCurrency().equals(ticker.getBase().getCurrency());
+                } else {
+                    throw new RuntimeException("No Take currency selected");
+                }
+            });
         }
     }
 
@@ -194,5 +280,16 @@ public class RepaySettleDebtDialog extends TabPane {
     @Nullable
     public Repayment getReturnRepayment() {
         return returnRepayment;
+    }
+
+    // --------------------------------------------
+
+    public void moveAmountToTake() {
+        BigDecimal amount = nullToZero(fromString(checkNotNull(takeAmountTextField).getText()));
+        checkNotNull(takeTextField).setText(formatAmount(amount));
+    }
+
+    public void takeProfitLoss() {
+        // TODO: implement
     }
 }

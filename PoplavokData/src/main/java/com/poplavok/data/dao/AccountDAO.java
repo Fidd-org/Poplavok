@@ -38,6 +38,12 @@ public class AccountDAO {
                 .list();
     }
 
+    public static List<Account> findByCurrencies(Session session, List<String> currencies) {
+        return session.createQuery("from Account a left join fetch a.currency where a.currency.currency in :currencies and a.archived = false", Account.class)
+                .setParameter("currencies", currencies)
+                .list();
+    }
+
     public static List<Account> findAvailableByCurrency(Session session, String currency) {
         return session.createQuery("from Account a left join fetch a.currency where a.currency.currency = :currency and a.availableAmount > 0", Account.class)
                 .setParameter("currency", currency)
