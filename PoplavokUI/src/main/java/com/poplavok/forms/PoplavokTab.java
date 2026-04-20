@@ -574,7 +574,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             MarketTicker ticker = checkNotNull(poplavok).getTicker();
             if (ticker != null) {
                 checkNotNull(tickerTextField).setText(poplavok.getTicker().getSymbol());
-                checkNotNull(feeTextField).setText(poplavok.getTicker().getMakerFeeRate());
+                checkNotNull(feeTextField).setText(formatAmount(poplavok.getTicker().getMakerFee()));
                 checkNotNull(directionTextBox).setText(checkNotNull(poplavok.getDirection()).name());
                 Rate rate = RateDAO.getLatestRateForTicker(ticker.getId());
                 if (rate != null && rate.getPrice() != null) {
@@ -711,19 +711,54 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                 String quote = checkNotNull(poplavok).getTicker().getQuote().getCurrency();
                                 String base = checkNotNull(poplavok).getTicker().getBase().getCurrency();
 
+                                // Source level: remove repayment amount from available, remove from debt (reduce debt)
                                 if (loanCurrency.equals(quote)) {
                                     BigDecimal availableAmountQuote = checkNotNull(lvl.getAvailableAmountQuote());
                                     lvl.setAvailableAmountQuote(availableAmountQuote.subtract(repayment.getAmount()));
+                                    BigDecimal debtAmountQuote = checkNotNull(lvl.getDebtQuote());
+                                    lvl.setDebtQuote(debtAmountQuote.subtract(repayment.getAmount()));
                                 } else if (loanCurrency.equals(base)) {
                                     BigDecimal availableAmountBase = checkNotNull(lvl.getAvailableAmountBase());
                                     lvl.setAvailableAmountBase(availableAmountBase.subtract(repayment.getAmount()));
+                                    BigDecimal debtAmountBase = checkNotNull(lvl.getDebtBase());
+                                    lvl.setDebtBase(debtAmountBase.subtract(repayment.getAmount()));
                                 } else {
                                     throw new RuntimeException("Loan currency doesn't match either BASE or QUOTE of the ticker");
                                 }
 
+                                // Add amount to destination
+                                Account destinationAccount = repayment.getDestinationAccount();
+                                Level destinationLevel = repayment.getDestinationLevel();
+                                if (destinationAccount != null) {
+                                    destinationAccount.setAvailableAmount(repayment.getAmount());
+                                } else if (destinationLevel != null) {
+                                    // Destination level: add amount to available, remove from lent amount
+                                    String destinationQuote = destinationLevel.getPoplavok().getTicker().getQuote().getCurrency();
+                                    String destinationBase = destinationLevel.getPoplavok().getTicker().getBase().getCurrency();
+                                    if (loanCurrency.equals(destinationQuote)) {
+                                        BigDecimal availableAmountQuote = checkNotNull(destinationLevel.getAvailableAmountQuote());
+                                        destinationLevel.setAvailableAmountQuote(availableAmountQuote.add(repayment.getAmount()));
+                                        BigDecimal lentAmountQuote = checkNotNull(destinationLevel.getLentAmountQuote());
+                                        destinationLevel.setLentAmountQuote(lentAmountQuote.subtract(repayment.getAmount()));
+                                    } else if (loanCurrency.equals(destinationBase)) {
+                                        BigDecimal availableAmountBase = checkNotNull(destinationLevel.getAvailableAmountBase());
+                                        destinationLevel.setAvailableAmountBase(availableAmountBase.add(repayment.getAmount()));
+                                        BigDecimal lentAmountBase = checkNotNull(destinationLevel.getLentAmountBase());
+                                        destinationLevel.setLentAmountBase(lentAmountBase.subtract(repayment.getAmount()));
+                                    } else {
+                                        throw new RuntimeException("Loan currency doesn't match either BASE or QUOTE of the destination level's ticker");
+                                    }
+                                }
+
                                 DBUtil.connectCommitAndClose(sess -> {
-                                    LevelDAO.update(sess, lvl);
                                     RepaymentDAO.save(sess, repayment);
+
+                                    LevelDAO.update(sess, lvl);
+                                    if (destinationAccount != null) {
+                                        AccountDAO.update(sess, destinationAccount);
+                                    } else if (destinationLevel != null) {
+                                        LevelDAO.update(sess, destinationLevel);
+                                    }
                                 });
                                 refreshContent();
                             }

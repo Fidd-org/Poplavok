@@ -172,6 +172,14 @@ public class RepaySettleDebtDialog extends TabPane {
             }
 
             returnRepayment = new Repayment(selectedLoan, repayAmount, date);
+            returnRepayment.setSourceLevel(level);
+
+            if (selectedLoan.getSourceAccount() != null) {
+                returnRepayment.setDestinationAccount(selectedLoan.getSourceAccount());
+            } else if (selectedLoan.getSourceLevel() != null) {
+                returnRepayment.setDestinationLevel(selectedLoan.getSourceLevel());
+            }
+
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);

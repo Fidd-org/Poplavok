@@ -12,10 +12,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 @Entity
 @Table(name = "tickers")
@@ -157,6 +160,16 @@ public class MarketTicker {
 
     public List<Poplavok> getPoplavoks() {
         return poplavoks;
+    }
+
+    public BigDecimal getMakerFee() {
+        return nullToZero(fromString(checkNotNull(getMakerFeeRate())))
+                .multiply(nullToZero(fromString((checkNotNull(getMakerCoefficient())))));
+    }
+
+    public BigDecimal getTakerFee() {
+        return nullToZero(fromString(checkNotNull(getTakerFeeRate())))
+                .multiply(nullToZero(fromString((checkNotNull(getTakerCoefficient())))));
     }
 }
 

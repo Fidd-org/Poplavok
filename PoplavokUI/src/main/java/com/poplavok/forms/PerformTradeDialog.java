@@ -96,7 +96,7 @@ public class PerformTradeDialog extends VBox {
         checkNotNull(availableQuoteTextField).textProperty().setValue(formatAmount(lvl.getAvailableAmountQuote()));
         checkNotNull(useAllBaseButton).textProperty().setValue(ticker.getBase().getCurrency());
         checkNotNull(useAllQuoteButton).textProperty().setValue(ticker.getQuote().getCurrency());
-        BigDecimal fee = nullToZero(fromString(checkNotNull(ticker.getMakerFeeRate()))).multiply(nullToZero(fromString((checkNotNull(ticker.getMakerCoefficient())))));
+        BigDecimal fee = ticker.getMakerFee();
         checkNotNull(feeTextField).textProperty().setValue(formatAmount(fee));
         checkNotNull(quoteBuyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
         checkNotNull(quoteBuyCommissionLabel).textProperty().setValue(ticker.getQuote().getCurrency());
