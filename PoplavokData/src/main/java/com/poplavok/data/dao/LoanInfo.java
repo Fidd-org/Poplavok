@@ -7,6 +7,8 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
+
 public class LoanInfo {
     public final Loan loan;
     public final List<Repayment> repayments;
@@ -30,7 +32,7 @@ public class LoanInfo {
         }
     }
 
-    public BigDecimal getRepaid() {
+    public BigDecimal getRepaidAmount() {
         BigDecimal totalRepaid = BigDecimal.ZERO;
         for (Repayment repayment : repayments) {
             totalRepaid = totalRepaid.add(repayment.getAmount());
@@ -38,12 +40,17 @@ public class LoanInfo {
         return totalRepaid;
     }
 
-    public BigDecimal getTotalOwed() {
-        return loan.getAmount();
+    public String getRepaid() {
+        BigDecimal totalRepaid = getRepaidAmount();
+        return formatAmount(totalRepaid);
     }
 
-    public BigDecimal getRemainingOwed() {
-        return getTotalOwed().subtract(getRepaid());
+    public String getTotalAmount() {
+        return formatAmount(loan.getAmount());
+    }
+
+    public String getRemainingOwed() {
+        return formatAmount(loan.getAmount().subtract(getRepaidAmount()));
     }
 
     public String getLoanCurrency() {

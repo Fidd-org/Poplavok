@@ -21,6 +21,7 @@ import com.poplavok.data.model.Transaction;
 import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.PoplavokDAO;
 import com.poplavok.data.dao.LoanDAO;
+import com.poplavok.data.dao.RepaymentDAO;
 import com.poplavok.data.utils.BigDecimalUtil;
 import com.poplavok.data.utils.BuyPriceInfo;
 import com.poplavok.data.utils.DBUtil;
@@ -705,9 +706,25 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                         try {
                             Repayment repayment = repaySettleDebtDialog.getReturnRepayment();
                             if (repayment != null) {
-                                // TODO: implement
-                                /*repayment.setPoplavok(checkNotNull(poplavok));
-                                DBUtil.connectCommitAndClose(sess -> LevelDAO.update(sess, checkNotNull(repayment)));*/
+                                Loan loan = repayment.getLoan();
+                                String loanCurrency = loan.getCurrency().getCurrency();
+                                String quote = checkNotNull(poplavok).getTicker().getQuote().getCurrency();
+                                String base = checkNotNull(poplavok).getTicker().getBase().getCurrency();
+
+                                if (loanCurrency.equals(quote)) {
+                                    BigDecimal availableAmountQuote = checkNotNull(lvl.getAvailableAmountQuote());
+                                    lvl.setAvailableAmountQuote(availableAmountQuote.subtract(repayment.getAmount()));
+                                } else if (loanCurrency.equals(base)) {
+                                    BigDecimal availableAmountBase = checkNotNull(lvl.getAvailableAmountBase());
+                                    lvl.setAvailableAmountBase(availableAmountBase.subtract(repayment.getAmount()));
+                                } else {
+                                    throw new RuntimeException("Loan currency doesn't match either BASE or QUOTE of the ticker");
+                                }
+
+                                DBUtil.connectCommitAndClose(sess -> {
+                                    LevelDAO.update(sess, lvl);
+                                    RepaymentDAO.save(sess, repayment);
+                                });
                                 refreshContent();
                             }
                         } catch (Exception e) {

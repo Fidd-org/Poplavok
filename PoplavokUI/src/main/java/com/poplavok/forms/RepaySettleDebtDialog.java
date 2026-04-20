@@ -5,6 +5,7 @@ import com.poplavok.data.dao.LoanDAO;
 import com.poplavok.data.dao.LoanInfo;
 import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
+import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Repayment;
 import com.poplavok.data.utils.DBUtil;
@@ -24,11 +25,14 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
+import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class RepaySettleDebtDialog extends TabPane {
     final static Logger LOGGER = LoggerFactory.getLogger(RepaySettleDebtDialog.class);
@@ -94,7 +98,7 @@ public class RepaySettleDebtDialog extends TabPane {
             if (loan != null) {
                 String loanCurrency = loan.getLoanCurrency();
 
-                checkNotNull(repaymentDebtTextField).setText(formatAmount(loan.getRemainingOwed()));
+                checkNotNull(repaymentDebtTextField).setText(loan.getRemainingOwed());
 
                 if (loanCurrency.equals(ticker.getBase().getCurrency())) {
                     checkNotNull(availableForRepaymentTextField).setText(formatAmount(level.getAvailableAmountBase()));
@@ -126,10 +130,6 @@ public class RepaySettleDebtDialog extends TabPane {
         }
     }
 
-    public void repay() {
-        //
-    }
-
     public void moveAllAvailableToRepay() {
         String debtStr = checkNotNull(repaymentDebtTextField).getText();
         String availableStr = checkNotNull(availableForRepaymentTextField).getText();
@@ -150,7 +150,33 @@ public class RepaySettleDebtDialog extends TabPane {
     }
 
     public void okClose() {
-        // TODO: remove this from FXML
+        try {
+            Loan selectedLoan = checkNotNull(loansTableView).getSelectionModel().getSelectedItem().loan;
+            BigDecimal repayAmount = nullToZero(fromString(checkNotNull(toRepayTextField).textProperty().get()));
+            Date date = new Date();
+
+            BigDecimal debtAmount = nullToZero(fromString(checkNotNull(repaymentDebtTextField).textProperty().get()));
+            BigDecimal availableAmount = nullToZero(fromString(checkNotNull(availableForRepaymentTextField).textProperty().get()));
+
+            if (repayAmount.compareTo(debtAmount) > 0) {
+                JavaFxUtils.showErrorMessage("Repay amount cannot be greater than debt amount");
+                return;
+            }
+            if (repayAmount.compareTo(availableAmount) > 0) {
+                JavaFxUtils.showErrorMessage("Repay amount cannot be greater than available amount");
+                return;
+            }
+            if (repayAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                JavaFxUtils.showErrorMessage("Repay amount must be greater than zero");
+                return;
+            }
+
+            returnRepayment = new Repayment(selectedLoan, repayAmount, date);
+            checkNotNull(stage).close();
+        } catch (Exception e) {
+            JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);
+            LOGGER.error("RepayDialog close Error:", e);
+        }
     }
 
     public void setStage(Stage stage) {
