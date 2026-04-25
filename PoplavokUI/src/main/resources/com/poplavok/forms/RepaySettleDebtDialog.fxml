@@ -131,7 +131,7 @@
                </AnchorPane>
          </content>
        </Tab>
-      <Tab text="Take Profit / Loss">
+      <Tab text="Take Profit">
          <content>
             <AnchorPane prefWidth="550.0">
                <children>
@@ -139,7 +139,7 @@
                      <items>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
-                              <TableView fx:id="accountsTableView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <TableView fx:id="takeProfitAccountsTableView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <columns>
                                     <TableColumn text="Id">
                                        <cellValueFactory>
@@ -194,32 +194,32 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                  </rowConstraints>
                                  <children>
-                                    <Label fx:id="takeLabel" text="Take:" GridPane.rowIndex="2">
+                                    <Label text="Take Profit:" GridPane.rowIndex="2">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
-                                    <TextField fx:id="takeTextField" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <TextField fx:id="takeProfitTextField" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                        <GridPane.margin>
                                           <Insets left="10.0" />
                                        </GridPane.margin>
                                     </TextField>
-                                    <TextField fx:id="takeAmountTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <TextField fx:id="takeProfitAvailableTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets left="10.0" />
                                        </GridPane.margin>
                                     </TextField>
-                                    <Button fx:id="takeAmountCurrencyButton" mnemonicParsing="false" onAction="#moveAmountToTake" text="Button" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <Button fx:id="takeProfitAvailableCurrencyButton" mnemonicParsing="false" onAction="#moveAvailableAmountToTakeProfit" text="Button" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets left="5.0" />
                                        </GridPane.margin>
                                     </Button>
-                                    <Label fx:id="takeCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                    <Label fx:id="takeProfitCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                        <GridPane.margin>
                                           <Insets left="5.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="takeAmountLabel" text="Amount:" GridPane.rowIndex="1" />
+                                    <Label text="Available:" GridPane.rowIndex="1" />
                                     <GridPane GridPane.columnIndex="1">
                                       <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -229,7 +229,7 @@
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                       </rowConstraints>
                                        <children>
-                                          <RadioButton fx:id="takeQuoteRadioButton" mnemonicParsing="false" selected="true" text="QUOTE">
+                                          <RadioButton fx:id="takeProfitQuoteRadioButton" mnemonicParsing="false" selected="true" text="QUOTE">
                                              <GridPane.margin>
                                                 <Insets left="10.0" />
                                              </GridPane.margin>
@@ -237,7 +237,7 @@
                                                 <ToggleGroup fx:id="takeProfit" />
                                              </toggleGroup>
                                           </RadioButton>
-                                          <RadioButton fx:id="takeBaseRadioButton" mnemonicParsing="false" text="BASE" toggleGroup="$takeProfit" GridPane.columnIndex="1">
+                                          <RadioButton fx:id="takeProfitBaseRadioButton" mnemonicParsing="false" text="BASE" toggleGroup="$takeProfit" GridPane.columnIndex="1">
                                              <GridPane.margin>
                                                 <Insets left="5.0" />
                                              </GridPane.margin>
@@ -253,7 +253,113 @@
                         </AnchorPane>
                         <AnchorPane prefHeight="50.0" prefWidth="242.0">
                            <children>
-                              <Button fx:id="takeProfitLossButton" layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#takeProfitLoss" text="Take Profit / Loss" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="10.0" />
+                              <Button layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#takeProfit" text="Take Profit" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="10.0" />
+                           </children>
+                        </AnchorPane>
+                     </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
+      <Tab text="Take Loss">
+         <content>
+            <AnchorPane prefWidth="550.0">
+               <children>
+                  <SplitPane dividerPositions="0.5, 1.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <items>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                              <TableView fx:id="takeLossLoansTableView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <columns>
+                                    <TableColumn text="Id">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="id" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Account Name">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="accountName" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Currency">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="currencyStr" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="AvailableAmount">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="availableAmountStr" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="LentAmount">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="lentAmountStr" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="CreationDate">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="creationDate" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Is Archived?">
+                                       <cellValueFactory>
+                                          <PropertyValueFactory property="archivedStatus" />
+                                       </cellValueFactory>
+                                    </TableColumn>
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane maxHeight="75.0" minHeight="100.0" prefHeight="75.0">
+                           <children>
+                              <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" />
+                                    <ColumnConstraints hgrow="ALWAYS" />
+                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label text="Take:" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="takeLossTextField" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <TextField fx:id="takeLossOwedTextField" editable="false" GridPane.columnIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <Button fx:id="takeLossOwedCurrencyButton" mnemonicParsing="false" onAction="#moveOwedAmountToTakeLoss" text="Button" GridPane.columnIndex="2">
+                                       <GridPane.margin>
+                                          <Insets left="5.0" />
+                                       </GridPane.margin>
+                                    </Button>
+                                    <Label fx:id="takeLossCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="5.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="Owed:" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </padding>
+                              </GridPane>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane prefHeight="50.0" prefWidth="242.0">
+                           <children>
+                              <Button layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#takeLoss" text="Take Loss" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="10.0" />
                            </children>
                         </AnchorPane>
                      </items>
