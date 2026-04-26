@@ -164,6 +164,29 @@ public class RepaySettleDebtDialog extends TabPane {
             checkNotNull(loansTableView).getSelectionModel().selectFirst();
         }
 
+        checkNotNull(takeLossLoansTableView).getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldSelection, loan) -> {
+            if (loan != null) {
+                String loanCurrency = loan.getLoanCurrency();
+
+                checkNotNull(takeLossOwedTextField).setText(loan.getRemainingOwed());
+                checkNotNull(takeLossTextField).setText(formatAmount(BigDecimal.ZERO));
+
+                checkNotNull(takeLossOwedCurrencyButton).textProperty().setValue(loanCurrency);
+                checkNotNull(takeLossCurrencyLabel).textProperty().setValue(loanCurrency);
+            } else {
+                checkNotNull(takeLossOwedTextField).setText("");
+                checkNotNull(takeLossTextField).setText(formatAmount(BigDecimal.ZERO));
+
+                checkNotNull(takeLossOwedCurrencyButton).textProperty().setValue("");
+                checkNotNull(takeLossCurrencyLabel).textProperty().setValue("");
+            }
+        });
+
+        if (this.takeLossLoans != null && !this.takeLossLoans.isEmpty()) {
+            checkNotNull(takeLossLoansTableView).getSelectionModel().selectFirst();
+        }
+
         // ------------------------------------------------------
 
         List<Account> accountList = DBUtil.connectGetResultAndClose(
@@ -174,8 +197,6 @@ public class RepaySettleDebtDialog extends TabPane {
         checkNotNull(takeProfitBaseRadioButton).selectedProperty().addListener((obs, oldVal, newVal) -> updateProfitAccountsFilter(ticker));
         updateProfitAccountsFilter(ticker);
 
-        updateLossLoansFilter(ticker);
-
         checkNotNull(takeProfitAccountsTableView).setItems(this.accounts);
         autoResizeTableColumns(takeProfitAccountsTableView);
 
@@ -183,32 +204,32 @@ public class RepaySettleDebtDialog extends TabPane {
         autoResizeTableColumns(takeLossLoansTableView);
     }
 
-    private void updateLossLoansFilter(MarketTicker ticker) {
-        if (loans != null) {
-            //
-        }
-    }
-
     private void updateProfitAccountsFilter(MarketTicker ticker) {
         if (accounts != null) {
             accounts.setPredicate(acc -> {
                 if (checkNotNull(takeProfitQuoteRadioButton).isSelected()) {
-                    BigDecimal amountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+                    BigDecimal profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+                    if (profitAmountQuote.compareTo(BigDecimal.ZERO) <= 0) {
+                        profitAmountQuote = BigDecimal.ZERO;
+                    }
 
                     checkNotNull(takeProfitCurrencyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
                     checkNotNull(takeProfitAvailableCurrencyButton).textProperty().setValue(ticker.getQuote().getCurrency());
 
-                    checkNotNull(takeProfitAvailableTextField).setText(formatAmount(amountQuote));
+                    checkNotNull(takeProfitAvailableTextField).setText(formatAmount(profitAmountQuote));
                     checkNotNull(takeProfitTextField).setText(formatAmount(BigDecimal.ZERO));
 
                     return acc.getCurrency().getCurrency().equals(ticker.getQuote().getCurrency());
                 } else if (checkNotNull(takeProfitBaseRadioButton).isSelected()) {
-                    BigDecimal amountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+                    BigDecimal profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+                    if (profitAmountBase.compareTo(BigDecimal.ZERO) <= 0) {
+                        profitAmountBase = BigDecimal.ZERO;
+                    }
 
                     checkNotNull(takeProfitCurrencyLabel).textProperty().setValue(ticker.getBase().getCurrency());
                     checkNotNull(takeProfitAvailableCurrencyButton).textProperty().setValue(ticker.getBase().getCurrency());
 
-                    checkNotNull(takeProfitAvailableTextField).setText(formatAmount(amountBase));
+                    checkNotNull(takeProfitAvailableTextField).setText(formatAmount(profitAmountBase));
                     checkNotNull(takeProfitTextField).setText(formatAmount(BigDecimal.ZERO));
 
                     return acc.getCurrency().getCurrency().equals(ticker.getBase().getCurrency());

@@ -11,14 +11,6 @@
 
 <VBox prefHeight="400.0" prefWidth="478.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.poplavok.forms.MainForm">
     <MenuBar VBox.vgrow="NEVER">
-      <Menu mnemonicParsing="false" text="Fund">
-        <items>
-          <MenuItem mnemonicParsing="false" onAction="#openAccountsTab" text="Accounts" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-               <MenuItem mnemonicParsing="false" onAction="#closeAllTabs" text="Close all tabs" />
-               <MenuItem mnemonicParsing="false" onAction="#quit" text="Quit" />
-        </items>
-      </Menu>
       <Menu mnemonicParsing="false" text="Trade">
         <items>
           <MenuItem mnemonicParsing="false" onAction="#openPoplavokListTab" text="Poplavoks" />
@@ -26,6 +18,14 @@
             <MenuItem mnemonicParsing="false" text="Trading Calc" />
             <MenuItem mnemonicParsing="false" text="Interest Calc" />
             <MenuItem mnemonicParsing="false" text="Liquidation Calc" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+               <MenuItem mnemonicParsing="false" onAction="#closeAllTabs" text="Close all tabs" />
+               <MenuItem mnemonicParsing="false" onAction="#quit" text="Quit" />
+        </items>
+      </Menu>
+      <Menu mnemonicParsing="false" text="Fund">
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#openAccountsTab" text="Accounts" />
         </items>
       </Menu>
       <Menu mnemonicParsing="false" text="Instruments">

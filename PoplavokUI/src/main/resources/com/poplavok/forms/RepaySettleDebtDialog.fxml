@@ -272,39 +272,34 @@
                            <children>
                               <TableView fx:id="takeLossLoansTableView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <columns>
-                                    <TableColumn text="Id">
+                                    <TableColumn text="LoanId">
                                        <cellValueFactory>
-                                          <PropertyValueFactory property="id" />
+                                          <PropertyValueFactory property="LoanId" />
                                        </cellValueFactory>
                                     </TableColumn>
-                                    <TableColumn text="Account Name">
+                                    <TableColumn text="Source">
                                        <cellValueFactory>
-                                          <PropertyValueFactory property="accountName" />
+                                          <PropertyValueFactory property="Source" />
                                        </cellValueFactory>
                                     </TableColumn>
-                                    <TableColumn text="Currency">
+                                    <TableColumn text="LoanCurrency">
                                        <cellValueFactory>
-                                          <PropertyValueFactory property="currencyStr" />
+                                          <PropertyValueFactory property="LoanCurrency" />
                                        </cellValueFactory>
                                     </TableColumn>
-                                    <TableColumn text="AvailableAmount">
+                                    <TableColumn text="RemainingOwed">
                                        <cellValueFactory>
-                                          <PropertyValueFactory property="availableAmountStr" />
+                                          <PropertyValueFactory property="RemainingOwed" />
                                        </cellValueFactory>
                                     </TableColumn>
-                                    <TableColumn text="LentAmount">
+                                    <TableColumn text="Repaid">
                                        <cellValueFactory>
-                                          <PropertyValueFactory property="lentAmountStr" />
+                                          <PropertyValueFactory property="Repaid" />
                                        </cellValueFactory>
                                     </TableColumn>
-                                    <TableColumn text="CreationDate">
+                                    <TableColumn text="TotalAmount">
                                        <cellValueFactory>
-                                          <PropertyValueFactory property="creationDate" />
-                                       </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Is Archived?">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="archivedStatus" />
+                                          <PropertyValueFactory property="TotalAmount" />
                                        </cellValueFactory>
                                     </TableColumn>
                                  </columns>
