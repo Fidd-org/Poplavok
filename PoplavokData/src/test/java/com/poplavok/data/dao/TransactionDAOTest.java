@@ -65,7 +65,7 @@ public class TransactionDAOTest {
         TransactionDAO.save(session, loan);
 
         // Create Repayment
-        Repayment repayment = new Repayment(loan, nullToZero(fromString("500.00")), new Date());
+        Repayment repayment = Repayment.repay(loan, null, nullToZero(fromString("500.00")), new Date());
         repayment.setNotes("Partial repayment");
         TransactionDAO.save(session, repayment);
 

@@ -123,7 +123,7 @@
                               </children>
                            </AnchorPane>
                             <AnchorPane prefHeight="50.0" prefWidth="242.0">
-                                <Button layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#okClose" text="Repay Debt" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="10.0" />
+                                <Button layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#repay" text="Repay Debt" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="10.0" />
                             </AnchorPane>
                        </items>
                      </SplitPane>
@@ -455,7 +455,7 @@
                            </AnchorPane>
                            <AnchorPane prefHeight="35.0" prefWidth="242.0">
                               <children>
-                                 <Button fx:id="addButton1" layoutX="97.0" layoutY="1.0" mnemonicParsing="false" onAction="#okClose" text="Settle Debt" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="0.0" />
+                                 <Button fx:id="addButton1" layoutX="97.0" layoutY="1.0" mnemonicParsing="false" text="Settle Debt" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="0.0" />
                               </children>
                            </AnchorPane>
                         </children>

@@ -38,11 +38,34 @@ public class Repayment extends Transaction {
     protected Repayment() {
     }
 
-    public Repayment(Loan loan, BigDecimal amount, Date date) {
+    public Repayment(Currency currency, @Nullable Account sourceAccount, @Nullable Level sourceLevel,
+                     @Nullable Account destinationAccount, @Nullable Level destinationLevel,
+                     BigDecimal amount, Date date) {
+        super(currency, sourceAccount, sourceLevel, destinationAccount, destinationLevel, amount, date);
+    }
+
+    public static Repayment repay(Loan loan, Level sourceLevel, BigDecimal amount, Date date) {
         // Diagram links Repayment to Level.
         // Assuming Repayment is related to a specific level (maybe repayment happens at a level?).
-        super(loan.getCurrency(), null, null, null, null, amount, date);
-        this.loan = loan;
+        Repayment repayment = new Repayment(loan.getCurrency(), null, sourceLevel, loan.getSourceAccount(), null, amount, date);
+        repayment.loan = loan;
+        repayment.type = RepaymentType.REPAY;
+        return repayment;
+    }
+
+    public static Repayment profit(Level sourceLevel, Account destinationAccount, BigDecimal repayAmount, Date date) {
+        Repayment repayment = new Repayment(destinationAccount.getCurrency(), null, sourceLevel, destinationAccount, null, repayAmount, date);
+        repayment.type = RepaymentType.PROFIT;
+        return repayment;
+    }
+
+    public static Repayment loss(Loan loan, Level sourceLevel, BigDecimal amount, Date date) {
+        // Diagram links Repayment to Level.
+        // Assuming Repayment is related to a specific level (maybe repayment happens at a level?).
+        Repayment repayment = new Repayment(loan.getCurrency(), null, sourceLevel, null, null, amount, date);
+        repayment.loan = loan;
+        repayment.type = RepaymentType.LOSS;
+        return repayment;
     }
 
     public Loan getLoan() {

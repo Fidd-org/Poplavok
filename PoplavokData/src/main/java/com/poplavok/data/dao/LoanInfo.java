@@ -40,6 +40,10 @@ public class LoanInfo {
         return totalRepaid;
     }
 
+    public BigDecimal getRemainingOwedAmount() {
+        return loan.getAmount().subtract(getRepaidAmount());
+    }
+
     public String getRepaid() {
         BigDecimal totalRepaid = getRepaidAmount();
         return formatAmount(totalRepaid);
@@ -50,7 +54,7 @@ public class LoanInfo {
     }
 
     public String getRemainingOwed() {
-        return formatAmount(loan.getAmount().subtract(getRepaidAmount()));
+        return formatAmount(getRemainingOwedAmount());
     }
 
     public String getLoanCurrency() {
