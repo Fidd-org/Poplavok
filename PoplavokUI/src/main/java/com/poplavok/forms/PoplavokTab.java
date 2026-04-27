@@ -803,7 +803,29 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     public void refreshPrice() {}
 
-    public void closePoplavok() {}
+    public void closePoplavok() {
+        // Close poplavok IFF - all its levels are closed
+        try {
+            DBUtil.connectCommitAndClose(sess -> {
+                List<Level> openLevels = LevelDAO.findByPoplavokId(sess, poplavokId, false);
+                if (!openLevels.isEmpty()) {
+                    throw new RuntimeException("Cannot close poplavok. All levels must be closed.");
+                }
+
+                checkNotNull(poplavok).setActive(false);
+                poplavok.setCloseDate(new Date());
+                poplavok = PoplavokDAO.update(sess, poplavok);
+            });
+
+            refreshContent();
+
+            showMessage("Poplavok closed.");
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error closing poplavok: " + e.getMessage(), ButtonType.OK);
+            LOGGER.error("Error closing poplavok: ", e);
+            alert.showAndWait();
+        }
+    }
 
     public void performTrade() {
         try {
