@@ -15,19 +15,23 @@ import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Rate;
-import com.poplavok.data.model.Repayment;
+import com.poplavok.data.model.RepaymentType;
 import com.poplavok.data.model.Trade;
 import com.poplavok.data.model.Transaction;
 import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.PoplavokDAO;
 import com.poplavok.data.dao.LoanDAO;
-import com.poplavok.data.dao.RepaymentDAO;
 import com.poplavok.data.utils.BigDecimalUtil;
 import com.poplavok.data.utils.BuyPriceInfo;
 import com.poplavok.data.utils.DBUtil;
 import com.poplavok.data.utils.PriceCalculator;
 import com.poplavok.data.utils.PriceInfo;
+import com.poplavok.data.utils.RepaymentManager;
 import com.poplavok.forms.wrapper.LevelTransaction;
+import com.poplavok.forms.wrapper.repayment.LossRepaymentInfo;
+import com.poplavok.forms.wrapper.repayment.ProfitRepaymentInfo;
+import com.poplavok.forms.wrapper.repayment.RepayRepaymentInfo;
+import com.poplavok.forms.wrapper.repayment.RepaymentInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
@@ -50,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.math.BigDecimal;
@@ -704,64 +709,16 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             workspaceStage.setOnHidden(
                     ev -> {
                         try {
-                            Repayment repayment = repaySettleDebtDialog.getReturnRepayment();
+                            RepaymentInfo repayment = repaySettleDebtDialog.getReturnRepayment();
                             if (repayment != null) {
-                                Loan loan = repayment.getLoan();
-                                String loanCurrency = loan.getCurrency().getCurrency();
-                                String quote = checkNotNull(poplavok).getTicker().getQuote().getCurrency();
-                                String base = checkNotNull(poplavok).getTicker().getBase().getCurrency();
-
-                                // Source level: remove repayment amount from available, remove from debt (reduce debt)
-                                if (loanCurrency.equals(quote)) {
-                                    BigDecimal availableAmountQuote = checkNotNull(lvl.getAvailableAmountQuote());
-                                    lvl.setAvailableAmountQuote(availableAmountQuote.subtract(repayment.getAmount()));
-                                    BigDecimal debtAmountQuote = checkNotNull(lvl.getDebtQuote());
-                                    lvl.setDebtQuote(debtAmountQuote.subtract(repayment.getAmount()));
-                                } else if (loanCurrency.equals(base)) {
-                                    BigDecimal availableAmountBase = checkNotNull(lvl.getAvailableAmountBase());
-                                    lvl.setAvailableAmountBase(availableAmountBase.subtract(repayment.getAmount()));
-                                    BigDecimal debtAmountBase = checkNotNull(lvl.getDebtBase());
-                                    lvl.setDebtBase(debtAmountBase.subtract(repayment.getAmount()));
-                                } else {
-                                    throw new RuntimeException("Loan currency doesn't match either BASE or QUOTE of the ticker");
+                                switch (repayment.getRepaymentType()) {
+                                    case REPAY: processRepay(lvl, repayment); break;
+                                    case PROFIT: processTakeProfit(lvl, repayment); break;
+                                    case LOSS: processTakeLoss(lvl, repayment); break;
+                                    default: throw new RuntimeException("Unknown repayment type: " + repayment.getRepaymentType());
                                 }
-
-                                // Add amount to destination
-                                Account destinationAccount = repayment.getDestinationAccount();
-                                Level destinationLevel = repayment.getDestinationLevel();
-                                if (destinationAccount != null) {
-                                    destinationAccount.setAvailableAmount(repayment.getAmount());
-                                } else if (destinationLevel != null) {
-                                    // Destination level: add amount to available, remove from lent amount
-                                    String destinationQuote = destinationLevel.getPoplavok().getTicker().getQuote().getCurrency();
-                                    String destinationBase = destinationLevel.getPoplavok().getTicker().getBase().getCurrency();
-                                    if (loanCurrency.equals(destinationQuote)) {
-                                        BigDecimal availableAmountQuote = checkNotNull(destinationLevel.getAvailableAmountQuote());
-                                        destinationLevel.setAvailableAmountQuote(availableAmountQuote.add(repayment.getAmount()));
-                                        BigDecimal lentAmountQuote = checkNotNull(destinationLevel.getLentAmountQuote());
-                                        destinationLevel.setLentAmountQuote(lentAmountQuote.subtract(repayment.getAmount()));
-                                    } else if (loanCurrency.equals(destinationBase)) {
-                                        BigDecimal availableAmountBase = checkNotNull(destinationLevel.getAvailableAmountBase());
-                                        destinationLevel.setAvailableAmountBase(availableAmountBase.add(repayment.getAmount()));
-                                        BigDecimal lentAmountBase = checkNotNull(destinationLevel.getLentAmountBase());
-                                        destinationLevel.setLentAmountBase(lentAmountBase.subtract(repayment.getAmount()));
-                                    } else {
-                                        throw new RuntimeException("Loan currency doesn't match either BASE or QUOTE of the destination level's ticker");
-                                    }
-                                }
-
-                                DBUtil.connectCommitAndClose(sess -> {
-                                    RepaymentDAO.save(sess, repayment);
-
-                                    LevelDAO.update(sess, lvl);
-                                    if (destinationAccount != null) {
-                                        AccountDAO.update(sess, destinationAccount);
-                                    } else if (destinationLevel != null) {
-                                        LevelDAO.update(sess, destinationLevel);
-                                    }
-                                });
-                                refreshContent();
                             }
+                            refreshContent();
                         } catch (Exception e) {
                             Alert alert = new Alert(Alert.AlertType.ERROR, "Error creating level: " + e, ButtonType.OK);
                             LOGGER.error("Error creating level: ", e);
@@ -774,6 +731,36 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             LOGGER.error("Error updating level: ", e);
             alert.showAndWait();
         }
+    }
+
+    public void processTakeProfit(Level sourceLevel, RepaymentInfo _repayment) {
+        if (_repayment.getRepaymentType() != RepaymentType.PROFIT) {
+            throw new RuntimeException("Trying to process non-REPAY type repayment (" +
+                    _repayment.getRepaymentType() + ") with repay process ");
+        }
+
+        ProfitRepaymentInfo repayment = (ProfitRepaymentInfo)_repayment;
+        RepaymentManager.takeProfit(sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getAccountToMoveProfitTo(), repayment.getAmount(), new Date());
+    }
+
+    public void processTakeLoss(Level sourceLevel, RepaymentInfo _repayment) {
+        if (_repayment.getRepaymentType() != RepaymentType.LOSS) {
+            throw new RuntimeException("Trying to process non-REPAY type repayment (" +
+                    _repayment.getRepaymentType() + ") with repay process ");
+        }
+
+        LossRepaymentInfo repayment = (LossRepaymentInfo)_repayment;
+        RepaymentManager.takeLoss(repayment.loanToWriteOff(), sourceLevel, repayment.getAmount(), new Date());
+    }
+
+    public void processRepay(Level sourceLevel, RepaymentInfo _repayment) {
+        if (_repayment.getRepaymentType() != RepaymentType.REPAY) {
+            throw new RuntimeException("Trying to process non-REPAY type repayment (" +
+                    _repayment.getRepaymentType() + ") with repay process ");
+        }
+
+        RepayRepaymentInfo repayment = (RepayRepaymentInfo)_repayment;
+        RepaymentManager.repay(repayment.getLoanToRepay(), sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getAmount(), new Date());
     }
 
     public void closeLevel() {

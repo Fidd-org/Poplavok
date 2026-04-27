@@ -9,8 +9,11 @@ import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.MarketTicker;
-import com.poplavok.data.model.Repayment;
 import com.poplavok.data.utils.DBUtil;
+import com.poplavok.forms.wrapper.repayment.LossRepaymentInfo;
+import com.poplavok.forms.wrapper.repayment.ProfitRepaymentInfo;
+import com.poplavok.forms.wrapper.repayment.RepayRepaymentInfo;
+import com.poplavok.forms.wrapper.repayment.RepaymentInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
@@ -84,7 +87,7 @@ public class RepaySettleDebtDialog extends TabPane {
     @Nullable Long levelId = null;
     Level level;
     final Direction tradeDirection;
-    @Nullable volatile Repayment returnRepayment = null;
+    @Nullable volatile RepaymentInfo returnRepayment = null;
 
     public RepaySettleDebtDialog(Level level, MarketTicker ticker, @Nullable BigDecimal price, @Nullable BigDecimal fee, Direction tradeDirection) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("RepaySettleDebtDialog.fxml"));
@@ -262,8 +265,12 @@ public class RepaySettleDebtDialog extends TabPane {
     public void repay() {
         try {
             Loan selectedLoan = checkNotNull(loansTableView).getSelectionModel().getSelectedItem().loan;
+            if (selectedLoan == null) {
+                JavaFxUtils.showErrorMessage("Please select loan");
+                return;
+            }
+
             BigDecimal repayAmount = nullToZero(fromString(checkNotNull(toRepayTextField).textProperty().get()));
-            Date date = new Date();
 
             BigDecimal debtAmount = nullToZero(fromString(checkNotNull(repaymentDebtTextField).textProperty().get()));
             BigDecimal availableAmount = nullToZero(fromString(checkNotNull(availableForRepaymentTextField).textProperty().get()));
@@ -281,8 +288,7 @@ public class RepaySettleDebtDialog extends TabPane {
                 return;
             }
 
-            returnRepayment = Repayment.repay(selectedLoan, level, repayAmount, date);
-
+            returnRepayment = new RepayRepaymentInfo(repayAmount, selectedLoan);
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);
@@ -295,7 +301,7 @@ public class RepaySettleDebtDialog extends TabPane {
     }
 
     @Nullable
-    public Repayment getReturnRepayment() {
+    public RepaymentInfo getReturnRepayment() {
         return returnRepayment;
     }
 
@@ -310,9 +316,12 @@ public class RepaySettleDebtDialog extends TabPane {
         // Taking profit from this level to the account chosen by user
         try {
             Account selectedAccount = checkNotNull(takeProfitAccountsTableView).getSelectionModel().getSelectedItem();
-            BigDecimal repayAmount = nullToZero(fromString(checkNotNull(takeProfitTextField).textProperty().get()));
-            Date date = new Date();
+            if (selectedAccount == null) {
+                JavaFxUtils.showErrorMessage("Please select account");
+                return;
+            }
 
+            BigDecimal repayAmount = nullToZero(fromString(checkNotNull(takeProfitTextField).textProperty().get()));
             BigDecimal availableAmount = nullToZero(fromString(checkNotNull(takeProfitAvailableTextField).textProperty().get()));
 
             if (repayAmount.compareTo(availableAmount) > 0) {
@@ -324,8 +333,7 @@ public class RepaySettleDebtDialog extends TabPane {
                 return;
             }
 
-            returnRepayment = Repayment.profit(level, selectedAccount, repayAmount, date);
-
+            returnRepayment = new ProfitRepaymentInfo(repayAmount, selectedAccount);
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);
@@ -344,9 +352,12 @@ public class RepaySettleDebtDialog extends TabPane {
         // Taking loss - reduce owed amount
         try {
             LoanInfo selectedLoan = checkNotNull(takeLossLoansTableView).getSelectionModel().getSelectedItem();
-            BigDecimal takeLossAmount = nullToZero(fromString(checkNotNull(takeLossTextField).textProperty().get()));
-            Date date = new Date();
+            if (selectedLoan == null) {
+                JavaFxUtils.showErrorMessage("Please select loan");
+                return;
+            }
 
+            BigDecimal takeLossAmount = nullToZero(fromString(checkNotNull(takeLossTextField).textProperty().get()));
             if (takeLossAmount.compareTo(selectedLoan.getRemainingOwedAmount()) > 0) {
                 JavaFxUtils.showErrorMessage("TakeLoss amount cannot be greater than owed amount");
                 return;
@@ -356,8 +367,7 @@ public class RepaySettleDebtDialog extends TabPane {
                 return;
             }
 
-            returnRepayment = Repayment.loss(selectedLoan.loan, level, takeLossAmount, date);
-
+            returnRepayment = new LossRepaymentInfo(takeLossAmount, selectedLoan.loan);
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);

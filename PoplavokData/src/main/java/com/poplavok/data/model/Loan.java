@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 @Entity
 @Table(name = "loans")
@@ -30,6 +31,14 @@ public class Loan extends Transaction {
     @Column(name = "interest_rate", precision = 10, scale = 6)
     @Nullable
     private BigDecimal interestRate;
+
+    @Column(name = "repaid_amount", precision = 10, scale = 6)
+    @Nullable
+    private BigDecimal repaidAmount;
+
+    @Column(name = "lost_amount", precision = 10, scale = 6)
+    @Nullable
+    private BigDecimal lostAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "interest_rate_type", length = 20)
@@ -88,5 +97,20 @@ public class Loan extends Transaction {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public @Nullable BigDecimal getRepaidAmount() { return repaidAmount; }
+
+    public void setRepaidAmount(@Nullable BigDecimal repaidAmount) { this.repaidAmount = repaidAmount; }
+
+    public @Nullable BigDecimal getLostAmount() { return lostAmount; }
+
+    public void setLostAmount(@Nullable BigDecimal lostAmount) { this.lostAmount = lostAmount; }
+
+    public boolean isFullyRepaidOrLost() {
+        BigDecimal repaid = nullToZero(getRepaidAmount());
+        BigDecimal lost = nullToZero(getLostAmount());
+
+        return (repaid.add(lost).compareTo(nullToZero(getAmount())) >= 0);
     }
 }
