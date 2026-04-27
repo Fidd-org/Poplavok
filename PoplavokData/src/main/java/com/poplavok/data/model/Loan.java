@@ -28,15 +28,15 @@ public class Loan extends Transaction {
     @Nullable
     private LoanType loanType;
 
-    @Column(name = "interest_rate", precision = 10, scale = 6)
+    @Column(name = "interest_rate", precision = 20, scale = 8)
     @Nullable
     private BigDecimal interestRate;
 
-    @Column(name = "repaid_amount", precision = 10, scale = 6)
+    @Column(name = "repaid_amount", precision = 20, scale = 8)
     @Nullable
     private BigDecimal repaidAmount;
 
-    @Column(name = "lost_amount", precision = 10, scale = 6)
+    @Column(name = "lost_amount", precision = 20, scale = 8)
     @Nullable
     private BigDecimal lostAmount;
 

@@ -156,14 +156,14 @@ public class RepaymentManager {
         return dbRepayment;
     }
 
-    public static Repayment takeLoss(Loan loan, Level sourceLevel, BigDecimal lossAmount, Date date) {
+    public static Repayment takeLoss(Loan loan, MarketTicker ticker, Level sourceLevel, BigDecimal lossAmount, Date date) {
         String loanCurrency = loan.getCurrency().getCurrency();
 
         // 1. Process source
 
         // Source level: writing off debt amount
-        String sourceQuote = sourceLevel.getPoplavok().getTicker().getQuote().getCurrency();
-        String sourceBase = sourceLevel.getPoplavok().getTicker().getBase().getCurrency();
+        String sourceQuote = ticker.getQuote().getCurrency();
+        String sourceBase = ticker.getBase().getCurrency();
         if (loanCurrency.equals(sourceQuote)) {
             BigDecimal debtAmountQuote = nullToZero(sourceLevel.getDebtQuote());
             sourceLevel.setDebtQuote(debtAmountQuote.subtract(lossAmount));

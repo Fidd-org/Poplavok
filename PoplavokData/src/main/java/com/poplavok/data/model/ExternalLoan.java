@@ -37,7 +37,7 @@ public class ExternalLoan {
     @Nullable
     private String externalId;
 
-    @Column(name = "daily_interest_rate", precision = 10, scale = 8)
+    @Column(name = "daily_interest_rate", precision = 20, scale = 8)
     @Nullable
     private BigDecimal dailyInterestRate;
 

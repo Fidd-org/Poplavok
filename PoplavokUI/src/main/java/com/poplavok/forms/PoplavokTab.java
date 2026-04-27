@@ -750,7 +750,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
 
         LossRepaymentInfo repayment = (LossRepaymentInfo)_repayment;
-        RepaymentManager.takeLoss(repayment.loanToWriteOff(), sourceLevel, repayment.getAmount(), new Date());
+        RepaymentManager.takeLoss(repayment.loanToWriteOff(), checkNotNull(poplavok).getTicker(), sourceLevel, repayment.getAmount(), new Date());
     }
 
     public void processRepay(Level sourceLevel, RepaymentInfo _repayment) {
