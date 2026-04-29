@@ -827,6 +827,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
     }
 
+    public void averagingTrade() {
+        //
+    }
+
     public void performTrade() {
         try {
             List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
