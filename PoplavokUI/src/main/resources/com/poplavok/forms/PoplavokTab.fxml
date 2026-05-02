@@ -51,7 +51,7 @@
                 <Button mnemonicParsing="false" onAction="#allocateFunds" text="[ Allocate funds ]" />
                   <Button mnemonicParsing="false" onAction="#repay" text="[ Repay ]" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Button mnemonicParsing="false" onAction="#performTrade" text="[ Level trade ]" />
+                  <Button mnemonicParsing="false" onAction="#performTrade" text="[ Trade ]" />
                   <Button mnemonicParsing="false" onAction="#averagingTrade" text="[ Averaging trade ]" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <CheckBox fx:id="showClosedLevelsCheckBox" mnemonicParsing="false" text="Show closed" />

@@ -134,7 +134,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             this.poplavok.getTicker().getSymbol();
         });
 
-        checkNotNull(averagingPane).init(checkNotNull(poplavok), checkNotNull(levelsTable), checkNotNull(feeTextField));
+        checkNotNull(averagingPane).init(checkNotNull(poplavok).getTicker(),
+                checkNotNull(checkNotNull(poplavok).getDirection()),
+                checkNotNull(levelsTable).getSelectionModel().getSelectedItems(),
+                nullToZero(fromString(checkNotNull(feeTextField).textProperty().get())));
         averagingPane.updateLabels();
 
         refreshContent();
@@ -548,7 +551,80 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     }
 
     public void averagingTrade() {
-        //
+        try {
+            List<Level> levels = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+
+            for (Level lvl : levels) {
+                LevelState state = lvl.getState();
+                if (state != LevelState.TRADING && state != LevelState.FUNDING) {
+                    showErrorMessage("Levels in " + state + " state can't perform trades.");
+                    return;
+                }
+            }
+
+            BigDecimal price = BigDecimalUtil.fromString(checkNotNull(priceTextField).textProperty().get());
+            AveragingTradeDialog averagingTradeDialog = new AveragingTradeDialog(levels, checkNotNull(poplavok).getTicker(),
+                    checkNotNull(checkNotNull(poplavok).getDirection()),
+                    nullToZero(fromString(checkNotNull(feeTextField).textProperty().get())), price);
+            Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
+                    stage -> { averagingTradeDialog.setStage(stage); return averagingTradeDialog; },
+                    "Perform Averaging Trade");
+
+            workspaceStage.setOnHidden(
+                    ev -> {
+                        try {
+                            Trade trade = averagingTradeDialog.getReturnTrade();
+                            if (trade != null) {
+                                /*BigDecimal baseIn = nullToZero(trade.getAmountBaseIn());
+                                BigDecimal quoteIn = nullToZero(trade.getAmountQuoteIn());
+                                BigDecimal baseOut = nullToZero(trade.getAmountBaseOut());
+                                BigDecimal quoteOut = nullToZero(trade.getAmountQuoteOut());
+                                BigDecimal baseCommission = nullToZero(trade.getCommissionBase());
+                                BigDecimal quoteCommission = nullToZero(trade.getCommissionQuote());
+
+                                BigDecimal lvlBase = nullToZero(lvl.getAvailableAmountBase());
+                                BigDecimal lvlQuote = nullToZero(lvl.getAvailableAmountQuote());
+
+                                if (lvlBase.compareTo(baseIn) < 0) {
+                                    throw new RuntimeException("Not enough Base available in level for this trade");
+                                }
+
+                                if (lvlQuote.compareTo(quoteIn) < 0) {
+                                    throw new RuntimeException("Not enough Quote available in level for this trade");
+                                }
+
+                                lvl.setState(LevelState.TRADING);
+
+                                lvlBase = lvlBase.subtract(baseIn).add(baseOut);
+                                lvlQuote = lvlQuote.subtract(quoteIn).add(quoteOut);
+
+                                lvl.setAvailableAmountBase(lvlBase);
+                                lvl.setAvailableAmountQuote(lvlQuote);
+
+                                LevelTrade levelTrade = new LevelTrade();
+                                levelTrade.setLevel(lvl);
+                                levelTrade.setTrade(trade);
+
+                                DBUtil.connectCommitAndClose(sess -> {
+                                    sess.persist(trade);
+                                    sess.persist(levelTrade);
+                                    LevelDAO.update(sess, lvl);
+                                });
+                                */
+                                refreshContent();
+                            }
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error performing averaging trade: " + e, ButtonType.OK);
+                            LOGGER.error("Error performing averaging trade: ", e);
+                            alert.showAndWait();
+                        }
+                    }
+            );
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error performing averaging trade: " + e, ButtonType.OK);
+            LOGGER.error("Error performing averaging trade: ", e);
+            alert.showAndWait();
+        }
     }
 
     public void performTrade() {
