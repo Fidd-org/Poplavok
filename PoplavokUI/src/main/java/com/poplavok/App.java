@@ -31,7 +31,7 @@ public class App extends Application {
             MainForm mainForm = fxmlLoader.getController();
             mainForm.setMainStage(mainStage);
 
-            Scene mainScene = new Scene(rootNode, 1024, 768);
+            Scene mainScene = new Scene(rootNode, 1200, 800);
 
             //Close all threads when we close JavaFX windows.
             mainStage.setOnHidden(event -> {

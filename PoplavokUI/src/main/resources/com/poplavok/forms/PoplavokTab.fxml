@@ -19,7 +19,6 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import com.poplavok.forms.AveragingPane?>
 
 <fx:root prefHeight="756.0" prefWidth="1020.0" type="AnchorPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
     <SplitPane dividerPositions="0.0, 0.0, 0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
@@ -182,9 +181,8 @@
          <children>
             <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <tabs>
-                  <Tab text="Averaging">
+                  <Tab fx:id="averagingTab" text="Averaging">
                     <content>
-                      <AveragingPane fx:id="averagingPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                     </content>
                   </Tab>
                 <Tab text="Transactions (level)">

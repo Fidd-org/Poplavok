@@ -39,6 +39,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tab;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
@@ -100,7 +101,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @FXML @Nullable Button closeLevelButton;
     @FXML @Nullable CheckBox showClosedLevelsCheckBox;
 
-    @FXML @Nullable AveragingPane averagingPane;
+    @FXML @Nullable Tab averagingTab;
+    @Nullable AveragingPane averagingPane;
 
     protected final MainForm mainApp;
     protected final Long poplavokId;
@@ -127,6 +129,9 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         checkNotNull(showClosedLevelsCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
             refreshContent();
         });
+
+        averagingPane = new AveragingPane();
+        checkNotNull(averagingTab).setContent(averagingPane);
 
         DBUtil.connectCommitAndClose(sess -> {
             this.poplavok = PoplavokDAO.findById(sess, poplavokId)

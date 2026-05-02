@@ -45,7 +45,8 @@ import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 public class AveragingTradeDialog extends AnchorPane {
     final static Logger LOGGER = LoggerFactory.getLogger(AveragingTradeDialog.class);
 
-    @FXML @Nullable AveragingPane averagingPane;
+    @FXML @Nullable AnchorPane averagingPaneContainer;
+    @Nullable AveragingPane averagingPane;
     @FXML @Nullable TableView<Level> levelsTable;
 
     @Nullable Stage stage;
@@ -64,6 +65,13 @@ public class AveragingTradeDialog extends AnchorPane {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+
+        averagingPane = new AveragingPane();
+        checkNotNull(averagingPaneContainer).getChildren().add(averagingPane);
+        AnchorPane.setTopAnchor(averagingPane, 0.0);
+        AnchorPane.setBottomAnchor(averagingPane, 0.0);
+        AnchorPane.setLeftAnchor(averagingPane, 0.0);
+        AnchorPane.setRightAnchor(averagingPane, 0.0);
 
         this.levels = levels;
         checkNotNull(levelsTable).setItems(new FilteredList<>(FXCollections.observableArrayList(levels)));

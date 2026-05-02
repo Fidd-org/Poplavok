@@ -6,8 +6,6 @@
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<?import com.poplavok.forms.AveragingPane?>
-
 <fx:root prefHeight="756.0" prefWidth="1020.0" type="AnchorPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
     <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
         <AnchorPane>
@@ -74,6 +72,6 @@
            </items>
          </SplitPane>
         </AnchorPane>
-        <AveragingPane fx:id="averagingPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+        <AnchorPane fx:id="averagingPaneContainer" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
     </SplitPane>
 </fx:root>
