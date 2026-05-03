@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
@@ -69,13 +70,19 @@ public class PerformTradeDialog extends VBox {
     @FXML @Nullable TextField commissionsBaseSellTextField;
     @FXML @Nullable Label quoteSellCommissionLabel;
 
+    @FXML @Nullable Separator debtSeparator;
+    @FXML @Nullable Label debtLabel;
+    @FXML @Nullable TextField debtTextField;
+    @FXML @Nullable Label debtCurrencyLabel;
+
     @Nullable Stage stage;
     @Nullable Trade returnTrade;
 
-    final Level lvl;
     final MarketTicker ticker;
 
-    public PerformTradeDialog(Level lvl, MarketTicker ticker, Direction direction, @Nullable BigDecimal price) {
+    /** Regular Trade */
+    public PerformTradeDialog(@Nullable BigDecimal availableAmountBase, @Nullable BigDecimal availableAmountQuote,
+                              MarketTicker ticker, Direction direction, @Nullable BigDecimal price) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PerformTradeDialog.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -86,14 +93,12 @@ public class PerformTradeDialog extends VBox {
             throw new RuntimeException(exception);
         }
 
-        this.lvl = lvl;
         this.ticker = ticker;
 
         checkNotNull(tickerLabel).textProperty().setValue(ticker.getSymbol());
         checkNotNull(priceTextField).textProperty().setValue(price != null ? price.toPlainString() : "");
-
-        checkNotNull(availableBaseTextField).textProperty().setValue(formatAmount(lvl.getAvailableAmountBase()));
-        checkNotNull(availableQuoteTextField).textProperty().setValue(formatAmount(lvl.getAvailableAmountQuote()));
+        checkNotNull(availableBaseTextField).textProperty().setValue(formatAmount(availableAmountBase));
+        checkNotNull(availableQuoteTextField).textProperty().setValue(formatAmount(availableAmountQuote));
         checkNotNull(useAllBaseButton).textProperty().setValue(ticker.getBase().getCurrency());
         checkNotNull(useAllQuoteButton).textProperty().setValue(ticker.getQuote().getCurrency());
         BigDecimal fee = ticker.getMakerFee();
@@ -115,6 +120,67 @@ public class PerformTradeDialog extends VBox {
         checkNotNull(giveBaseSellTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
         checkNotNull(getQuoteSellTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
         
+        checkNotNull(priceTextField).textProperty().addListener(this::onPriceChanged);
+        checkNotNull(feeTextField).textProperty().addListener(this::onFeeChanged);
+
+        checkNotNull(manualEntryCheckBox).selectedProperty().addListener(this::onManualEntryCheckedChanged);
+
+        checkNotNull(debtSeparator).visibleProperty().setValue(false);
+        checkNotNull(debtLabel).visibleProperty().setValue(false);
+        checkNotNull(debtTextField).visibleProperty().setValue(false);
+        checkNotNull(debtCurrencyLabel).visibleProperty().setValue(false);
+
+        switch (direction) {
+            case LONG:
+                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(buyTab));
+                break;
+            case SHORT:
+                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(sellTab));
+                break;
+            default: throw new IllegalStateException("Unknown direction: " + direction);
+        }
+    }
+
+    /** Averaging Trade */
+    public PerformTradeDialog(BigDecimal availableAmountBase, BigDecimal availableAmountQuote, BigDecimal debt,
+                              MarketTicker ticker, Direction direction, @Nullable BigDecimal price) {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PerformTradeDialog.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
+
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+
+        this.ticker = ticker;
+
+        checkNotNull(tickerLabel).textProperty().setValue(ticker.getSymbol());
+        checkNotNull(priceTextField).textProperty().setValue(price != null ? price.toPlainString() : "");
+        checkNotNull(availableBaseTextField).textProperty().setValue(formatAmount(availableAmountBase));
+        checkNotNull(availableQuoteTextField).textProperty().setValue(formatAmount(availableAmountQuote));
+        checkNotNull(useAllBaseButton).textProperty().setValue(ticker.getBase().getCurrency());
+        checkNotNull(useAllQuoteButton).textProperty().setValue(ticker.getQuote().getCurrency());
+        BigDecimal fee = ticker.getMakerFee();
+        checkNotNull(feeTextField).textProperty().setValue(formatAmount(fee));
+        checkNotNull(quoteBuyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(quoteBuyCommissionLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(baseBuyLabel).textProperty().setValue(ticker.getBase().getCurrency());
+        checkNotNull(baseSellLabel).textProperty().setValue(ticker.getBase().getCurrency());
+        checkNotNull(quoteSellCommissionLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(quoteSellLabel).textProperty().setValue(ticker.getQuote().getCurrency());
+        checkNotNull(buyButton).textProperty().setValue("BUY " + ticker.getBase().getCurrency());
+        checkNotNull(sellButton).textProperty().setValue("SELL " + ticker.getBase().getCurrency());
+
+        checkNotNull(priceTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(availableBaseTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(availableQuoteTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(giveQuoteBuyTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(getBaseBuyTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(giveBaseSellTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(getQuoteSellTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+
         checkNotNull(priceTextField).textProperty().addListener(this::onPriceChanged);
         checkNotNull(feeTextField).textProperty().addListener(this::onFeeChanged);
 

@@ -647,7 +647,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
             BigDecimal price = BigDecimalUtil.fromString(checkNotNull(priceTextField).textProperty().get());
             price = price == null ? lvl.getProjectedPrice() : price;
-            PerformTradeDialog performTradeDialog = new PerformTradeDialog(lvl, checkNotNull(poplavok).getTicker(),
+            PerformTradeDialog performTradeDialog = new PerformTradeDialog(lvl.getAvailableAmountBase(), lvl.getAvailableAmountQuote(),
+                    checkNotNull(poplavok).getTicker(),
                     checkNotNull(checkNotNull(poplavok).getDirection()), price);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { performTradeDialog.setStage(stage); return performTradeDialog; },

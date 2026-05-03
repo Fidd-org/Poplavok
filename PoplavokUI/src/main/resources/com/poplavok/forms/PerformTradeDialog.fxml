@@ -164,6 +164,14 @@
                         <Insets left="5.0" right="5.0" />
                      </padding>
                   </Label>
+                  <Separator fx:id="debtSeparator" orientation="VERTICAL" />
+                  <Label fx:id="debtLabel" text="Debt: " />
+                  <TextField fx:id="debtTextField">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+                  <Label fx:id="debtCurrencyLabel" text="Label" />
                </items>
             </ToolBar>
             <Label text="Fee:" GridPane.rowIndex="2" />
