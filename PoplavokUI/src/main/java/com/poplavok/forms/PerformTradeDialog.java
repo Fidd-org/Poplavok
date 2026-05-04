@@ -2,7 +2,6 @@ package com.poplavok.forms;
 
 import com.flower.fxutils.JavaFxUtils;
 import com.poplavok.data.model.Direction;
-import com.poplavok.data.model.Level;
 import com.poplavok.data.model.Trade;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.TradeOperation;
@@ -18,6 +17,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -31,6 +31,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 
+import static com.flower.fxutils.JavaFxUtils.YesNo.NO;
+import static com.flower.fxutils.JavaFxUtils.showYesNoDialog;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
@@ -42,6 +44,7 @@ public class PerformTradeDialog extends VBox {
 
     @FXML @Nullable TextField priceTextField;
     @FXML @Nullable Label tickerLabel;
+    @FXML @Nullable ToolBar availableToolBar;
     @FXML @Nullable Separator availableAmountSeparator;
     @FXML @Nullable TextField availableBaseTextField;
     @FXML @Nullable TextField availableQuoteTextField;
@@ -79,7 +82,9 @@ public class PerformTradeDialog extends VBox {
     @Nullable Stage stage;
     @Nullable Trade returnTrade;
 
+    final Direction direction;
     final MarketTicker ticker;
+    final boolean isAveragingTrade;
 
     /** Regular Trade */
     public PerformTradeDialog(@Nullable BigDecimal availableAmountBase, @Nullable BigDecimal availableAmountQuote,
@@ -94,7 +99,9 @@ public class PerformTradeDialog extends VBox {
             throw new RuntimeException(exception);
         }
 
+        this.isAveragingTrade = false;
         this.ticker = ticker;
+        this.direction = direction;
 
         checkNotNull(tickerLabel).textProperty().setValue(ticker.getSymbol());
         checkNotNull(priceTextField).textProperty().setValue(price != null ? price.toPlainString() : "");
@@ -155,10 +162,12 @@ public class PerformTradeDialog extends VBox {
             throw new RuntimeException(exception);
         }
 
+        this.isAveragingTrade = true;
         this.ticker = ticker;
+        this.direction = direction;
 
         checkNotNull(debtTextField).textProperty().setValue(formatAmount(debt));
-        checkNotNull(availableAmountSeparator).visibleProperty().setValue(false);
+        checkNotNull(availableToolBar).getItems().remove(availableAmountSeparator);
         checkNotNull(debtCurrencyLabel).visibleProperty().setValue(false);
 
         checkNotNull(tickerLabel).textProperty().setValue(ticker.getSymbol());
@@ -196,15 +205,15 @@ public class PerformTradeDialog extends VBox {
                 // LONG: Sell BASE to average
                 checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(sellTab));
                 checkNotNull(tradeTabPane).getTabs().remove(checkNotNull(buyTab));
-                checkNotNull(availableQuoteTextField).visibleProperty().setValue(false);
-                checkNotNull(useAllQuoteButton).visibleProperty().setValue(false);
+                checkNotNull(availableToolBar).getItems().remove(availableQuoteTextField);
+                checkNotNull(availableToolBar).getItems().remove(useAllQuoteButton);
                 break;
             case SHORT:
                 // SHORT: Buy BASE to average
                 checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(buyTab));
                 checkNotNull(tradeTabPane).getTabs().remove(checkNotNull(sellTab));
-                checkNotNull(availableBaseTextField).visibleProperty().setValue(false);
-                checkNotNull(useAllBaseButton).visibleProperty().setValue(false);
+                checkNotNull(availableToolBar).getItems().remove(availableBaseTextField);
+                checkNotNull(availableToolBar).getItems().remove(useAllBaseButton);
                 break;
             default:
                 throw new IllegalStateException("Unknown direction: " + direction);
@@ -231,6 +240,18 @@ public class PerformTradeDialog extends VBox {
             returnTrade.setCommissionQuote(tradeQuoteAmount.multiply(fee));
             returnTrade.setCommissionBase(tradeQuoteAmount.multiply(fee).divide(price, SCALE, RoundingMode.CEILING));
 
+            if (isAveragingTrade) {
+                BigDecimal debt = nullToZero(fromString(checkNotNull(debtTextField).getText()));
+                boolean debtCovered = tradeBaseAmount.compareTo(debt) >= 0;
+
+                if (!debtCovered) {
+                    if (NO == showYesNoDialog("Debt not fully covered",
+                            "The amount of proceeds in " + ticker.getBase().getCurrency() + " is less than debt amount. Trade anyway?")) {
+                        return;
+                    }
+                }
+            }
+
             checkNotNull(stage).close();
         } catch (Exception e) {
             LOGGER.error("Buy Error:", e);
@@ -254,6 +275,18 @@ public class PerformTradeDialog extends VBox {
 
             returnTrade.setCommissionBase(tradeBaseAmount.multiply(fee));
             returnTrade.setCommissionQuote(tradeBaseAmount.multiply(fee).multiply(price));
+
+            if (isAveragingTrade) {
+                BigDecimal debt = nullToZero(fromString(checkNotNull(debtTextField).getText()));
+                boolean debtCovered = tradeQuoteAmount.compareTo(debt) >= 0;
+
+                if (!debtCovered) {
+                    if (NO == showYesNoDialog("Debt not fully covered",
+                            "The amount of proceeds in " + ticker.getQuote().getCurrency() + " is less than debt amount. Trade anyway?")) {
+                        return;
+                    }
+                }
+            }
 
             checkNotNull(stage).close();
        } catch (Exception e) {

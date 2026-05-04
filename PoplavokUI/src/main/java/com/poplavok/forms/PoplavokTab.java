@@ -556,7 +556,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     public void averagingTrade() {
         try {
-            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            final List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
             if (selected == null || selected.isEmpty()) {
                 showErrorMessage("Please select 1 or more levels to average-trade.");
                 return;
@@ -590,6 +590,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                         try {
                             Trade trade = performTradeDialog.getReturnTrade();
                             if (trade != null) {
+                                // ------------------------------------------------------------------------------
+
                                 /*BigDecimal baseIn = nullToZero(trade.getAmountBaseIn());
                                 BigDecimal quoteIn = nullToZero(trade.getAmountQuoteIn());
                                 BigDecimal baseOut = nullToZero(trade.getAmountBaseOut());
@@ -624,8 +626,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                     sess.persist(trade);
                                     sess.persist(levelTrade);
                                     LevelDAO.update(sess, lvl);
-                                });
-                                */
+                                });*/
+
+                                // ------------------------------------------------------------------------------
+
                                 refreshContent();
                             }
                         } catch (Exception e) {

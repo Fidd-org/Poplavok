@@ -176,7 +176,7 @@
             </ToolBar>
             <Label text="Fee:" GridPane.rowIndex="2" />
             <Label text="Available:" GridPane.rowIndex="1" />
-            <ToolBar GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <ToolBar fx:id="availableToolBar" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <items>
                   <TextField fx:id="availableQuoteTextField" editable="false" />
                   <Button fx:id="useAllQuoteButton" mnemonicParsing="false" onAction="#useAllQuote" text="QUOTE" />
