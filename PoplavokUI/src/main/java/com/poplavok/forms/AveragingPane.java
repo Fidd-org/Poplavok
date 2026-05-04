@@ -56,13 +56,6 @@ public class AveragingPane extends AnchorPane {
     @FXML @Nullable TextField proceedsTextField;
     @FXML @Nullable TextField commissionTextField;
     @FXML @Nullable TextField profitTextField;
-    @FXML @Nullable TextField profitPercentTextField;
-
-    @FXML @Nullable CheckBox reserveCurrencyCheckBox;
-    @FXML @Nullable CheckBox removeCommissionCheckBox;
-
-    @FXML @Nullable TextField debtCurrencyTextField;
-    @FXML @Nullable TextField holdingCurrencyTextField;
 
     @FXML @Nullable RadioButton profitInQuoteRadioButton;
     @FXML @Nullable RadioButton profitInBaseRadioButton;
@@ -82,6 +75,21 @@ public class AveragingPane extends AnchorPane {
     @FXML @Nullable Label averagingCurrencyLabel;
 
     @FXML @Nullable CheckBox includeLentAmountsCheckBox;
+
+    // Retain holdings
+
+    @FXML @Nullable CheckBox retainHoldingsCheckBox;
+    @FXML @Nullable CheckBox excludeCommissionCheckBox;
+
+    @FXML @Nullable TextField retainTextField;
+    @FXML @Nullable TextField retainWorthTextField;
+    @FXML @Nullable TextField retainCommissionTextField;
+    @FXML @Nullable TextField retainTotalTextField;
+
+    @FXML @Nullable Label retainCurrencyLabel;
+    @FXML @Nullable Label retainWorhCurrencyLabel;
+    @FXML @Nullable Label retainTotalCurrencyLabel;
+    @FXML @Nullable Label retainCommisionCurrencyLabel;
 
     protected final MarketTicker ticker;
     protected Collection<Level> averageLevels;
@@ -295,19 +303,9 @@ public class AveragingPane extends AnchorPane {
             checkNotNull(profitTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
             checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
         }
-
-        /*
-        @FXML @Nullable CheckBox reserveCurrencyCheckBox;
-        @FXML @Nullable CheckBox removeCommissionCheckBox;
-        @FXML @Nullable CheckBox debtCurrencyCheckBox;
-        @FXML @Nullable CheckBox holdingCurrencyCheckBox;
-        @FXML @Nullable TextField debtCurrencyTextField;
-        @FXML @Nullable TextField holdingCurrencyTextField;
-        */
     }
 
     public void updateLabels() {
-        String quoteCurrency = checkNotNull(ticker).getQuote().getCurrency();
         String debtCurrency = checkNotNull(direction) == Direction.LONG
                 ? ticker.getQuote().getCurrency() : ticker.getBase().getCurrency();
         String holdCurrency = direction == Direction.LONG
@@ -318,8 +316,6 @@ public class AveragingPane extends AnchorPane {
         checkNotNull(averagingActionLabel).textProperty().setValue(checkNotNull(direction) == Direction.LONG ? "SELL" : "BUY");
         checkNotNull(averagingCurrencyLabel).textProperty().setValue(ticker.getBase().getCurrency());
 
-        // Commission is always in QUOTE currency
-        checkNotNull(commissionCurrencyLabel).textProperty().setValue(quoteCurrency);
         checkNotNull(debtCurrencyLabel).textProperty().setValue(debtCurrency);
         checkNotNull(availableCurrencyLabel).textProperty().setValue(debtCurrency);
         checkNotNull(toRepayCurrencyLabel).textProperty().setValue(debtCurrency);
@@ -329,6 +325,15 @@ public class AveragingPane extends AnchorPane {
         checkNotNull(toTradeCurrencyLabel).textProperty().setValue(holdCurrency);
         checkNotNull(tradePriceLabel).textProperty().setValue(ticker.getSymbol());
         checkNotNull(proceedsCurrencyLabel).textProperty().setValue(debtCurrency);
+
+        checkNotNull(retainCurrencyLabel).textProperty().setValue(holdCurrency);
+        checkNotNull(retainWorhCurrencyLabel).textProperty().setValue(debtCurrency);
+        checkNotNull(retainTotalCurrencyLabel).textProperty().setValue(holdCurrency);
+
+        String quoteCurrency = checkNotNull(ticker).getQuote().getCurrency();
+        // Commission is always in QUOTE currency
+        checkNotNull(retainCommisionCurrencyLabel).textProperty().setValue(quoteCurrency);
+        checkNotNull(commissionCurrencyLabel).textProperty().setValue(quoteCurrency);
         // Default: take profit in quote
         checkNotNull(profitCurrencyLabel).textProperty().setValue(quoteCurrency);
     }
