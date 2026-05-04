@@ -130,22 +130,21 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             refreshContent();
         });
 
-        averagingPane = new AveragingPane();
-        checkNotNull(averagingTab).setContent(averagingPane);
-
         DBUtil.connectCommitAndClose(sess -> {
             this.poplavok = PoplavokDAO.findById(sess, poplavokId)
                     .orElseThrow(() -> new RuntimeException("Poplavok not found"));
             this.poplavok.getTicker().getSymbol();
         });
 
-        checkNotNull(averagingPane).init(checkNotNull(poplavok).getTicker(),
+        refreshContent();
+
+        averagingPane = new AveragingPane(checkNotNull(poplavok).getTicker(),
                 checkNotNull(checkNotNull(poplavok).getDirection()),
                 checkNotNull(levelsTable).getSelectionModel().getSelectedItems(),
                 nullToZero(fromString(checkNotNull(feeTextField).textProperty().get())));
-        averagingPane.updateLabels();
+        checkNotNull(averagingTab).setContent(averagingPane);
 
-        refreshContent();
+        averagingPane.updateLabels();
     }
 
     protected boolean isEmpty(@Nullable BigDecimal amount) {
@@ -557,28 +556,39 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     public void averagingTrade() {
         try {
-            List<Level> levels = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (selected == null || selected.isEmpty()) {
+                showErrorMessage("Please select 1 or more levels to average-trade.");
+                return;
+            }
 
-            for (Level lvl : levels) {
+            Direction direction = checkNotNull(checkNotNull(poplavok).getDirection());
+            BigDecimal availableAmountBase = BigDecimal.ZERO;
+            BigDecimal availableAmountQuote = BigDecimal.ZERO;
+            for (Level lvl : selected) {
                 LevelState state = lvl.getState();
                 if (state != LevelState.TRADING && state != LevelState.FUNDING) {
                     showErrorMessage("Levels in " + state + " state can't perform trades.");
                     return;
                 }
+
+                availableAmountBase = availableAmountBase.add(nullToZero(lvl.getAvailableAmountBase()));
+                availableAmountQuote = availableAmountQuote.add(nullToZero(lvl.getAvailableAmountQuote()));
             }
 
-            BigDecimal price = BigDecimalUtil.fromString(checkNotNull(priceTextField).textProperty().get());
-            AveragingTradeDialog averagingTradeDialog = new AveragingTradeDialog(levels, checkNotNull(poplavok).getTicker(),
-                    checkNotNull(checkNotNull(poplavok).getDirection()),
-                    nullToZero(fromString(checkNotNull(feeTextField).textProperty().get())), price);
+            BigDecimal debtToRepay = checkNotNull(averagingPane).getDebtToRepay();
+            BigDecimal price = checkNotNull(averagingPane).getAveragingPrice();
+
+            PerformTradeDialog performTradeDialog = new PerformTradeDialog(availableAmountBase, availableAmountQuote, debtToRepay,
+                    checkNotNull(poplavok).getTicker(), direction, price);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
-                    stage -> { averagingTradeDialog.setStage(stage); return averagingTradeDialog; },
+                    stage -> { performTradeDialog.setStage(stage); return performTradeDialog; },
                     "Perform Averaging Trade");
 
             workspaceStage.setOnHidden(
                     ev -> {
                         try {
-                            Trade trade = averagingTradeDialog.getReturnTrade();
+                            Trade trade = performTradeDialog.getReturnTrade();
                             if (trade != null) {
                                 /*BigDecimal baseIn = nullToZero(trade.getAmountBaseIn());
                                 BigDecimal quoteIn = nullToZero(trade.getAmountQuoteIn());
@@ -635,7 +645,10 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     public void performTrade() {
         try {
             List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
-            if (selected == null || selected.size() != 1) return;
+            if (selected == null || selected.size() != 1) {
+                showErrorMessage("Please select exactly 1 level to trade.");
+                return;
+            }
 
             Level lvl = selected.get(0);
             LevelState state = lvl.getState();

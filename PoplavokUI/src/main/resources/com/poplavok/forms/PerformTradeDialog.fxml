@@ -166,7 +166,7 @@
                   </Label>
                   <Separator fx:id="debtSeparator" orientation="VERTICAL" />
                   <Label fx:id="debtLabel" text="Debt: " />
-                  <TextField fx:id="debtTextField">
+                  <TextField fx:id="debtTextField" editable="false">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -180,7 +180,7 @@
                <items>
                   <TextField fx:id="availableQuoteTextField" editable="false" />
                   <Button fx:id="useAllQuoteButton" mnemonicParsing="false" onAction="#useAllQuote" text="QUOTE" />
-                  <Separator orientation="VERTICAL" />
+                  <Separator fx:id="availableAmountSeparator" orientation="VERTICAL" />
                   <TextField fx:id="availableBaseTextField" editable="false" />
                   <Button fx:id="useAllBaseButton" mnemonicParsing="false" onAction="#useAllBase" text="BASE" />
                </items>

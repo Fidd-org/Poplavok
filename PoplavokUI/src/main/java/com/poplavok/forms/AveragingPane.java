@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
@@ -82,13 +83,23 @@ public class AveragingPane extends AnchorPane {
 
     @FXML @Nullable CheckBox includeLentAmountsCheckBox;
 
-    protected @Nullable MarketTicker ticker;
-    protected @Nullable Collection<Level> levels;
-    protected @Nullable Direction direction;
-    protected @Nullable BigDecimal fee;
+    protected final MarketTicker ticker;
+    protected Collection<Level> averageLevels;
+    protected final Direction direction;
+    protected final BigDecimal fee;
 
-    public void init(MarketTicker ticker, Direction direction, Collection<Level> lvls, BigDecimal fee) {
-        this.levels = lvls;
+    public AveragingPane(MarketTicker ticker, Direction direction, Collection<Level> lvls, BigDecimal fee) {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("AveragingPane.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
+
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+
+        this.averageLevels = lvls;
         this.ticker = ticker;
         this.direction = direction;
         this.fee = fee;
@@ -111,23 +122,23 @@ public class AveragingPane extends AnchorPane {
         checkNotNull(profitInQuoteRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue && ticker != null) {
                 checkNotNull(profitCurrencyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
-                updateAverageTab(checkNotNull(levels));
+                updateAverageTab(checkNotNull(averageLevels));
             }
         });
         checkNotNull(profitInBaseRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue && ticker != null) {
                 checkNotNull(profitCurrencyLabel).textProperty().setValue(ticker.getBase().getCurrency());
-                updateAverageTab(checkNotNull(levels));
+                updateAverageTab(checkNotNull(averageLevels));
             }
         });
         checkNotNull(commsRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) { updateAverageTab(checkNotNull(levels)); }
+            if (newValue) { updateAverageTab(checkNotNull(averageLevels)); }
         });
         checkNotNull(percentRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) { updateAverageTab(checkNotNull(levels)); }
+            if (newValue) { updateAverageTab(checkNotNull(averageLevels)); }
         });
         checkNotNull(includeLentAmountsCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
-            updateAverageTab(checkNotNull(levels));
+            updateAverageTab(checkNotNull(averageLevels));
         });
 
         if (checkNotNull(commsRadioButton).isSelected()) {
@@ -145,32 +156,19 @@ public class AveragingPane extends AnchorPane {
         });
 
         checkNotNull(commsCountTextField).textProperty().addListener((observable, oldValue, newValue) -> {
-            updateAverageTab(checkNotNull(levels));
+            updateAverageTab(checkNotNull(averageLevels));
         });
 
         checkNotNull(percentTextField).textProperty().addListener((observable, oldValue, newValue) -> {
-            updateAverageTab(checkNotNull(levels));
+            updateAverageTab(checkNotNull(averageLevels));
         });
 
         updateAverageTab(lvls);
     }
 
-    public AveragingPane() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("AveragingPane.fxml"));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-
-        try {
-            fxmlLoader.load();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    public void updateAverageTab(Collection<Level> levels) {
-        if (levels == null || levels.isEmpty()) {
-            return;
-        }
+    public void updateAverageTab(Collection<Level> lvls) {
+        if (lvls == null) { lvls = List.of(); }
+        averageLevels = lvls;
 
         boolean includeLentAmounts = checkNotNull(includeLentAmountsCheckBox).selectedProperty().get();
 
@@ -178,7 +176,7 @@ public class AveragingPane extends AnchorPane {
         BigDecimal available = BigDecimal.ZERO;
         BigDecimal holding = BigDecimal.ZERO;
 
-        for (Level lvl : levels) {
+        for (Level lvl : averageLevels) {
             if (checkNotNull(direction) == Direction.LONG) {
                 debt = debt.add(nullToZero(lvl.getDebtQuote()));
                 available = available.add(nullToZero(lvl.getAvailableAmountQuote()));
@@ -333,5 +331,17 @@ public class AveragingPane extends AnchorPane {
         checkNotNull(proceedsCurrencyLabel).textProperty().setValue(debtCurrency);
         // Default: take profit in quote
         checkNotNull(profitCurrencyLabel).textProperty().setValue(quoteCurrency);
+    }
+
+    public BigDecimal getTotalDebt() {
+        return nullToZero(fromString(checkNotNull(debtTextField).textProperty().get()));
+    }
+
+    public BigDecimal getDebtToRepay() {
+        return nullToZero(fromString(checkNotNull(toRepayTextField).textProperty().get()));
+    }
+
+    public BigDecimal getAveragingPrice() {
+        return nullToZero(fromString(checkNotNull(sellPriceTextField).textProperty().get()));
     }
 }

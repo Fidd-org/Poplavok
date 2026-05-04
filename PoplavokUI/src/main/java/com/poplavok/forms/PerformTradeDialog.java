@@ -42,6 +42,7 @@ public class PerformTradeDialog extends VBox {
 
     @FXML @Nullable TextField priceTextField;
     @FXML @Nullable Label tickerLabel;
+    @FXML @Nullable Separator availableAmountSeparator;
     @FXML @Nullable TextField availableBaseTextField;
     @FXML @Nullable TextField availableQuoteTextField;
     @FXML @Nullable Button useAllBaseButton;
@@ -142,8 +143,8 @@ public class PerformTradeDialog extends VBox {
     }
 
     /** Averaging Trade */
-    public PerformTradeDialog(BigDecimal availableAmountBase, BigDecimal availableAmountQuote, BigDecimal debt,
-                              MarketTicker ticker, Direction direction, @Nullable BigDecimal price) {
+    public PerformTradeDialog(@Nullable BigDecimal availableAmountBase, @Nullable BigDecimal availableAmountQuote,
+                              BigDecimal debt, MarketTicker ticker, Direction direction, @Nullable BigDecimal price) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PerformTradeDialog.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -155,6 +156,10 @@ public class PerformTradeDialog extends VBox {
         }
 
         this.ticker = ticker;
+
+        checkNotNull(debtTextField).textProperty().setValue(formatAmount(debt));
+        checkNotNull(availableAmountSeparator).visibleProperty().setValue(false);
+        checkNotNull(debtCurrencyLabel).visibleProperty().setValue(false);
 
         checkNotNull(tickerLabel).textProperty().setValue(ticker.getSymbol());
         checkNotNull(priceTextField).textProperty().setValue(price != null ? price.toPlainString() : "");
@@ -188,12 +193,21 @@ public class PerformTradeDialog extends VBox {
 
         switch (direction) {
             case LONG:
-                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(buyTab));
+                // LONG: Sell BASE to average
+                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(sellTab));
+                checkNotNull(tradeTabPane).getTabs().remove(checkNotNull(buyTab));
+                checkNotNull(availableQuoteTextField).visibleProperty().setValue(false);
+                checkNotNull(useAllQuoteButton).visibleProperty().setValue(false);
                 break;
             case SHORT:
-                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(sellTab));
+                // SHORT: Buy BASE to average
+                checkNotNull(tradeTabPane).getSelectionModel().select(checkNotNull(buyTab));
+                checkNotNull(tradeTabPane).getTabs().remove(checkNotNull(sellTab));
+                checkNotNull(availableBaseTextField).visibleProperty().setValue(false);
+                checkNotNull(useAllBaseButton).visibleProperty().setValue(false);
                 break;
-            default: throw new IllegalStateException("Unknown direction: " + direction);
+            default:
+                throw new IllegalStateException("Unknown direction: " + direction);
         }
     }
 
