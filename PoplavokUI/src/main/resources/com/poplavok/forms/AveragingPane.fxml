@@ -192,7 +192,7 @@
                            <Insets left="10.0" />
                         </GridPane.margin>
                      </Label>
-                     <TextField fx:id="percentTextField" disable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <TextField fx:id="percentTextField" disable="true" onKeyTyped="#updateAverageTabEvent" GridPane.columnIndex="1" GridPane.rowIndex="1">
                         <GridPane.margin>
                            <Insets left="10.0" right="10.0" />
                         </GridPane.margin>
@@ -226,7 +226,7 @@
                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                        </rowConstraints>
                         <children>
-                           <TextField fx:id="commsCountTextField" editable="false" text="1" />
+                           <TextField fx:id="commsCountTextField" editable="false" onKeyTyped="#updateAverageTabEvent" text="1" />
                            <Slider fx:id="commsCountSlider" blockIncrement="1.0" max="10.0" value="1.0" GridPane.columnIndex="1">
                               <GridPane.margin>
                                  <Insets left="10.0" right="10.0" />
@@ -315,48 +315,48 @@
                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                  </rowConstraints>
                   <children>
-                     <TextField fx:id="retainTextField" disable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <TextField fx:id="retainTextField" disable="true" onKeyTyped="#updateRetainedAmountByRetained" GridPane.columnIndex="1" GridPane.rowIndex="2">
                         <GridPane.margin>
                            <Insets right="10.0" />
                         </GridPane.margin>
                      </TextField>
-                     <TextField fx:id="retainWorthTextField" disable="true" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <TextField fx:id="retainWorthTextField" disable="true" onKeyTyped="#updateRetainedAmountByWorth" GridPane.columnIndex="1" GridPane.rowIndex="3">
                         <GridPane.margin>
                            <Insets right="10.0" />
                         </GridPane.margin>
                      </TextField>
                      <CheckBox fx:id="excludeCommissionCheckBox" disable="true" mnemonicParsing="false" text="Exclude commission" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                      <CheckBox fx:id="retainHoldingsCheckBox" mnemonicParsing="false" text="Retain Holdings" GridPane.columnIndex="1" />
-                     <Label text="Retain total:" GridPane.rowIndex="5">
+                     <Label fx:id="retainTotalCaptionLabel" disable="true" text="Total to retain:" GridPane.rowIndex="4">
                         <GridPane.margin>
                            <Insets left="10.0" />
                         </GridPane.margin>
                      </Label>
-                     <Label text="Commission:" GridPane.rowIndex="4">
+                     <Label fx:id="retainCommissionCaptionLabel" disable="true" text="Commission:" GridPane.rowIndex="5">
                         <GridPane.margin>
                            <Insets left="10.0" />
                         </GridPane.margin>
                      </Label>
-                     <TextField fx:id="retainCommissionTextField" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <TextField fx:id="retainCommissionTextField" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5">
                         <GridPane.margin>
                            <Insets right="10.0" />
                         </GridPane.margin>
                      </TextField>
-                     <TextField fx:id="retainTotalTextField" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                     <TextField fx:id="retainTotalTextField" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4">
                         <GridPane.margin>
                            <Insets right="10.0" />
                         </GridPane.margin>
                      </TextField>
-                     <Label fx:id="retainTotalCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                     <Label fx:id="retainCommisionCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                     <Label fx:id="retainWorhCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                     <Label fx:id="retainCurrencyLabel" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                     <Label text="Retain:" GridPane.rowIndex="2">
+                     <Label fx:id="retainTotalCurrencyLabel" disable="true" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                     <Label fx:id="retainCommisionCurrencyLabel" disable="true" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                     <Label fx:id="retainWorhCurrencyLabel" disable="true" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                     <Label fx:id="retainCurrencyLabel" disable="true" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                     <Label fx:id="retainCaptionLabel" disable="true" text="Retain:" GridPane.rowIndex="2">
                         <GridPane.margin>
                            <Insets left="10.0" />
                         </GridPane.margin>
                      </Label>
-                     <Label text="Worth:" GridPane.rowIndex="3">
+                     <Label fx:id="retainWorthCaptionLabel" disable="true" text="Retain Debt:" GridPane.rowIndex="3">
                         <GridPane.margin>
                            <Insets left="10.0" />
                         </GridPane.margin>

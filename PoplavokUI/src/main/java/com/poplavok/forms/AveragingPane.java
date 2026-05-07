@@ -3,7 +3,9 @@ package com.poplavok.forms;
 import com.poplavok.data.model.Direction;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.MarketTicker;
+import com.poplavok.data.utils.AmountAndCommission;
 import com.poplavok.data.utils.BuyPriceInfo;
+import com.poplavok.data.utils.LongShortCalculator;
 import com.poplavok.data.utils.PriceCalculator;
 import com.poplavok.data.utils.PriceInfo;
 import javafx.fxml.FXML;
@@ -24,6 +26,7 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
 
+import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
@@ -80,6 +83,11 @@ public class AveragingPane extends AnchorPane {
 
     @FXML @Nullable CheckBox retainHoldingsCheckBox;
     @FXML @Nullable CheckBox excludeCommissionCheckBox;
+
+    @FXML @Nullable Label retainCaptionLabel;
+    @FXML @Nullable Label retainWorthCaptionLabel;
+    @FXML @Nullable Label retainTotalCaptionLabel;
+    @FXML @Nullable Label retainCommissionCaptionLabel;
 
     @FXML @Nullable TextField retainTextField;
     @FXML @Nullable TextField retainWorthTextField;
@@ -161,17 +169,105 @@ public class AveragingPane extends AnchorPane {
 
         checkNotNull(commsCountSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
             checkNotNull(commsCountTextField).setText(String.valueOf(newValue.intValue()));
+            updateAverageTabEvent();
         });
 
-        checkNotNull(commsCountTextField).textProperty().addListener((observable, oldValue, newValue) -> {
-            updateAverageTab(checkNotNull(averageLevels));
+        checkNotNull(percentTextField).setTextFormatter(createDecimalTextFormatter());
+        checkNotNull(retainTextField).setTextFormatter(createDecimalTextFormatter());
+        checkNotNull(retainWorthTextField).setTextFormatter(createDecimalTextFormatter());
+
+        checkNotNull(retainHoldingsCheckBox).selectedProperty().addListener((observable, oldValue, enable) -> {
+            boolean disable = !enable;
+            switchDisableRetainControls(disable);
+            if (!disable) {
+                updateRetainedAmountByRetained();
+            }
         });
 
-        checkNotNull(percentTextField).textProperty().addListener((observable, oldValue, newValue) -> {
-            updateAverageTab(checkNotNull(averageLevels));
+        checkNotNull(excludeCommissionCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            updateRetainedAmountByRetained();
         });
 
-        updateAverageTab(lvls);
+        updateAverageTab(averageLevels);
+    }
+
+    public void updateAverageTabEvent() {
+        updateAverageTab(checkNotNull(averageLevels));
+    }
+
+    public void switchDisableRetainControls(boolean disable) {
+        checkNotNull(excludeCommissionCheckBox).disableProperty().setValue(disable);
+
+        checkNotNull(retainCaptionLabel).disableProperty().setValue(disable);
+        checkNotNull(retainWorthCaptionLabel).disableProperty().setValue(disable);
+        checkNotNull(retainTotalCaptionLabel).disableProperty().setValue(disable);
+        checkNotNull(retainCommissionCaptionLabel).disableProperty().setValue(disable);
+
+        checkNotNull(retainTextField).disableProperty().setValue(disable);
+        checkNotNull(retainWorthTextField).disableProperty().setValue(disable);
+        checkNotNull(retainCommissionTextField).disableProperty().setValue(disable);
+        checkNotNull(retainTotalTextField).disableProperty().setValue(disable);
+
+        checkNotNull(retainCurrencyLabel).disableProperty().setValue(disable);
+        checkNotNull(retainWorhCurrencyLabel).disableProperty().setValue(disable);
+        checkNotNull(retainTotalCurrencyLabel).disableProperty().setValue(disable);
+        checkNotNull(retainCommisionCurrencyLabel).disableProperty().setValue(disable);
+    }
+
+    public void updateRetainedAmountByRetained() {
+        String retainedAmountStr = checkNotNull(retainTextField).textProperty().get();
+        BigDecimal retainedAmount = nullToZero(fromString(retainedAmountStr));
+
+        BigDecimal fee = checkNotNull(excludeCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
+        BigDecimal price = getAveragingPrice();
+
+        AmountAndCommission aac;
+        if (direction == Direction.LONG) {
+            aac = LongShortCalculator.calculateQuoteAmountToGetShort(retainedAmount, price, checkNotNull(fee));
+        } else if (direction == Direction.SHORT) {
+            aac = LongShortCalculator.calculateBaseAmountToGetLong(retainedAmount, price, checkNotNull(fee));
+        } else {
+            throw new RuntimeException("Unknown Direction " + direction);
+        }
+
+        BigDecimal worthAmount = aac.amount;
+        BigDecimal commissionAmount = aac.commissionQuote;
+
+        checkNotNull(retainWorthTextField).textProperty().setValue(formatAmount(worthAmount));
+        checkNotNull(retainCommissionTextField).textProperty().setValue(formatAmount(commissionAmount));
+
+        BigDecimal retainTotalAmount = retainedAmount.subtract(commissionAmount);
+        checkNotNull(retainTotalTextField).textProperty().setValue(formatAmount(retainTotalAmount));
+
+        updateAverageTab(averageLevels);
+    }
+
+    public void updateRetainedAmountByWorth() {
+        String worthAmountStr = checkNotNull(retainWorthTextField).textProperty().get();
+        BigDecimal worthAmount = nullToZero(fromString(worthAmountStr));
+
+        BigDecimal fee = checkNotNull(excludeCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
+        BigDecimal price = getAveragingPrice();
+
+        AmountAndCommission aac;
+        if (direction == Direction.LONG) {
+            aac = LongShortCalculator.calculateBaseAmountToGiveShort(worthAmount, price, checkNotNull(fee));
+        } else if (direction == Direction.SHORT) {
+            aac = LongShortCalculator.calculateQuoteAmountToGiveLong(worthAmount, price, checkNotNull(fee));
+        } else {
+            throw new RuntimeException("Unknown Direction " + direction);
+        }
+
+        BigDecimal retainedAmount = aac.amount;
+        BigDecimal commissionAmount = aac.commissionQuote;
+
+        checkNotNull(retainTextField).textProperty().setValue(formatAmount(retainedAmount));
+        checkNotNull(retainCommissionTextField).textProperty().setValue(formatAmount(commissionAmount));
+
+        BigDecimal retainTotalAmount = retainedAmount.subtract(commissionAmount);
+        checkNotNull(retainTotalTextField).textProperty().setValue(formatAmount(retainTotalAmount));
+
+        updateAverageTab(averageLevels);
     }
 
     public void updateAverageTab(Collection<Level> lvls) {
@@ -348,5 +444,21 @@ public class AveragingPane extends AnchorPane {
 
     public BigDecimal getAveragingPrice() {
         return nullToZero(fromString(checkNotNull(sellPriceTextField).textProperty().get()));
+    }
+
+    public BigDecimal getRetainedDebt() {
+        if (checkNotNull(retainHoldingsCheckBox).isSelected()) {
+            return nullToZero(fromString(checkNotNull(retainWorthTextField).textProperty().get()));
+        } else {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    public BigDecimal getRetainedAmount() {
+        if (checkNotNull(retainHoldingsCheckBox).isSelected()) {
+            return nullToZero(fromString(checkNotNull(retainTextField).textProperty().get()));
+        } else {
+            return BigDecimal.ZERO;
+        }
     }
 }

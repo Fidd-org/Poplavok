@@ -579,6 +579,18 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             BigDecimal debtToRepay = checkNotNull(averagingPane).getDebtToRepay();
             BigDecimal price = checkNotNull(averagingPane).getAveragingPrice();
 
+            BigDecimal retainedDebt = checkNotNull(averagingPane).getRetainedDebt();
+            BigDecimal retainedAmount = checkNotNull(averagingPane).getRetainedAmount();
+
+            debtToRepay = debtToRepay.subtract(retainedDebt);
+            if (direction == Direction.LONG) {
+                availableAmountBase = availableAmountBase.subtract(retainedAmount);
+            } else if (direction == Direction.SHORT) {
+                availableAmountQuote = availableAmountQuote.subtract(retainedAmount);
+            } else {
+                throw new RuntimeException("Unknown Direction " + direction);
+            }
+
             PerformTradeDialog performTradeDialog = new PerformTradeDialog(availableAmountBase, availableAmountQuote, debtToRepay,
                     checkNotNull(poplavok).getTicker(), direction, price);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
