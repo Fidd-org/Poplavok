@@ -21,6 +21,7 @@ class LongShortCalculatorTest {
         AmountAndCommission result = LongShortCalculator.calculateBaseAmountToGetLong(giveQuoteBuy, price, fee);
         assertEquals(nullToZero(fromString("9.9")).setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
         assertEquals(nullToZero(fromString("1")).setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
+        assertEquals(nullToZero(fromString("0.1")).setScale(result.commissionBase.scale(), RoundingMode.HALF_UP), result.commissionBase);
     }
 
     @Test
@@ -34,6 +35,7 @@ class LongShortCalculatorTest {
         AmountAndCommission result = LongShortCalculator.calculateBaseAmountToGetLong(giveQuoteBuy, price, fee);
         assertEquals(nullToZero(fromString("9.8")).setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
         assertEquals(nullToZero(fromString("2")).setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
+        assertEquals(nullToZero(fromString("0.2")).setScale(result.commissionBase.scale(), RoundingMode.HALF_UP), result.commissionBase);
     }
 
     @Test
@@ -48,6 +50,7 @@ class LongShortCalculatorTest {
         AmountAndCommission result = LongShortCalculator.calculateQuoteAmountToGetShort(giveBaseSell, price, fee);
         assertEquals(nullToZero(fromString("99.00")).setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
         assertEquals(nullToZero(fromString("1")).setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
+        assertEquals(nullToZero(fromString("0.1")).setScale(result.commissionBase.scale(), RoundingMode.HALF_UP), result.commissionBase);
     }
 
     @Test
@@ -61,6 +64,7 @@ class LongShortCalculatorTest {
         AmountAndCommission result = LongShortCalculator.calculateBaseAmountToGiveShort(getQuoteSell, price, fee);
         assertEquals(nullToZero(fromString("10")).setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
         assertEquals(nullToZero(fromString("1")).setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
+        assertEquals(nullToZero(fromString("0.1")).setScale(result.commissionBase.scale(), RoundingMode.HALF_UP), result.commissionBase);
     }
 
 
@@ -75,6 +79,7 @@ class LongShortCalculatorTest {
         AmountAndCommission result = LongShortCalculator.calculateQuoteAmountToGiveLong(getBaseSell, price, fee);
         assertEquals(nullToZero(fromString("100")).setScale(result.amount.scale(), RoundingMode.HALF_UP), result.amount);
         assertEquals(nullToZero(fromString("1")).setScale(result.commissionQuote.scale(), RoundingMode.HALF_UP), result.commissionQuote);
+        assertEquals(nullToZero(fromString("0.1")).setScale(result.commissionBase.scale(), RoundingMode.HALF_UP), result.commissionBase);
     }
 
 }

@@ -14,7 +14,11 @@ public class LongShortCalculator {
         BigDecimal getBaseBuy = giveQuoteBuy
                 .subtract(commissionQuote)
                 .divide(price, SCALE, RoundingMode.FLOOR);
-        return new AmountAndCommission(commissionQuote, getBaseBuy);
+
+        BigDecimal getBaseBuyFull = giveQuoteBuy
+                .divide(price, SCALE, RoundingMode.FLOOR);
+        BigDecimal commissionBase = getBaseBuyFull.subtract(getBaseBuy);
+        return new AmountAndCommission(commissionQuote, commissionBase, getBaseBuy);
     }
 
     public static AmountAndCommission calculateBaseAmountToGiveShort(BigDecimal getQuoteSell, BigDecimal price, BigDecimal fee) {
@@ -22,7 +26,12 @@ public class LongShortCalculator {
         BigDecimal giveBaseSell = getQuoteSell.divide(
                 price.multiply(withoutCommission), SCALE, RoundingMode.CEILING);
         BigDecimal commissionQuote = giveBaseSell.multiply(price).multiply(fee);
-        return new AmountAndCommission(commissionQuote, giveBaseSell);
+
+        BigDecimal giveBaseSellWithoutCommission = getQuoteSell.divide(
+                price, SCALE, RoundingMode.CEILING);
+        BigDecimal commissionBase = giveBaseSell.subtract(giveBaseSellWithoutCommission);
+
+        return new AmountAndCommission(commissionQuote, commissionBase, giveBaseSell);
     }
 
     // --------------- QUOTE CALCULATIONS ---------------
@@ -32,7 +41,10 @@ public class LongShortCalculator {
         BigDecimal giveQuoteBuy = getBaseBuy.multiply(price).divide(withoutCommission, SCALE, RoundingMode.CEILING);
         BigDecimal commissionQuote = giveQuoteBuy.multiply(fee);
 
-        return new AmountAndCommission(commissionQuote, giveQuoteBuy);
+        BigDecimal getBaseBuyFull = giveQuoteBuy
+                .divide(price, SCALE, RoundingMode.FLOOR);
+        BigDecimal commissionBase = getBaseBuyFull.subtract(getBaseBuy);
+        return new AmountAndCommission(commissionQuote, commissionBase, giveQuoteBuy);
     }
 
     public static AmountAndCommission calculateQuoteAmountToGetShort(BigDecimal giveBaseSell, BigDecimal price, BigDecimal fee) {
@@ -40,6 +52,7 @@ public class LongShortCalculator {
         BigDecimal commissionQuote = giveBaseSell.multiply(fee).multiply(price);
         getQuoteSell = getQuoteSell.subtract(commissionQuote);
 
-        return new AmountAndCommission(commissionQuote, getQuoteSell);
+        BigDecimal commissionBase = giveBaseSell.multiply(fee);
+        return new AmountAndCommission(commissionQuote, commissionBase, getQuoteSell);
     }
 }

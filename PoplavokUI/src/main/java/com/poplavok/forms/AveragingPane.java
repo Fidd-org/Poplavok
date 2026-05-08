@@ -28,6 +28,8 @@ import java.util.List;
 
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.model.Direction.LONG;
+import static com.poplavok.data.model.Direction.SHORT;
 import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 import static com.poplavok.data.utils.BigDecimalUtil.fromString;
@@ -86,17 +88,14 @@ public class AveragingPane extends AnchorPane {
 
     @FXML @Nullable Label retainCaptionLabel;
     @FXML @Nullable Label retainWorthCaptionLabel;
-    @FXML @Nullable Label retainTotalCaptionLabel;
     @FXML @Nullable Label retainCommissionCaptionLabel;
 
     @FXML @Nullable TextField retainTextField;
     @FXML @Nullable TextField retainWorthTextField;
     @FXML @Nullable TextField retainCommissionTextField;
-    @FXML @Nullable TextField retainTotalTextField;
 
     @FXML @Nullable Label retainCurrencyLabel;
     @FXML @Nullable Label retainWorhCurrencyLabel;
-    @FXML @Nullable Label retainTotalCurrencyLabel;
     @FXML @Nullable Label retainCommisionCurrencyLabel;
 
     protected final MarketTicker ticker;
@@ -138,23 +137,23 @@ public class AveragingPane extends AnchorPane {
         checkNotNull(profitInQuoteRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue && ticker != null) {
                 checkNotNull(profitCurrencyLabel).textProperty().setValue(ticker.getQuote().getCurrency());
-                updateAverageTab(checkNotNull(averageLevels));
+                updateAverageTabEvent();
             }
         });
         checkNotNull(profitInBaseRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue && ticker != null) {
                 checkNotNull(profitCurrencyLabel).textProperty().setValue(ticker.getBase().getCurrency());
-                updateAverageTab(checkNotNull(averageLevels));
+                updateAverageTabEvent();
             }
         });
         checkNotNull(commsRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) { updateAverageTab(checkNotNull(averageLevels)); }
+            if (newValue) { updateAverageTabEvent(); }
         });
         checkNotNull(percentRadioButton).selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) { updateAverageTab(checkNotNull(averageLevels)); }
+            if (newValue) { updateAverageTabEvent(); }
         });
         checkNotNull(includeLentAmountsCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
-            updateAverageTab(checkNotNull(averageLevels));
+            updateAverageTabEvent();
         });
 
         if (checkNotNull(commsRadioButton).isSelected()) {
@@ -180,15 +179,15 @@ public class AveragingPane extends AnchorPane {
             boolean disable = !enable;
             switchDisableRetainControls(disable);
             if (!disable) {
-                updateRetainedAmountByRetained();
+                updateRetainedAmountByQuote();
             }
         });
 
         checkNotNull(excludeCommissionCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
-            updateRetainedAmountByRetained();
+            updateRetainedAmountByQuote();
         });
 
-        updateAverageTab(averageLevels);
+        updateAverageTabEvent();
     }
 
     public void updateAverageTabEvent() {
@@ -200,18 +199,25 @@ public class AveragingPane extends AnchorPane {
 
         checkNotNull(retainCaptionLabel).disableProperty().setValue(disable);
         checkNotNull(retainWorthCaptionLabel).disableProperty().setValue(disable);
-        checkNotNull(retainTotalCaptionLabel).disableProperty().setValue(disable);
         checkNotNull(retainCommissionCaptionLabel).disableProperty().setValue(disable);
 
         checkNotNull(retainTextField).disableProperty().setValue(disable);
         checkNotNull(retainWorthTextField).disableProperty().setValue(disable);
         checkNotNull(retainCommissionTextField).disableProperty().setValue(disable);
-        checkNotNull(retainTotalTextField).disableProperty().setValue(disable);
 
         checkNotNull(retainCurrencyLabel).disableProperty().setValue(disable);
         checkNotNull(retainWorhCurrencyLabel).disableProperty().setValue(disable);
-        checkNotNull(retainTotalCurrencyLabel).disableProperty().setValue(disable);
         checkNotNull(retainCommisionCurrencyLabel).disableProperty().setValue(disable);
+    }
+
+    public void updateRetainedAmountByQuote() {
+        if (direction == LONG) {
+            updateRetainedAmountByWorth();
+        } else if (direction == SHORT) {
+            updateRetainedAmountByRetained();
+        } else {
+            throw new RuntimeException("Unknown direction " + direction);
+        }
     }
 
     public void updateRetainedAmountByRetained() {
@@ -221,53 +227,59 @@ public class AveragingPane extends AnchorPane {
         BigDecimal fee = checkNotNull(excludeCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
         BigDecimal price = getAveragingPrice();
 
-        AmountAndCommission aac;
-        if (direction == Direction.LONG) {
-            aac = LongShortCalculator.calculateQuoteAmountToGetShort(retainedAmount, price, checkNotNull(fee));
-        } else if (direction == Direction.SHORT) {
-            aac = LongShortCalculator.calculateBaseAmountToGetLong(retainedAmount, price, checkNotNull(fee));
+        BigDecimal debtAmount;
+        BigDecimal commissionAmount;
+        if (!retainedAmount.equals(BigDecimal.ZERO)) {
+            AmountAndCommission aac;
+            if (direction == LONG) {
+                aac = LongShortCalculator.calculateQuoteAmountToGetShort(retainedAmount, price, checkNotNull(fee));
+            } else if (direction == SHORT) {
+                aac = LongShortCalculator.calculateBaseAmountToGetLong(retainedAmount, price, checkNotNull(fee));
+            } else {
+                throw new RuntimeException("Unknown Direction " + direction);
+            }
+
+            debtAmount = aac.amount;
+            commissionAmount = aac.commissionQuote;
         } else {
-            throw new RuntimeException("Unknown Direction " + direction);
+            debtAmount = BigDecimal.ZERO;
+            commissionAmount = BigDecimal.ZERO;
+            checkNotNull(retainTextField).textProperty().set(formatAmount(retainedAmount));
         }
 
-        BigDecimal worthAmount = aac.amount;
-        BigDecimal commissionAmount = aac.commissionQuote;
-
-        checkNotNull(retainWorthTextField).textProperty().setValue(formatAmount(worthAmount));
+        checkNotNull(retainWorthTextField).textProperty().setValue(formatAmount(debtAmount));
         checkNotNull(retainCommissionTextField).textProperty().setValue(formatAmount(commissionAmount));
-
-        BigDecimal retainTotalAmount = retainedAmount.subtract(commissionAmount);
-        checkNotNull(retainTotalTextField).textProperty().setValue(formatAmount(retainTotalAmount));
-
-        updateAverageTab(averageLevels);
     }
 
     public void updateRetainedAmountByWorth() {
-        String worthAmountStr = checkNotNull(retainWorthTextField).textProperty().get();
-        BigDecimal worthAmount = nullToZero(fromString(worthAmountStr));
+        String debtAmountStr = checkNotNull(retainWorthTextField).textProperty().get();
+        BigDecimal debtAmount = nullToZero(fromString(debtAmountStr));
 
         BigDecimal fee = checkNotNull(excludeCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
         BigDecimal price = getAveragingPrice();
 
-        AmountAndCommission aac;
-        if (direction == Direction.LONG) {
-            aac = LongShortCalculator.calculateBaseAmountToGiveShort(worthAmount, price, checkNotNull(fee));
-        } else if (direction == Direction.SHORT) {
-            aac = LongShortCalculator.calculateQuoteAmountToGiveLong(worthAmount, price, checkNotNull(fee));
-        } else {
-            throw new RuntimeException("Unknown Direction " + direction);
-        }
+        BigDecimal retainedAmount;
+        BigDecimal commissionAmount;
+        if (!debtAmount.equals(BigDecimal.ZERO)) {
+            AmountAndCommission aac;
+            if (direction == LONG) {
+                aac = LongShortCalculator.calculateBaseAmountToGiveShort(debtAmount, price, checkNotNull(fee));
+            } else if (direction == SHORT) {
+                aac = LongShortCalculator.calculateQuoteAmountToGiveLong(debtAmount, price, checkNotNull(fee));
+            } else {
+                throw new RuntimeException("Unknown Direction " + direction);
+            }
 
-        BigDecimal retainedAmount = aac.amount;
-        BigDecimal commissionAmount = aac.commissionQuote;
+            retainedAmount = aac.amount;
+            commissionAmount = aac.commissionQuote;
+        } else {
+            retainedAmount = BigDecimal.ZERO;
+            commissionAmount = BigDecimal.ZERO;
+            checkNotNull(retainWorthTextField).textProperty().set(formatAmount(debtAmount));
+        }
 
         checkNotNull(retainTextField).textProperty().setValue(formatAmount(retainedAmount));
         checkNotNull(retainCommissionTextField).textProperty().setValue(formatAmount(commissionAmount));
-
-        BigDecimal retainTotalAmount = retainedAmount.subtract(commissionAmount);
-        checkNotNull(retainTotalTextField).textProperty().setValue(formatAmount(retainTotalAmount));
-
-        updateAverageTab(averageLevels);
     }
 
     public void updateAverageTab(Collection<Level> lvls) {
@@ -281,7 +293,7 @@ public class AveragingPane extends AnchorPane {
         BigDecimal holding = BigDecimal.ZERO;
 
         for (Level lvl : averageLevels) {
-            if (checkNotNull(direction) == Direction.LONG) {
+            if (checkNotNull(direction) == LONG) {
                 debt = debt.add(nullToZero(lvl.getDebtQuote()));
                 available = available.add(nullToZero(lvl.getAvailableAmountQuote()));
                 holding = holding.add(nullToZero(lvl.getAvailableAmountBase()));
@@ -321,7 +333,7 @@ public class AveragingPane extends AnchorPane {
         boolean profitInBase = checkNotNull(profitInBaseRadioButton).selectedProperty().get();
 
         if (holding.compareTo(BigDecimal.ZERO) != 0) {
-            if (checkNotNull(direction) == Direction.LONG) {
+            if (checkNotNull(direction) == LONG) {
                 // LONG
 
                 if (profitInBase) {
@@ -399,17 +411,19 @@ public class AveragingPane extends AnchorPane {
             checkNotNull(profitTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
             checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
         }
+
+        updateRetainedAmountByQuote();
     }
 
     public void updateLabels() {
-        String debtCurrency = checkNotNull(direction) == Direction.LONG
+        String debtCurrency = checkNotNull(direction) == LONG
                 ? ticker.getQuote().getCurrency() : ticker.getBase().getCurrency();
-        String holdCurrency = direction == Direction.LONG
+        String holdCurrency = direction == LONG
                 ? ticker.getBase().getCurrency() : ticker.getQuote().getCurrency();
 
         checkNotNull(poplavokDirectionLabel).textProperty().setValue(checkNotNull(direction).name());
         checkNotNull(poplavokTickerLabel).textProperty().setValue(checkNotNull(ticker).getSymbol());
-        checkNotNull(averagingActionLabel).textProperty().setValue(checkNotNull(direction) == Direction.LONG ? "SELL" : "BUY");
+        checkNotNull(averagingActionLabel).textProperty().setValue(checkNotNull(direction) == LONG ? "SELL" : "BUY");
         checkNotNull(averagingCurrencyLabel).textProperty().setValue(ticker.getBase().getCurrency());
 
         checkNotNull(debtCurrencyLabel).textProperty().setValue(debtCurrency);
@@ -424,7 +438,6 @@ public class AveragingPane extends AnchorPane {
 
         checkNotNull(retainCurrencyLabel).textProperty().setValue(holdCurrency);
         checkNotNull(retainWorhCurrencyLabel).textProperty().setValue(debtCurrency);
-        checkNotNull(retainTotalCurrencyLabel).textProperty().setValue(holdCurrency);
 
         String quoteCurrency = checkNotNull(ticker).getQuote().getCurrency();
         // Commission is always in QUOTE currency
