@@ -229,7 +229,7 @@ public class AveragingPane extends AnchorPane {
 
         BigDecimal debtAmount;
         BigDecimal commissionAmount;
-        if (!retainedAmount.equals(BigDecimal.ZERO)) {
+        if (BigDecimal.ZERO.compareTo(retainedAmount) != 0 && BigDecimal.ZERO.compareTo(price) != 0) {
             AmountAndCommission aac;
             if (direction == LONG) {
                 aac = LongShortCalculator.calculateQuoteAmountToGetShort(retainedAmount, price, checkNotNull(fee));
@@ -260,7 +260,7 @@ public class AveragingPane extends AnchorPane {
 
         BigDecimal retainedAmount;
         BigDecimal commissionAmount;
-        if (!debtAmount.equals(BigDecimal.ZERO)) {
+        if (BigDecimal.ZERO.compareTo(debtAmount) != 0 && BigDecimal.ZERO.compareTo(price) != 0) {
             AmountAndCommission aac;
             if (direction == LONG) {
                 aac = LongShortCalculator.calculateBaseAmountToGiveShort(debtAmount, price, checkNotNull(fee));
