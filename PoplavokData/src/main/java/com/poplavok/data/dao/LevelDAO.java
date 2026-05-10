@@ -37,6 +37,23 @@ public class LevelDAO {
                 .list();
     }
 
+    public static List<Level> findByCurrencies(Session session, List<String> currencies) {
+        String hql = "select l from Level l join fetch l.poplavok p join fetch p.marketTicker t " +
+                     "join fetch t.base b join fetch t.quote q " +
+                     "where l.state = com.poplavok.data.model.LevelState.TRADING " +
+                     "and p.isActive = true " +
+                     "and (b.currency in :currencies or q.currency in :currencies)";
+        List<Level> levels = session.createQuery(hql, Level.class)
+                .setParameter("currencies", currencies)
+                .list();
+
+        levels.forEach(l -> {
+            l.getPoplavok().getTicker().getBase().getCurrency();
+            l.getPoplavok().getTicker().getQuote().getCurrency();
+        });
+        return levels;
+    }
+
     public static List<Level> findByPoplavokId(Session session, Long poplavokId, boolean includeClosed) {
         String hql = "from Level l where l.poplavok.id = :poplavokId";
         if (!includeClosed) {

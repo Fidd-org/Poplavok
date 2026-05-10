@@ -2,6 +2,7 @@ package com.poplavok.forms;
 
 import com.flower.fxutils.JavaFxUtils;
 import com.poplavok.data.dao.AccountDAO;
+import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.LoanDAO;
 import com.poplavok.data.dao.LoanInfo;
 import com.poplavok.data.model.Account;
@@ -21,6 +22,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -31,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
@@ -80,7 +81,25 @@ public class RepaySettleDebtDialog extends TabPane {
     @FXML @Nullable RadioButton takeProfitQuoteRadioButton;
     @FXML @Nullable RadioButton takeProfitBaseRadioButton;
 
+    // ---------- TAKE PROFIT LEVEL ----------
+
+    @Nullable FilteredList<Level> levels;
+    @FXML @Nullable TableView<Level> takeProfitLevelsTableView;
+
+    @FXML @Nullable RadioButton takeProfitLevelQuoteRadioButton;
+    @FXML @Nullable RadioButton takeProfitLevelBaseRadioButton;
+
+    @FXML @Nullable Button takeProfitLevelAvailableCurrencyButton;
+    @FXML @Nullable TextField takeProfitLevelAvailableTextField;
+
+    @FXML @Nullable TextField takeProfitLevelTextField;
+    @FXML @Nullable Label takeProfitLevelCurrencyLabel;
+
     // ---------------------------------
+
+    @FXML @Nullable Tab takeProfitToAccTab;
+    @FXML @Nullable Tab takeProfitToLvlTab;
+    @FXML @Nullable Tab takeLossTab;
 
     @Nullable Stage stage;
 
@@ -100,6 +119,16 @@ public class RepaySettleDebtDialog extends TabPane {
             throw new RuntimeException(exception);
         }
 
+        if (nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0 ||
+                nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0) {
+            checkNotNull(takeProfitToAccTab).disableProperty().setValue(true);
+            checkNotNull(takeProfitToLvlTab).disableProperty().setValue(true);
+        }
+        if (nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) <= 0 &&
+                nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) <= 0) {
+            checkNotNull(takeLossTab).disableProperty().setValue(true);
+        }
+
         this.tradeDirection = tradeDirection;
 
         this.level = level;
@@ -117,6 +146,7 @@ public class RepaySettleDebtDialog extends TabPane {
 
         checkNotNull(toRepayTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
         checkNotNull(takeProfitTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
+        checkNotNull(takeProfitLevelTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
         checkNotNull(takeLossTextField).setTextFormatter(JavaFxUtils.createDecimalTextFormatter());
 
         String currency;
@@ -203,6 +233,17 @@ public class RepaySettleDebtDialog extends TabPane {
         checkNotNull(takeProfitAccountsTableView).setItems(this.accounts);
         autoResizeTableColumns(takeProfitAccountsTableView);
 
+        List<Level> levelList = DBUtil.connectGetResultAndClose(
+                sess -> LevelDAO.findByCurrencies(sess, List.of(ticker.getQuote().getCurrency(), ticker.getBase().getCurrency())));
+        this.levels = new FilteredList<>(FXCollections.observableArrayList(levelList));
+
+        checkNotNull(takeProfitLevelQuoteRadioButton).selectedProperty().addListener((obs, oldVal, newVal) -> updateProfitLevelsFilter(ticker));
+        checkNotNull(takeProfitLevelBaseRadioButton).selectedProperty().addListener((obs, oldVal, newVal) -> updateProfitLevelsFilter(ticker));
+        updateProfitLevelsFilter(ticker);
+
+        checkNotNull(takeProfitLevelsTableView).setItems(this.levels);
+        autoResizeTableColumns(takeProfitLevelsTableView);
+
         checkNotNull(takeLossLoansTableView).setItems(this.loans);
         autoResizeTableColumns(takeLossLoansTableView);
     }
@@ -236,6 +277,48 @@ public class RepaySettleDebtDialog extends TabPane {
                     checkNotNull(takeProfitTextField).setText(formatAmount(BigDecimal.ZERO));
 
                     return acc.getCurrency().getCurrency().equals(ticker.getBase().getCurrency());
+                } else {
+                    throw new RuntimeException("No Take currency selected");
+                }
+            });
+        }
+    }
+
+    public void updateProfitLevelsFilter(MarketTicker ticker) {
+        if (levels != null) {
+            levels.setPredicate(lvl -> {
+                if (checkNotNull(takeProfitLevelQuoteRadioButton).isSelected()) {
+                    String quote = ticker.getQuote().getCurrency();
+
+                    BigDecimal profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+                    if (profitAmountQuote.compareTo(BigDecimal.ZERO) <= 0) {
+                        profitAmountQuote = BigDecimal.ZERO;
+                    }
+
+                    checkNotNull(takeProfitLevelCurrencyLabel).textProperty().setValue(quote);
+                    checkNotNull(takeProfitLevelAvailableCurrencyButton).textProperty().setValue(quote);
+
+                    checkNotNull(takeProfitLevelAvailableTextField).setText(formatAmount(profitAmountQuote));
+                    checkNotNull(takeProfitLevelTextField).setText(formatAmount(BigDecimal.ZERO));
+
+                    return quote.equals(lvl.getPoplavok().getTicker().getQuote().getCurrency())
+                            || quote.equals(lvl.getPoplavok().getTicker().getBase().getCurrency());
+                } else if (checkNotNull(takeProfitLevelBaseRadioButton).isSelected()) {
+                    String base = ticker.getBase().getCurrency();
+
+                    BigDecimal profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+                    if (profitAmountBase.compareTo(BigDecimal.ZERO) <= 0) {
+                        profitAmountBase = BigDecimal.ZERO;
+                    }
+
+                    checkNotNull(takeProfitLevelCurrencyLabel).textProperty().setValue(base);
+                    checkNotNull(takeProfitLevelAvailableCurrencyButton).textProperty().setValue(base);
+
+                    checkNotNull(takeProfitLevelAvailableTextField).setText(formatAmount(profitAmountBase));
+                    checkNotNull(takeProfitLevelTextField).setText(formatAmount(BigDecimal.ZERO));
+
+                    return base.equals(lvl.getPoplavok().getTicker().getQuote().getCurrency())
+                            || base.equals(lvl.getPoplavok().getTicker().getBase().getCurrency());
                 } else {
                     throw new RuntimeException("No Take currency selected");
                 }
@@ -312,6 +395,11 @@ public class RepaySettleDebtDialog extends TabPane {
         checkNotNull(takeProfitTextField).setText(formatAmount(amount));
     }
 
+    public void moveAvailableAmountToTakeProfitLevel() {
+        BigDecimal amount = nullToZero(fromString(checkNotNull(takeProfitLevelAvailableTextField).getText()));
+        checkNotNull(takeProfitLevelTextField).setText(formatAmount(amount));
+    }
+
     public void takeProfit() {
         // Taking profit from this level to the account chosen by user
         try {
@@ -334,6 +422,35 @@ public class RepaySettleDebtDialog extends TabPane {
             }
 
             returnRepayment = new ProfitRepaymentInfo(repayAmount, selectedAccount);
+            checkNotNull(stage).close();
+        } catch (Exception e) {
+            JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);
+            LOGGER.error("RepayDialog close Error:", e);
+        }
+    }
+
+    public void takeProfitToLevel() {
+        // Taking profit from this level to the account chosen by user
+        try {
+            /*Level selectedLevel = checkNotNull(takeProfitLevelsTableView).getSelectionModel().getSelectedItem();
+            if (selectedAccount == null) {
+                JavaFxUtils.showErrorMessage("Please select account");
+                return;
+            }
+
+            BigDecimal repayAmount = nullToZero(fromString(checkNotNull(takeProfitTextField).textProperty().get()));
+            BigDecimal availableAmount = nullToZero(fromString(checkNotNull(takeProfitAvailableTextField).textProperty().get()));
+
+            if (repayAmount.compareTo(availableAmount) > 0) {
+                JavaFxUtils.showErrorMessage("TakeProfit amount cannot be greater than available amount");
+                return;
+            }
+            if (repayAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                JavaFxUtils.showErrorMessage("TakeProfit amount must be greater than zero");
+                return;
+            }
+
+            returnRepayment = new ProfitRepaymentInfo(repayAmount, selectedAccount);*/
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);

@@ -604,7 +604,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                             if (trade != null) {
                                 // ------------------------------------------------------------------------------
 
-                                /*BigDecimal baseIn = nullToZero(trade.getAmountBaseIn());
+                                /*
+                                BigDecimal baseIn = nullToZero(trade.getAmountBaseIn());
                                 BigDecimal quoteIn = nullToZero(trade.getAmountQuoteIn());
                                 BigDecimal baseOut = nullToZero(trade.getAmountBaseOut());
                                 BigDecimal quoteOut = nullToZero(trade.getAmountQuoteOut());
@@ -638,7 +639,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                     sess.persist(trade);
                                     sess.persist(levelTrade);
                                     LevelDAO.update(sess, lvl);
-                                });*/
+                                });
+                                */
 
                                 // ------------------------------------------------------------------------------
 
