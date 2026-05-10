@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 public class LossRepaymentInfo extends BaseRepaymentInfo {
     protected final Loan loanToWriteOff;
 
-    public LossRepaymentInfo(BigDecimal amount, Loan loanToWriteOff) {
-        super(RepaymentType.LOSS, amount);
+    public LossRepaymentInfo(BigDecimal amount, String currency, Loan loanToWriteOff) {
+        super(RepaymentType.LOSS, amount, currency);
         this.loanToWriteOff = loanToWriteOff;
     }
 

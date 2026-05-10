@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 public class RepayRepaymentInfo extends BaseRepaymentInfo {
     protected final Loan loanToRepay;
 
-    public RepayRepaymentInfo(BigDecimal amount, Loan loanToRepay) {
-        super(RepaymentType.REPAY, amount);
+    public RepayRepaymentInfo(BigDecimal amount, String currency, Loan loanToRepay) {
+        super(RepaymentType.REPAY, amount, currency);
         this.loanToRepay = loanToRepay;
     }
 

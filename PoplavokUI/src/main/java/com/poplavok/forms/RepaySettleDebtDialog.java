@@ -104,7 +104,8 @@ public class RepaySettleDebtDialog extends TabPane {
     @Nullable Stage stage;
 
     @Nullable Long levelId = null;
-    Level level;
+    final Level level;
+    final MarketTicker ticker;
     final Direction tradeDirection;
     @Nullable volatile RepaymentInfo returnRepayment = null;
 
@@ -131,6 +132,7 @@ public class RepaySettleDebtDialog extends TabPane {
 
         this.tradeDirection = tradeDirection;
 
+        this.ticker = ticker;
         this.level = level;
         //checkNotNull(addButton).textProperty().set("Update Level");
         levelId = level.getId();
@@ -320,7 +322,7 @@ public class RepaySettleDebtDialog extends TabPane {
                     return base.equals(lvl.getPoplavok().getTicker().getQuote().getCurrency())
                             || base.equals(lvl.getPoplavok().getTicker().getBase().getCurrency());
                 } else {
-                    throw new RuntimeException("No Take currency selected");
+                    throw new RuntimeException("No Take Level currency selected");
                 }
             });
         }
@@ -371,7 +373,7 @@ public class RepaySettleDebtDialog extends TabPane {
                 return;
             }
 
-            returnRepayment = new RepayRepaymentInfo(repayAmount, selectedLoan);
+            returnRepayment = new RepayRepaymentInfo(repayAmount, selectedLoan.getCurrency().getCurrency(), selectedLoan);
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);
@@ -421,7 +423,7 @@ public class RepaySettleDebtDialog extends TabPane {
                 return;
             }
 
-            returnRepayment = new ProfitRepaymentInfo(repayAmount, selectedAccount);
+            returnRepayment = new ProfitRepaymentInfo(repayAmount, selectedAccount.getCurrency().getCurrency(), selectedAccount);
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);
@@ -432,14 +434,14 @@ public class RepaySettleDebtDialog extends TabPane {
     public void takeProfitToLevel() {
         // Taking profit from this level to the account chosen by user
         try {
-            /*Level selectedLevel = checkNotNull(takeProfitLevelsTableView).getSelectionModel().getSelectedItem();
-            if (selectedAccount == null) {
-                JavaFxUtils.showErrorMessage("Please select account");
+            Level selectedLevel = checkNotNull(takeProfitLevelsTableView).getSelectionModel().getSelectedItem();
+            if (selectedLevel == null) {
+                JavaFxUtils.showErrorMessage("Please select level");
                 return;
             }
 
-            BigDecimal repayAmount = nullToZero(fromString(checkNotNull(takeProfitTextField).textProperty().get()));
-            BigDecimal availableAmount = nullToZero(fromString(checkNotNull(takeProfitAvailableTextField).textProperty().get()));
+            BigDecimal repayAmount = nullToZero(fromString(checkNotNull(takeProfitLevelTextField).textProperty().get()));
+            BigDecimal availableAmount = nullToZero(fromString(checkNotNull(takeProfitLevelAvailableTextField).textProperty().get()));
 
             if (repayAmount.compareTo(availableAmount) > 0) {
                 JavaFxUtils.showErrorMessage("TakeProfit amount cannot be greater than available amount");
@@ -450,7 +452,17 @@ public class RepaySettleDebtDialog extends TabPane {
                 return;
             }
 
-            returnRepayment = new ProfitRepaymentInfo(repayAmount, selectedAccount);*/
+            String currency;
+            if (checkNotNull(takeProfitLevelQuoteRadioButton).isSelected()) {
+                currency = ticker.getQuote().getCurrency();
+            } else if (checkNotNull(takeProfitLevelBaseRadioButton).isSelected()) {
+                currency = ticker.getBase().getCurrency();
+            } else {
+                throw new RuntimeException("No Take Level currency selected");
+            }
+
+            returnRepayment = new ProfitRepaymentInfo(repayAmount, currency, selectedLevel);
+
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);
@@ -484,7 +496,7 @@ public class RepaySettleDebtDialog extends TabPane {
                 return;
             }
 
-            returnRepayment = new LossRepaymentInfo(takeLossAmount, selectedLoan.loan);
+            returnRepayment = new LossRepaymentInfo(takeLossAmount, selectedLoan.loan.getCurrency().getCurrency(), selectedLoan.loan);
             checkNotNull(stage).close();
         } catch (Exception e) {
             JavaFxUtils.showErrorMessage("RepayDialog close Error: " + e);

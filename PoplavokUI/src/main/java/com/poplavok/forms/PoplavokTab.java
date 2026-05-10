@@ -467,7 +467,13 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
 
         ProfitRepaymentInfo repayment = (ProfitRepaymentInfo)_repayment;
-        RepaymentManager.takeProfit(sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getAccountToMoveProfitTo(), repayment.getAmount(), new Date());
+        if (repayment.getAccountToMoveProfitTo() != null) {
+            RepaymentManager.takeProfitToAccount(sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getAccountToMoveProfitTo(), repayment.getAmount(), repayment.getCurrency(), new Date());
+        } else if (repayment.getLevelToMoveProfitTo() != null) {
+            RepaymentManager.takeProfitToLevel(sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getLevelToMoveProfitTo(), repayment.getAmount(), repayment.getCurrency(), new Date());
+        } else {
+            throw new RuntimeException("Profit taken should be moved to either Account or Level");
+        }
     }
 
     public void processTakeLoss(Level sourceLevel, RepaymentInfo _repayment) {

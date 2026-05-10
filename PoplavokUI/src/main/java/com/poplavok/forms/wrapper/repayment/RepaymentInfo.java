@@ -7,4 +7,5 @@ import java.math.BigDecimal;
 public interface RepaymentInfo {
     RepaymentType getRepaymentType();
     BigDecimal getAmount();
+    String getCurrency();
 }

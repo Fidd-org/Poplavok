@@ -6,11 +6,13 @@ import java.math.BigDecimal;
 
 abstract class BaseRepaymentInfo implements RepaymentInfo {
     private final BigDecimal amount;
+    private final String currency;
     private final RepaymentType repaymentType;
 
-    public BaseRepaymentInfo(RepaymentType repaymentType, BigDecimal amount) {
+    public BaseRepaymentInfo(RepaymentType repaymentType, BigDecimal amount, String currency) {
         this.amount = amount;
         this.repaymentType = repaymentType;
+        this.currency = currency;
     }
 
     @Override
@@ -21,6 +23,11 @@ abstract class BaseRepaymentInfo implements RepaymentInfo {
     @Override
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    @Override
+    public String getCurrency() {
+        return currency;
     }
 }
 

@@ -1,11 +1,11 @@
 package com.poplavok.data.utils;
 
-import com.google.common.base.Ticker;
 import com.poplavok.data.dao.AccountDAO;
 import com.poplavok.data.dao.LevelDAO;
 import com.poplavok.data.dao.LoanDAO;
 import com.poplavok.data.dao.RepaymentDAO;
 import com.poplavok.data.model.Account;
+import com.poplavok.data.model.Currency;
 import com.poplavok.data.model.Level;
 import com.poplavok.data.model.Loan;
 import com.poplavok.data.model.MarketTicker;
@@ -110,22 +110,20 @@ public class RepaymentManager {
         return dbRepayment;
     }
 
-    public static Repayment takeProfit(Level sourceLevel, MarketTicker ticker, Account destinationAccount, BigDecimal repaymentAmount, Date date) {
-        String loanCurrency = destinationAccount.getCurrency().getCurrency();
-
+    public static Repayment takeProfitToAccount(Level sourceLevel, MarketTicker ticker, Account destinationAccount, BigDecimal repaymentAmount, String repaymentCurrency, Date date) {
         // 1. Process source
 
         // Source level: remove amount from available
         String sourceQuote = ticker.getQuote().getCurrency();
         String sourceBase = ticker.getBase().getCurrency();
-        if (loanCurrency.equals(sourceQuote)) {
+        if (repaymentCurrency.equals(sourceQuote)) {
             BigDecimal availableAmountQuote = nullToZero(sourceLevel.getAvailableAmountQuote());
             if (availableAmountQuote.compareTo(repaymentAmount) < 0) {
                 throw new RuntimeException("Not enough available amount in the source level to cover the repayment "
                         + formatAmount(availableAmountQuote) + " < " + formatAmount(repaymentAmount));
             }
             sourceLevel.setAvailableAmountQuote(availableAmountQuote.subtract(repaymentAmount));
-        } else if (loanCurrency.equals(sourceBase)) {
+        } else if (repaymentCurrency.equals(sourceBase)) {
             BigDecimal availableAmountBase = nullToZero(sourceLevel.getAvailableAmountBase());
             if (availableAmountBase.compareTo(repaymentAmount) < 0) {
                 throw new RuntimeException("Not enough available amount in the source level to cover the repayment "
@@ -150,6 +148,62 @@ public class RepaymentManager {
         DBUtil.connectCommitAndClose(sess -> {
             LevelDAO.update(sess, sourceLevel);
             AccountDAO.update(sess, destinationAccount);
+            RepaymentDAO.save(sess, dbRepayment);
+        });
+
+        return dbRepayment;
+    }
+
+    public static Repayment takeProfitToLevel(Level sourceLevel, MarketTicker ticker, Level destinationLevel, BigDecimal repaymentAmount, String repaymentCurrency, Date date) {
+        // 1. Process source
+
+        // Source level: remove amount from available
+        Currency repaymentCurrencyObj;
+        String sourceQuote = ticker.getQuote().getCurrency();
+        String sourceBase = ticker.getBase().getCurrency();
+        if (repaymentCurrency.equals(sourceQuote)) {
+            repaymentCurrencyObj = ticker.getQuote();
+            BigDecimal availableAmountQuote = nullToZero(sourceLevel.getAvailableAmountQuote());
+            if (availableAmountQuote.compareTo(repaymentAmount) < 0) {
+                throw new RuntimeException("Not enough available amount in the source level to cover the repayment "
+                        + formatAmount(availableAmountQuote) + " < " + formatAmount(repaymentAmount));
+            }
+            sourceLevel.setAvailableAmountQuote(availableAmountQuote.subtract(repaymentAmount));
+        } else if (repaymentCurrency.equals(sourceBase)) {
+            repaymentCurrencyObj = ticker.getBase();
+            BigDecimal availableAmountBase = nullToZero(sourceLevel.getAvailableAmountBase());
+            if (availableAmountBase.compareTo(repaymentAmount) < 0) {
+                throw new RuntimeException("Not enough available amount in the source level to cover the repayment "
+                        + formatAmount(availableAmountBase) + " < " + formatAmount(repaymentAmount));
+            }
+            sourceLevel.setAvailableAmountBase(availableAmountBase.subtract(repaymentAmount));
+        } else {
+            throw new RuntimeException("Loan currency doesn't match either BASE or QUOTE of the source level's ticker");
+        }
+
+        // 2. Process destination
+
+        // Add amount to destination level's available amount
+        String destinationQuote = destinationLevel.getPoplavok().getTicker().getQuote().getCurrency();
+        String destinationBase = destinationLevel.getPoplavok().getTicker().getBase().getCurrency();
+        if (repaymentCurrency.equals(destinationQuote)) {
+            BigDecimal availableAmountQuote = nullToZero(destinationLevel.getAvailableAmountQuote());
+            destinationLevel.setAvailableAmountQuote(availableAmountQuote.add(repaymentAmount));
+        } else if (repaymentCurrency.equals(destinationBase)) {
+            BigDecimal availableAmountBase = nullToZero(destinationLevel.getAvailableAmountBase());
+            destinationLevel.setAvailableAmountBase(availableAmountBase.add(repaymentAmount));
+        } else {
+            throw new RuntimeException("Loan currency doesn't match either BASE or QUOTE of the destination level's ticker");
+        }
+
+        // 3. Create Repayment
+        Repayment dbRepayment = new Repayment(repaymentCurrencyObj, null, sourceLevel,
+                null, destinationLevel, repaymentAmount, date, RepaymentType.PROFIT, null, null);
+
+        // 4. Save everything to DB
+        DBUtil.connectCommitAndClose(sess -> {
+            LevelDAO.update(sess, sourceLevel);
+            LevelDAO.update(sess, destinationLevel);
             RepaymentDAO.save(sess, dbRepayment);
         });
 
