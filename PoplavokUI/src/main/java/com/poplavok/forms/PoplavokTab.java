@@ -569,19 +569,15 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             }
 
             Direction direction = checkNotNull(checkNotNull(poplavok).getDirection());
-            BigDecimal availableAmountBase = BigDecimal.ZERO;
-            BigDecimal availableAmountQuote = BigDecimal.ZERO;
             for (Level lvl : selected) {
                 LevelState state = lvl.getState();
                 if (state != LevelState.TRADING && state != LevelState.FUNDING) {
                     showErrorMessage("Levels in " + state + " state can't perform trades.");
                     return;
                 }
-
-                availableAmountBase = availableAmountBase.add(nullToZero(lvl.getAvailableAmountBase()));
-                availableAmountQuote = availableAmountQuote.add(nullToZero(lvl.getAvailableAmountQuote()));
             }
 
+            BigDecimal amountToRepay = checkNotNull(averagingPane).getAmountToTrade();
             BigDecimal debtToRepay = checkNotNull(averagingPane).getDebtToRepay();
             BigDecimal price = checkNotNull(averagingPane).getAveragingPrice();
 
@@ -589,10 +585,16 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             BigDecimal retainedAmount = checkNotNull(averagingPane).getRetainedAmount();
 
             debtToRepay = debtToRepay.subtract(retainedDebt);
+            amountToRepay = amountToRepay.subtract(retainedAmount);
+
+            BigDecimal availableAmountBase;
+            BigDecimal availableAmountQuote;
             if (direction == Direction.LONG) {
-                availableAmountBase = availableAmountBase.subtract(retainedAmount);
+                availableAmountBase = amountToRepay;
+                availableAmountQuote = BigDecimal.ZERO;
             } else if (direction == Direction.SHORT) {
-                availableAmountQuote = availableAmountQuote.subtract(retainedAmount);
+                availableAmountQuote = amountToRepay;
+                availableAmountBase = BigDecimal.ZERO;
             } else {
                 throw new RuntimeException("Unknown Direction " + direction);
             }
