@@ -59,6 +59,8 @@ import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.flower.fxutils.JavaFxUtils.showErrorMessage;
 import static com.flower.fxutils.JavaFxUtils.showMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.poplavok.data.model.Direction.LONG;
+import static com.poplavok.data.model.Direction.SHORT;
 import static com.poplavok.data.model.LoanType.ACCOUNT_FUNDED;
 import static com.poplavok.data.model.LoanType.EXTERNAL_CROSS_MARGIN;
 import static com.poplavok.data.model.LoanType.EXTERNAL_ISOLATED_MARGIN;
@@ -562,14 +564,14 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
     public void averagingTrade() {
         try {
-            final List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
-            if (selected == null || selected.isEmpty()) {
+            final List<Level> levels = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (levels == null || levels.isEmpty()) {
                 showErrorMessage("Please select 1 or more levels to average-trade.");
                 return;
             }
 
             Direction direction = checkNotNull(checkNotNull(poplavok).getDirection());
-            for (Level lvl : selected) {
+            for (Level lvl : levels) {
                 LevelState state = lvl.getState();
                 if (state != LevelState.TRADING && state != LevelState.FUNDING) {
                     showErrorMessage("Levels in " + state + " state can't perform trades.");
@@ -577,23 +579,23 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 }
             }
 
-            BigDecimal amountToRepay = checkNotNull(averagingPane).getAmountToTrade();
-            BigDecimal debtToRepay = checkNotNull(averagingPane).getDebtToRepay();
+            BigDecimal fullAmountToTrade = checkNotNull(averagingPane).getAmountToTrade();
+            BigDecimal fullDebtToRepay = checkNotNull(averagingPane).getDebtToRepay();
             BigDecimal price = checkNotNull(averagingPane).getAveragingPrice();
 
             BigDecimal retainedDebt = checkNotNull(averagingPane).getRetainedDebt();
             BigDecimal retainedAmount = checkNotNull(averagingPane).getRetainedAmount();
 
-            debtToRepay = debtToRepay.subtract(retainedDebt);
-            amountToRepay = amountToRepay.subtract(retainedAmount);
+            BigDecimal debtToRepay = fullDebtToRepay.subtract(retainedDebt);
+            BigDecimal amountToTrade = fullAmountToTrade.subtract(retainedAmount);
 
             BigDecimal availableAmountBase;
             BigDecimal availableAmountQuote;
             if (direction == Direction.LONG) {
-                availableAmountBase = amountToRepay;
+                availableAmountBase = amountToTrade;
                 availableAmountQuote = BigDecimal.ZERO;
-            } else if (direction == Direction.SHORT) {
-                availableAmountQuote = amountToRepay;
+            } else if (direction == SHORT) {
+                availableAmountQuote = amountToTrade;
                 availableAmountBase = BigDecimal.ZERO;
             } else {
                 throw new RuntimeException("Unknown Direction " + direction);
@@ -727,6 +729,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                 LevelTrade levelTrade = new LevelTrade();
                                 levelTrade.setLevel(lvl);
                                 levelTrade.setTrade(trade);
+
+                                levelTrade.setAmountBaseIn(baseIn);
+                                levelTrade.setAmountQuoteIn(quoteIn);
+                                levelTrade.setAmountBaseOut(baseOut);
+                                levelTrade.setAmountQuoteOut(quoteOut);
 
                                 DBUtil.connectCommitAndClose(sess -> {
                                     sess.persist(trade);
