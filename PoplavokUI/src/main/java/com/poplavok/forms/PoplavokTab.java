@@ -3,7 +3,11 @@ package com.poplavok.forms;
 import com.flower.fxutils.ModalWindow;
 import com.flower.fxutils.Refreshable;
 import com.poplavok.data.dao.AccountDAO;
+import com.poplavok.data.dao.LevelTradeDAO;
+import com.poplavok.data.dao.LoanTransferDAO;
 import com.poplavok.data.dao.RateDAO;
+import com.poplavok.data.dao.RepaymentDAO;
+import com.poplavok.data.dao.TradeDAO;
 import com.poplavok.data.dao.TransactionDAO;
 import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Currency;
@@ -12,9 +16,11 @@ import com.poplavok.data.model.Level;
 import com.poplavok.data.model.LevelState;
 import com.poplavok.data.model.LevelTrade;
 import com.poplavok.data.model.Loan;
+import com.poplavok.data.model.LoanTransfer;
 import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import com.poplavok.data.model.Rate;
+import com.poplavok.data.model.Repayment;
 import com.poplavok.data.model.RepaymentType;
 import com.poplavok.data.model.Trade;
 import com.poplavok.data.model.Transaction;
@@ -23,7 +29,9 @@ import com.poplavok.data.dao.PoplavokDAO;
 import com.poplavok.data.dao.LoanDAO;
 import com.poplavok.data.utils.BigDecimalUtil;
 import com.poplavok.data.utils.DBUtil;
+import com.poplavok.data.utils.LoanTransferManager;
 import com.poplavok.data.utils.RepaymentManager;
+import com.poplavok.data.utils.WithdrawalDistributor;
 import com.poplavok.forms.wrapper.LevelTransaction;
 import com.poplavok.forms.wrapper.repayment.LossRepaymentInfo;
 import com.poplavok.forms.wrapper.repayment.ProfitRepaymentInfo;
@@ -48,6 +56,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
@@ -65,6 +74,7 @@ import static com.poplavok.data.model.LoanType.ACCOUNT_FUNDED;
 import static com.poplavok.data.model.LoanType.EXTERNAL_CROSS_MARGIN;
 import static com.poplavok.data.model.LoanType.EXTERNAL_ISOLATED_MARGIN;
 import static com.poplavok.data.model.LoanType.POPLAVOK_FUNDED;
+import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 import static com.poplavok.data.utils.BigDecimalUtil.fromString;
@@ -472,7 +482,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         if (repayment.getAccountToMoveProfitTo() != null) {
             RepaymentManager.takeProfitToAccount(sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getAccountToMoveProfitTo(), repayment.getAmount(), repayment.getCurrency(), new Date());
         } else if (repayment.getLevelToMoveProfitTo() != null) {
-            RepaymentManager.takeProfitToLevel(sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getLevelToMoveProfitTo(), repayment.getAmount(), repayment.getCurrency(), new Date());
+            RepaymentManager.takeProfitToLevelAndSave(sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getLevelToMoveProfitTo(), repayment.getAmount(), repayment.getCurrency(), new Date());
         } else {
             throw new RuntimeException("Profit taken should be moved to either Account or Level");
         }
@@ -495,7 +505,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
 
         RepayRepaymentInfo repayment = (RepayRepaymentInfo)_repayment;
-        RepaymentManager.repay(repayment.getLoanToRepay(), sourceLevel, checkNotNull(poplavok).getTicker(), repayment.getAmount(), new Date());
+        RepaymentManager.repay(repayment.getLoanToRepay(), sourceLevel, repayment.getAmount(), new Date(), "Repayment from Poplavok level");
     }
 
     public void closeLevel() {
@@ -562,8 +572,50 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
     }
 
+    static class LevelHoldingsAndDebts {
+        public final List<BigDecimal> levelDebts;
+        public final List<BigDecimal> levelHoldings;
+
+        public LevelHoldingsAndDebts(List<BigDecimal> levelDebts, List<BigDecimal> levelHoldings) {
+            this.levelDebts = levelDebts;
+            this.levelHoldings = levelHoldings;
+        }
+    }
+
+    public LevelHoldingsAndDebts getLevelHoldingsAndDebts(List<Level> levels, Direction direction, boolean removeAvailableFromDebts) {
+        List<BigDecimal> levelDebts = new ArrayList<>();
+        List<BigDecimal> levelHoldings = new ArrayList<>();
+
+        for (Level lvl : levels) {
+            BigDecimal levelDebt;
+            BigDecimal levelHoldingsAmount;
+            if (direction == LONG) {
+                levelDebt = nullToZero(lvl.getDebtQuote());
+                if (removeAvailableFromDebts) {
+                    levelDebt = levelDebt.subtract(lvl.getAvailableAmountQuote());
+                }
+
+                levelHoldingsAmount = lvl.getAvailableAmountBase();
+            } else { //if (direction == SHORT) {
+                levelDebt = nullToZero(lvl.getDebtBase());
+                if (removeAvailableFromDebts) {
+                    levelDebt = levelDebt.subtract(lvl.getAvailableAmountBase());
+                }
+
+                levelHoldingsAmount = lvl.getAvailableAmountQuote();
+            }
+
+            levelDebts.add(levelDebt);
+            levelHoldings.add(levelHoldingsAmount);
+        }
+
+        return new LevelHoldingsAndDebts(levelDebts, levelHoldings);
+    }
+
     public void averagingTrade() {
         try {
+            MarketTicker ticker = checkNotNull(poplavok).getTicker();
+
             final List<Level> levels = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
             if (levels == null || levels.isEmpty()) {
                 showErrorMessage("Please select 1 or more levels to average-trade.");
@@ -581,7 +633,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
             BigDecimal fullAmountToTrade = checkNotNull(averagingPane).getAmountToTrade();
             BigDecimal fullDebtToRepay = checkNotNull(averagingPane).getDebtToRepay();
-            BigDecimal price = checkNotNull(averagingPane).getAveragingPrice();
+            BigDecimal averagingPrice = checkNotNull(averagingPane).getAveragingPrice();
 
             BigDecimal retainedDebt = checkNotNull(averagingPane).getRetainedDebt();
             BigDecimal retainedAmount = checkNotNull(averagingPane).getRetainedAmount();
@@ -602,7 +654,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             }
 
             PerformTradeDialog performTradeDialog = new PerformTradeDialog(availableAmountBase, availableAmountQuote, debtToRepay,
-                    checkNotNull(poplavok).getTicker(), direction, price);
+                    checkNotNull(poplavok).getTicker(), direction, averagingPrice);
             Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
                     stage -> { performTradeDialog.setStage(stage); return performTradeDialog; },
                     "Perform Averaging Trade");
@@ -612,9 +664,6 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                         try {
                             Trade trade = performTradeDialog.getReturnTrade();
                             if (trade != null) {
-                                // ------------------------------------------------------------------------------
-
-                                /*
                                 BigDecimal baseIn = nullToZero(trade.getAmountBaseIn());
                                 BigDecimal quoteIn = nullToZero(trade.getAmountQuoteIn());
                                 BigDecimal baseOut = nullToZero(trade.getAmountBaseOut());
@@ -622,37 +671,211 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                 BigDecimal baseCommission = nullToZero(trade.getCommissionBase());
                                 BigDecimal quoteCommission = nullToZero(trade.getCommissionQuote());
 
-                                BigDecimal lvlBase = nullToZero(lvl.getAvailableAmountBase());
-                                BigDecimal lvlQuote = nullToZero(lvl.getAvailableAmountQuote());
+                                BigDecimal amountIn;
+                                BigDecimal amountOut;
+                                if (direction == LONG) {
+                                    amountIn = baseIn;
+                                    amountOut = quoteOut;
+                                } else { //if (direction == SHORT) {
+                                    amountIn = quoteIn;
+                                    amountOut = baseOut;
+                                }
+                                BigDecimal amountInForCheck = amountIn;
+                                amountIn = amountIn.setScale(SCALE, RoundingMode.CEILING);
+                                amountOut = amountOut.setScale(SCALE, RoundingMode.FLOOR);
 
-                                if (lvlBase.compareTo(baseIn) < 0) {
-                                    throw new RuntimeException("Not enough Base available in level for this trade");
+                                // 1. Determine holdings and debts for each level
+                                LevelHoldingsAndDebts levelHoldingsAndDebts = getLevelHoldingsAndDebts(levels, direction, true);
+
+                                // 2. Create LevelTrades
+                                List<LevelTrade> levelTrades = new ArrayList<>();
+
+                                List<BigDecimal> levelAmountsIn = WithdrawalDistributor.distributeWithdrawal(levelHoldingsAndDebts.levelHoldings, amountIn, SCALE);
+                                List<BigDecimal> levelAmountsOut = WithdrawalDistributor.distributeWithdrawal(levelHoldingsAndDebts.levelDebts, amountOut, SCALE, true);
+
+                                BigDecimal amountInCheck = BigDecimal.ZERO;
+                                BigDecimal amountOutCheck = BigDecimal.ZERO;
+                                for (int i = 0; i < levels.size(); i++) {
+                                    Level lvl = levels.get(i);
+
+                                    BigDecimal levelAmountIn = levelAmountsIn.get(i);
+                                    BigDecimal levelAmountOut = levelAmountsOut.get(i);
+
+                                    amountInCheck = amountInCheck.add(levelAmountIn);
+                                    amountOutCheck = amountOutCheck.add(levelAmountOut);
+
+                                    LevelTrade levelTrade = new LevelTrade();
+                                    levelTrade.setLevel(lvl);
+                                    levelTrade.setTrade(trade);
+
+                                    levelTrades.add(levelTrade);
+
+                                    if (direction == LONG) {
+                                        levelTrade.setAmountBaseIn(levelAmountIn);
+                                        levelTrade.setAmountQuoteOut(levelAmountOut);
+
+                                        lvl.setAvailableAmountBase(nullToZero(lvl.getAvailableAmountBase()).subtract(levelAmountIn));
+                                        lvl.setAvailableAmountQuote(nullToZero(lvl.getAvailableAmountQuote()).add(levelAmountOut));
+                                    } else { //if (direction == SHORT) {
+                                        levelTrade.setAmountQuoteIn(levelAmountIn);
+                                        levelTrade.setAmountBaseOut(levelAmountOut);
+
+                                        lvl.setAvailableAmountQuote(nullToZero(lvl.getAvailableAmountQuote()).subtract(levelAmountIn));
+                                        lvl.setAvailableAmountBase(nullToZero(lvl.getAvailableAmountBase()).add(levelAmountOut));
+                                    }
                                 }
 
-                                if (lvlQuote.compareTo(quoteIn) < 0) {
-                                    throw new RuntimeException("Not enough Quote available in level for this trade");
+                                // Make sure trade amounts match
+                                // TODO: reinstate those checks after WithdrawalDistributor is fixed to properly handle rounding and scale
+                                /*if (amountIn.compareTo(amountInCheck) != 0) {
+                                    throw new RuntimeException("Trade AmountIn mismatch " + formatAmount(amountIn) + " != " + formatAmount(amountInCheck));
                                 }
+                                if (amountOut.compareTo(amountOutCheck) != 0) {
+                                    throw new RuntimeException("Trade AmountOut mismatch " + formatAmount(amountOut) + " != " + formatAmount(amountOutCheck));
+                                }*/
 
-                                lvl.setState(LevelState.TRADING);
+                                // 3. Create a new Level, containing retained amounts
+                                if (retainedAmount.compareTo(BigDecimal.ZERO) > 0 || retainedDebt.compareTo(BigDecimal.ZERO) > 0) {
+                                    // 3.1. Determine updated holdings and debts for each level
+                                    levelHoldingsAndDebts = getLevelHoldingsAndDebts(levels, direction, false);
 
-                                lvlBase = lvlBase.subtract(baseIn).add(baseOut);
-                                lvlQuote = lvlQuote.subtract(quoteIn).add(quoteOut);
+                                    // Make sure retained amount is within limits
+                                    // TODO: SCALE is all over the place, need to properly handle it in all calculations and checks
+                                    if (fullAmountToTrade.subtract(amountInForCheck).compareTo(retainedAmount) < 0) {
+                                        throw new RuntimeException("RetainedAmount too large: FullAmount " + formatAmount(fullAmountToTrade) +
+                                                "; TradedAmount " + formatAmount(amountIn) + "; RetainedAmount " + retainedAmount);
+                                    }
 
-                                lvl.setAvailableAmountBase(lvlBase);
-                                lvl.setAvailableAmountQuote(lvlQuote);
+                                    // 3.2 Create a new level for this poplavok to transfer retained debt and amount to
+                                    Level newLevel = new Level();
+                                    newLevel.setState(LevelState.INCEPTION);
+                                    newLevel.setCreationDate(new Date());
+                                    newLevel.setPoplavok(checkNotNull(poplavok));
+                                    newLevel.setProjectedPrice(nullToZero(averagingPrice));
 
-                                LevelTrade levelTrade = new LevelTrade();
-                                levelTrade.setLevel(lvl);
-                                levelTrade.setTrade(trade);
+                                    if (direction == LONG) {
+                                        // LONG - Retain BASE
+                                        newLevel.setProjectedAmountBase(retainedAmount);
+                                        newLevel.setProjectedAmountQuote(retainedDebt);
+                                    } else { //if (direction == SHORT) {
+                                        // SHORT - Retain QUOTE
+                                        newLevel.setProjectedAmountQuote(retainedAmount);
+                                        newLevel.setProjectedAmountBase(retainedDebt);
+                                    }
 
-                                DBUtil.connectCommitAndClose(sess -> {
-                                    sess.persist(trade);
-                                    sess.persist(levelTrade);
-                                    LevelDAO.update(sess, lvl);
-                                });
-                                */
+                                    newLevel.setNotes("Proceeds of averaging trade");
 
-                                // ------------------------------------------------------------------------------
+                                    // 3.2 Loan Transfer to new level in the amount of retainedDebt (potentially from multiple input levels)
+                                    List<BigDecimal> retainedLevelAmounts = WithdrawalDistributor.distributeWithdrawal(levelHoldingsAndDebts.levelHoldings, retainedAmount, SCALE);
+                                    // TODO: situations are possible, in which levels don't have enough debt to transfer. We need to understand what to do in such cases.
+                                    List<BigDecimal> retainedLevelDebts = WithdrawalDistributor.distributeWithdrawal(levelHoldingsAndDebts.levelDebts, retainedDebt, SCALE/*, true*/);
+
+                                    BigDecimal transferredLoanAmount = BigDecimal.ZERO;
+                                    List<LoanTransfer> loanTransfers = new ArrayList<>();
+                                    for (int i = 0; i < levels.size(); i++) {
+                                        BigDecimal retainDebtFromLevel = retainedLevelDebts.get(i);
+
+                                        // Go through all levels to TransferLoan
+                                        Level lvlFrom = levels.get(i);
+
+                                        List<Loan> loansOnLvlFrom = DBUtil.connectGetResultAndClose(sess ->
+                                                LoanDAO.findByDestinationLevel(sess, lvlFrom)
+                                        );
+
+                                        BigDecimal leftToTransferForLevel = retainDebtFromLevel;
+                                        BigDecimal transferredAmountForLevelCheck = BigDecimal.ZERO;
+                                        for (Loan loan : loansOnLvlFrom) {
+                                            if (loan.getTransferableAmount().compareTo(BigDecimal.ZERO) > 0) {
+                                                BigDecimal loanTransferAmount = leftToTransferForLevel.compareTo(loan.getTransferableAmount()) <= 0 ? leftToTransferForLevel : loan.getTransferableAmount();
+                                                if (loanTransferAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                                                    break;
+                                                }
+
+                                                LoanTransfer loanTransfer = LoanTransferManager.transferLoan(loan,
+                                                        lvlFrom, newLevel, loanTransferAmount, new Date());
+                                                loanTransfers.add(loanTransfer);
+
+                                                leftToTransferForLevel = leftToTransferForLevel.subtract(loanTransferAmount);
+                                                transferredAmountForLevelCheck = transferredAmountForLevelCheck.add(loanTransferAmount);
+                                            }
+                                        }
+
+                                        if (transferredAmountForLevelCheck.compareTo(retainDebtFromLevel) != 0) {
+                                            throw new RuntimeException("Transferred amount for level doesn't match expected retainDebtFromLevel: " +
+                                                    formatAmount(transferredAmountForLevelCheck) + " != " + formatAmount(retainDebtFromLevel));
+                                        }
+
+                                        transferredLoanAmount = transferredLoanAmount.add(transferredAmountForLevelCheck);
+                                    }
+
+                                    // TODO: reinstate those checks after WithdrawalDistributor is fixed to properly handle rounding and scale
+                                    /*if (transferredLoanAmount.compareTo(retainedDebt) != 0) {
+                                        throw new RuntimeException("Transferred loan amount doesn't match retained debt: " +
+                                                formatAmount(transferredLoanAmount) + " != " + formatAmount(retainedDebt));
+                                    }*/
+
+                                    // 3.3 Take Profit to new level in the amount of retainedAmount (potentially from multiple input levels)
+                                    //      Important to note here: normally TakeProfit requires absence of debt on src level, but in this case it's possible that
+                                    //      debt is not fully covered. We allow to TakeProfit in this case still, because we transfer it alongside debt.
+                                    BigDecimal transferredHoldingsAmount = BigDecimal.ZERO;
+                                    List<Repayment> takeProfitTransfers = new ArrayList<>();
+                                    for (int i = 0; i < levels.size(); i++) {
+                                        BigDecimal retainHoldingsFromLevel = retainedLevelAmounts.get(i);
+
+                                        // Go through all levels to TransferLoan
+                                        Level lvlFrom = levels.get(i);
+
+                                        String proceedsCurrency;
+                                        if (direction == LONG) {
+                                            proceedsCurrency = lvlFrom.getPoplavok().getTicker().getBase().getCurrency();
+                                        } else { //if (direction == SHORT) {
+                                            proceedsCurrency = lvlFrom.getPoplavok().getTicker().getQuote().getCurrency();
+                                        }
+
+                                        //TODO: error here
+                                        Repayment dbRepayment = RepaymentManager.takeProfitToLevel(lvlFrom, ticker, newLevel, retainHoldingsFromLevel, proceedsCurrency, new Date());
+                                        takeProfitTransfers.add(dbRepayment);
+
+                                        transferredHoldingsAmount = transferredHoldingsAmount.add(retainHoldingsFromLevel);
+                                    }
+
+                                    // TODO: reinstate those checks after WithdrawalDistributor is fixed to properly handle rounding and scale
+                                    /*if (transferredHoldingsAmount.compareTo(retainedAmount) != 0) {
+                                        throw new RuntimeException("Transferred holdings amount doesn't match retained amount: " +
+                                                formatAmount(transferredHoldingsAmount) + " != " + formatAmount(retainedAmount));
+                                    }*/
+
+                                    DBUtil.connectCommitAndClose(sess -> {
+                                        TradeDAO.save(sess, trade);
+                                        for (int i = 0; i < levelTrades.size(); i++) {
+                                            LevelTradeDAO.save(sess, levelTrades.get(i));
+                                        }
+                                        for (int i = 0; i < levels.size(); i++) {
+                                            LevelDAO.update(sess, levels.get(i));
+                                        }
+                                        LevelDAO.save(sess, newLevel);
+                                        for (int i = 0; i < loanTransfers.size(); i++) {
+                                            LoanTransfer loanTransfer = loanTransfers.get(i);
+                                            RepaymentDAO.save(sess, checkNotNull(loanTransfer.getRepayment()));
+                                            LoanDAO.save(sess, checkNotNull(loanTransfer.getLoanTo()));
+                                            LoanTransferDAO.update(sess, loanTransfer);
+                                        }
+                                        for (int i = 0; i < takeProfitTransfers.size(); i++) {
+                                            Repayment takeProfitTransfer = takeProfitTransfers.get(i);
+                                            RepaymentDAO.save(sess, takeProfitTransfer);
+                                        }
+                                    });
+                                } else {
+                                    DBUtil.connectCommitAndClose(sess -> {
+                                        TradeDAO.save(sess, trade);
+                                        for (int i = 0; i < levelTrades.size(); i++) {
+                                            LevelTradeDAO.save(sess, levelTrades.get(i));
+                                        }
+                                        for (int i = 0; i < levels.size(); i++) {
+                                            LevelDAO.update(sess, levels.get(i));
+                                        }
+                                    });
+                                }
 
                                 refreshContent();
                             }

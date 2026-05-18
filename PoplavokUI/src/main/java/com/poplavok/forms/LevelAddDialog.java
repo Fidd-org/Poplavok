@@ -119,7 +119,7 @@ public class LevelAddDialog extends VBox {
             if (level == null) {
                 Level level = new Level();
                 level.setState(LevelState.INCEPTION);
-                level.setId(levelId);
+                level.setId(levelId); // TODO: wtf
                 level.setCreationDate(new Date());
                 level.setProjectedPrice(nullToZero(fromString(checkNotNull(priceTextField).textProperty().get())));
                 level.setProjectedAmountBase(nullToZero(fromString(checkNotNull(baseAmountTextField).textProperty().get())));

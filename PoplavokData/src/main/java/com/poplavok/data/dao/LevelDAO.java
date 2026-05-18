@@ -55,7 +55,8 @@ public class LevelDAO {
     }
 
     public static List<Level> findByPoplavokId(Session session, Long poplavokId, boolean includeClosed) {
-        String hql = "from Level l where l.poplavok.id = :poplavokId";
+        String hql = "from Level l join fetch l.poplavok p join fetch p.marketTicker t " +
+                "join fetch t.base b join fetch t.quote q where l.poplavok.id = :poplavokId";
         if (!includeClosed) {
             hql += " and l.state != com.poplavok.data.model.LevelState.CLOSED";
         }

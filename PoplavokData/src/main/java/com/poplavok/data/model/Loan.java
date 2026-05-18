@@ -52,9 +52,9 @@ public class Loan extends Transaction {
     public Loan() {
     }
 
-    public Loan(Currency currency, BigDecimal amount, Level level,
+    public Loan(Currency currency, BigDecimal amount, Level destinationLevel,
                 Date date, LoanType loanType) {
-        super(currency, null, null, null, level, amount, date);
+        super(currency, null, null, null, destinationLevel, amount, date);
         this.loanType = loanType;
         this.isActive = true;
     }
@@ -113,4 +113,6 @@ public class Loan extends Transaction {
 
         return (repaid.add(lost).compareTo(nullToZero(getAmount())) >= 0);
     }
+
+    public BigDecimal getTransferableAmount() { return nullToZero(getAmount()).subtract(nullToZero(getRepaidAmount())).subtract(nullToZero(getLostAmount())); }
 }

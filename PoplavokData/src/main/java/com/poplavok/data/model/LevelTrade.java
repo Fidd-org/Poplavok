@@ -28,12 +28,13 @@ public class LevelTrade {
     private Level level;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trade_id", nullable = false)
+    @JoinColumn(name = "trade_id")
     @Nullable
     private Trade trade;
 
+    /** TODO: Possibly a useful thing but not used for any reason, maybe remove? */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "virtual_trade_id", nullable = false)
+    @JoinColumn(name = "virtual_trade_id")
     @Nullable
     private VirtualTrade virtualTrade;
 

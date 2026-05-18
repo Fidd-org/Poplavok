@@ -33,7 +33,7 @@ public class LoanTransfer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_id")
     @Nullable
-    private Loan newLoan;
+    private Loan loanTo;
 
     @Column(name = "amount", precision = 20, scale = 8)
     @Nullable
@@ -44,6 +44,13 @@ public class LoanTransfer {
     private Date date;
 
     public LoanTransfer() {
+    }
+
+    public LoanTransfer(Repayment repayment, Loan loanTo, BigDecimal transferAmount, Date date) {
+        this.repayment = repayment;
+        this.loanTo = loanTo;
+        this.transferAmount = transferAmount;
+        this.date = date;
     }
 
     public Long getId() {
@@ -60,12 +67,12 @@ public class LoanTransfer {
     }
 
     @Nullable
-    public Loan getNewLoan() {
-        return newLoan;
+    public Loan getLoanTo() {
+        return loanTo;
     }
 
-    public void setNewLoan(@Nullable Loan newLoan) {
-        this.newLoan = newLoan;
+    public void setLoanTo(@Nullable Loan loanTo) {
+        this.loanTo = loanTo;
     }
 
     @Nullable
