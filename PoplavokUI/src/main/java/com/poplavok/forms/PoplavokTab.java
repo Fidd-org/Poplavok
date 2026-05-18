@@ -31,7 +31,7 @@ import com.poplavok.data.utils.BigDecimalUtil;
 import com.poplavok.data.utils.DBUtil;
 import com.poplavok.data.utils.LoanTransferManager;
 import com.poplavok.data.utils.RepaymentManager;
-import com.poplavok.data.utils.WithdrawalDistributor;
+import com.poplavok.data.utils.distributors.WithdrawalDistributor;
 import com.poplavok.forms.wrapper.LevelTransaction;
 import com.poplavok.forms.wrapper.repayment.LossRepaymentInfo;
 import com.poplavok.forms.wrapper.repayment.ProfitRepaymentInfo;
