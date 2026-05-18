@@ -84,7 +84,7 @@ public class AveragingPane extends AnchorPane {
     // Retain holdings
 
     @FXML @Nullable CheckBox retainHoldingsCheckBox;
-    @FXML @Nullable CheckBox excludeCommissionCheckBox;
+    @FXML @Nullable CheckBox retainCommissionCheckBox;
 
     @FXML @Nullable Label retainCaptionLabel;
     @FXML @Nullable Label retainWorthCaptionLabel;
@@ -183,7 +183,7 @@ public class AveragingPane extends AnchorPane {
             }
         });
 
-        checkNotNull(excludeCommissionCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
+        checkNotNull(retainCommissionCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
             updateRetainedAmountByQuote();
         });
 
@@ -195,7 +195,7 @@ public class AveragingPane extends AnchorPane {
     }
 
     public void switchDisableRetainControls(boolean disable) {
-        checkNotNull(excludeCommissionCheckBox).disableProperty().setValue(disable);
+        checkNotNull(retainCommissionCheckBox).disableProperty().setValue(disable);
 
         checkNotNull(retainCaptionLabel).disableProperty().setValue(disable);
         checkNotNull(retainWorthCaptionLabel).disableProperty().setValue(disable);
@@ -224,7 +224,7 @@ public class AveragingPane extends AnchorPane {
         String retainedAmountStr = checkNotNull(retainTextField).textProperty().get();
         BigDecimal retainedAmount = nullToZero(fromString(retainedAmountStr));
 
-        BigDecimal fee = checkNotNull(excludeCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
+        BigDecimal fee = checkNotNull(retainCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
         BigDecimal price = getAveragingPrice();
 
         BigDecimal debtAmount;
@@ -232,9 +232,9 @@ public class AveragingPane extends AnchorPane {
         if (BigDecimal.ZERO.compareTo(retainedAmount) != 0 && BigDecimal.ZERO.compareTo(price) != 0) {
             AmountAndCommission aac;
             if (direction == LONG) {
-                aac = LongShortCalculator.calculateQuoteAmountToGetShort(retainedAmount, price, checkNotNull(fee));
+                aac = LongShortCalculator.calculateQuoteAmountToGiveLong(retainedAmount, price, checkNotNull(fee));
             } else if (direction == SHORT) {
-                aac = LongShortCalculator.calculateBaseAmountToGetLong(retainedAmount, price, checkNotNull(fee));
+                aac = LongShortCalculator.calculateBaseAmountToGiveShort(retainedAmount, price, checkNotNull(fee));
             } else {
                 throw new RuntimeException("Unknown Direction " + direction);
             }
@@ -255,7 +255,7 @@ public class AveragingPane extends AnchorPane {
         String debtAmountStr = checkNotNull(retainWorthTextField).textProperty().get();
         BigDecimal debtAmount = nullToZero(fromString(debtAmountStr));
 
-        BigDecimal fee = checkNotNull(excludeCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
+        BigDecimal fee = checkNotNull(retainCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
         BigDecimal price = getAveragingPrice();
 
         BigDecimal retainedAmount;
@@ -263,9 +263,9 @@ public class AveragingPane extends AnchorPane {
         if (BigDecimal.ZERO.compareTo(debtAmount) != 0 && BigDecimal.ZERO.compareTo(price) != 0) {
             AmountAndCommission aac;
             if (direction == LONG) {
-                aac = LongShortCalculator.calculateBaseAmountToGiveShort(debtAmount, price, checkNotNull(fee));
+                aac = LongShortCalculator.calculateBaseAmountToGetLong(debtAmount, price, checkNotNull(fee));
             } else if (direction == SHORT) {
-                aac = LongShortCalculator.calculateQuoteAmountToGiveLong(debtAmount, price, checkNotNull(fee));
+                aac = LongShortCalculator.calculateQuoteAmountToGetShort(debtAmount, price, checkNotNull(fee));
             } else {
                 throw new RuntimeException("Unknown Direction " + direction);
             }

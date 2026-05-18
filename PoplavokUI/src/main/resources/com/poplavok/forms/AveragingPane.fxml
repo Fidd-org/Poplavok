@@ -324,7 +324,7 @@
                            <Insets right="10.0" />
                         </GridPane.margin>
                      </TextField>
-                     <CheckBox fx:id="excludeCommissionCheckBox" disable="true" mnemonicParsing="false" text="Exclude commission" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     <CheckBox fx:id="retainCommissionCheckBox" disable="true" mnemonicParsing="false" text="Retain commission" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                      <CheckBox fx:id="retainHoldingsCheckBox" mnemonicParsing="false" text="Retain Holdings" GridPane.columnIndex="1" />
                      <Label fx:id="retainCommissionCaptionLabel" disable="true" text="Commission:" GridPane.rowIndex="4">
                         <GridPane.margin>
