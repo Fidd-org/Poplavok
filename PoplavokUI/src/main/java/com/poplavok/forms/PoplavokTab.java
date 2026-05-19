@@ -206,8 +206,8 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                     closeLevelButton.setDisable(false);
                     closeLevelButton.setText("[ Delete level ]");
                 } else if (state == LevelState.FUNDING) {
-                    closeLevelButton.setText("[ Delete level ]");
                     closeLevelButton.setDisable(false);
+                    closeLevelButton.setText("[ Close level ]");
                 } else if (state == LevelState.TRADING) {
                     closeLevelButton.setDisable(false);
                     closeLevelButton.setText("[ Close level ]");
@@ -526,9 +526,9 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                 return;
             }
 
-            if (state == LevelState.INCEPTION || (state == LevelState.FUNDING && isLevelEmpty(lvl))) {
+            if (state == LevelState.INCEPTION) {
                 DBUtil.connectCommitAndClose(sess -> LevelDAO.delete(sess, lvl));
-            } else if (state == LevelState.TRADING && isLevelEmpty(lvl)) {
+            } else if ((state == LevelState.TRADING || state == LevelState.FUNDING) && isLevelEmpty(lvl)) {
                 lvl.setState(LevelState.CLOSED);
                 DBUtil.connectCommitAndClose(sess -> LevelDAO.update(sess, lvl));
             } else if (!isLevelEmpty(lvl)) {
@@ -1045,6 +1045,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                 if (loan.getLoanType() != ACCOUNT_FUNDED && loan.getLoanType() != POPLAVOK_FUNDED
                                         && loan.getLoanType() != EXTERNAL_CROSS_MARGIN && loan.getLoanType() != EXTERNAL_ISOLATED_MARGIN) {
                                     showMessage("Unsupported loan type: " + loan.getLoanType());
+                                    return;
+                                }
+
+                                if (loan.getAmount() == null || loan.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                                    showMessage("Loan must have a positive amount: > 0");
                                     return;
                                 }
 
