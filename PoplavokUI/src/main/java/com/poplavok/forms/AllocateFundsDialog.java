@@ -33,7 +33,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import static com.flower.fxutils.JavaFxUtils.*;
+import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
+import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
+import static com.flower.fxutils.JavaFxUtils.showMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 import static com.poplavok.data.utils.BigDecimalUtil.fromString;

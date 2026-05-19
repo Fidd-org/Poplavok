@@ -12,7 +12,9 @@ public class PoplavokDAO {
     }
 
     public static Poplavok update(Session session, Poplavok poplavok) {
-        return session.merge(poplavok);
+        Poplavok merged = session.merge(poplavok);
+        org.hibernate.Hibernate.initialize(merged.getTicker());
+        return merged;
     }
 
     public static void delete(Session session, Poplavok poplavok) {
@@ -20,7 +22,9 @@ public class PoplavokDAO {
     }
 
     public static Optional<Poplavok> findById(Session session, Long id) {
-        return Optional.ofNullable(session.find(Poplavok.class, id));
+        return session.createQuery("from Poplavok p left join fetch p.marketTicker where p.id = :id", Poplavok.class)
+                .setParameter("id", id)
+                .uniqueResultOptional();
     }
 
     public static List<Poplavok> findAll(Session session) {
