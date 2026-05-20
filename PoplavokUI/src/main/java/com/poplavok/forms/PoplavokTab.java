@@ -893,6 +893,35 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
         }
     }
 
+    public void invertLevels() {
+        try {
+            List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
+            if (selected == null || selected.size() != 1) {
+                showErrorMessage("Please select exactly 1 level to trade.");
+                return;
+            }
+
+            CreateInverseLevelDialog createInverseLevelDialog = new CreateInverseLevelDialog(selected);
+            Stage workspaceStage = ModalWindow.showModal(checkNotNull(mainApp.mainStage),
+                    stage -> { createInverseLevelDialog.setStage(stage); return createInverseLevelDialog; },
+                    "Create Inverse Level");
+
+            workspaceStage.setOnHidden(
+                    ev -> {
+                        // TODO: get return poplavok, and whether it's a new poplavok
+                        Level level = createInverseLevelDialog.getReturnLevel();
+                        if (level != null) {
+                            //
+                        }
+                    }
+            );
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error inverting Levels: " + e, ButtonType.OK);
+            LOGGER.error("Error inverting Levels: ", e);
+            alert.showAndWait();
+        }
+    }
+
     public void performTrade() {
         try {
             List<Level> selected = checkNotNull(levelsTable).getSelectionModel().getSelectedItems();
