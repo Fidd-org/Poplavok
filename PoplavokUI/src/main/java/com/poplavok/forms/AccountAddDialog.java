@@ -43,6 +43,7 @@ public class AccountAddDialog extends VBox {
     @Nullable Stage stage;
 
     @Nullable Long accountId = null;
+    @Nullable final Account accountToEdit;
     @Nullable volatile Account returnAccount = null;
     @Nullable FilteredList<Currency> currencies;
 
@@ -56,6 +57,8 @@ public class AccountAddDialog extends VBox {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+
+        accountToEdit = account;
 
         checkNotNull(currencyComboBox).setConverter(new StringConverter<>() {
             @Override
@@ -119,16 +122,22 @@ public class AccountAddDialog extends VBox {
 
     public void okClose() {
         try {
-            Account account = new Account();
-            account.setId(accountId);
-            account.setCreationDate(new Date());
-            account.setCurrency(checkNotNull(currencyComboBox).getSelectionModel().getSelectedItem());
-            account.setAccountName(checkNotNull(accountNameTextField).textProperty().get());
-            account.setAvailableAmount(BigDecimal.ZERO);
-            account.setLentAmount(BigDecimal.ZERO);
-            account.setTradingAccountType(checkNotNull(tradingAccountTypeComboBox).getSelectionModel().getSelectedItem());
+            if (accountToEdit == null) {
+                Account account = new Account();
+                account.setId(accountId);
+                account.setCreationDate(new Date());
+                account.setCurrency(checkNotNull(currencyComboBox).getSelectionModel().getSelectedItem());
+                account.setAccountName(checkNotNull(accountNameTextField).textProperty().get());
+                account.setAvailableAmount(BigDecimal.ZERO);
+                account.setLentAmount(BigDecimal.ZERO);
+                account.setTradingAccountType(checkNotNull(tradingAccountTypeComboBox).getSelectionModel().getSelectedItem());
 
-            returnAccount = account;
+                returnAccount = account;
+            } else {
+                accountToEdit.setAccountName(checkNotNull(accountNameTextField).textProperty().get());
+
+                returnAccount = accountToEdit;
+            }
             checkNotNull(stage).close();
        } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "AccountAddDialog close Error: " + e, ButtonType.OK);
