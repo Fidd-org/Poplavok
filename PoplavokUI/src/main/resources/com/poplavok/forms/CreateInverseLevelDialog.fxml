@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <fx:root type="VBox" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
     <AnchorPane prefHeight="325.0" prefWidth="436.0" VBox.vgrow="NEVER">
@@ -31,6 +32,7 @@
             <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label text="Poplavok:" GridPane.rowIndex="1">
@@ -39,7 +41,7 @@
                </GridPane.margin></Label>
             <ToolBar GridPane.columnIndex="1" GridPane.rowIndex="2">
                <items>
-                  <RadioButton fx:id="createNewRadioButton" mnemonicParsing="false" text="Create New">
+                  <RadioButton fx:id="createNewRadioButton" mnemonicParsing="false" text="Create New:">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -63,14 +65,13 @@
             </ToolBar>
             <ToolBar GridPane.columnIndex="1" GridPane.rowIndex="3">
                <items>
-                  <TextField fx:id="feeTextField" prefHeight="26.0" prefWidth="200.0" />
-                  <Label fx:id="feeCurrencyLabel" text="CURRENCY" />
+                  <TextField fx:id="feeTextField" prefHeight="26.0" prefWidth="200.0" text="0" />
                </items>
             </ToolBar>
             <Label text="Price:" GridPane.rowIndex="4" />
             <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <items>
-                  <TextField fx:id="priceTextField" prefHeight="26.0" prefWidth="200.0" />
+                  <TextField fx:id="priceTextField" prefHeight="26.0" prefWidth="200.0" text="0" />
                   <Label fx:id="priceTickerLabel" text="TICKER" />
                </items>
             </ToolBar>
@@ -80,21 +81,27 @@
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label text="Amount:" GridPane.rowIndex="6" />
+            <Label text="Amount:" GridPane.rowIndex="6">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font></Label>
             <Label text="Proceeds:" GridPane.rowIndex="7" />
             <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                <items>
-                  <TextField fx:id="amountTextField" prefHeight="26.0" prefWidth="200.0" />
-                  <Label fx:id="amountCurrencyLabel" text="CURRENCY" />
+                  <TextField fx:id="amountTextField" onKeyTyped="#onAmountChanged" prefHeight="26.0" prefWidth="200.0" text="0" />
+                  <Label fx:id="amountCurrencyLabel" text="CURRENCY">
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font></Label>
                </items>
             </ToolBar>
             <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
                <items>
-                  <TextField fx:id="proceedsTextField" prefHeight="26.0" prefWidth="200.0" />
+                  <TextField fx:id="proceedsTextField" onKeyTyped="#onProceedsChanged" prefHeight="26.0" prefWidth="200.0" text="0" />
                   <Label fx:id="proceedsCurrencyLabel" text="CURRENCY" />
                </items>
             </ToolBar>
-            <Button mnemonicParsing="false" onAction="#okClose" text="Create Inverse Level" GridPane.columnIndex="1" GridPane.rowIndex="8">
+            <Button mnemonicParsing="false" onAction="#okClose" text="Create Inverse Level" GridPane.columnIndex="1" GridPane.rowIndex="9">
                <GridPane.margin>
                   <Insets left="30.0" />
                </GridPane.margin>
@@ -102,8 +109,15 @@
             <Label text="Available:" GridPane.rowIndex="5" />
             <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <items>
-                  <TextField fx:id="availableTextField" prefHeight="26.0" prefWidth="200.0" />
+                  <TextField fx:id="availableTextField" editable="false" prefHeight="26.0" prefWidth="200.0" text="0" />
                   <Button fx:id="availableCurrencyButton" mnemonicParsing="false" onAction="#addAllAvailable" text="CURRENCY" />
+               </items>
+            </ToolBar>
+            <Label text="Commission:" GridPane.rowIndex="8" />
+            <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
+               <items>
+                  <TextField fx:id="commissionTextField" prefHeight="26.0" prefWidth="200.0" text="0" />
+                  <Label fx:id="commissionCurrencyLabel" text="CURRENCY" />
                </items>
             </ToolBar>
          </children>

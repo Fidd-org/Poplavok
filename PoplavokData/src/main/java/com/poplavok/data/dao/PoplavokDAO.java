@@ -1,5 +1,7 @@
 package com.poplavok.data.dao;
 
+import com.poplavok.data.model.Direction;
+import com.poplavok.data.model.MarketTicker;
 import com.poplavok.data.model.Poplavok;
 import org.hibernate.Session;
 
@@ -36,5 +38,12 @@ public class PoplavokDAO {
                 .setParameter("isActive", isActive)
                 .list();
     }
-}
 
+    public static List<Poplavok> findInversePoplavoks(Session session, MarketTicker ticker, Direction direction) {
+        Direction opposite = direction == Direction.LONG ? Direction.SHORT : Direction.LONG;
+        return session.createQuery("from Poplavok p left join fetch p.marketTicker where p.marketTicker = :ticker and p.direction = :opposite and p.closeDate is null", Poplavok.class)
+                .setParameter("ticker", ticker)
+                .setParameter("opposite", opposite)
+                .list();
+    }
+}
