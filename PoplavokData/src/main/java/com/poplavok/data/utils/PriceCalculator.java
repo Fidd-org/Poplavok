@@ -9,7 +9,7 @@ public class PriceCalculator {
     // --------------- PRICE CALCULATIONS ---------------
 
     /**
-     * KuCoin cmomission mechanics: Selling
+     * KuCoin commission mechanics: Selling
      *   - When we sell, commission is applied to the proceeds in QUOTE.
      *   - Thus, if we sell BASE worth $1000 at current price, it will first be converted to QUOTE, and then
      *      the commission will be applied to the proceeds.
@@ -32,20 +32,19 @@ public class PriceCalculator {
      *      even though we specifically entered $1000.
      *   - I.e. Buy commission is charged in QUOTE _before_ operation.
      */
-    public static BuyPriceInfo calculateBuyPriceForEntry(BigDecimal giveEntryQuoteBuy, BigDecimal getBaseBuy, BigDecimal fee) {
+    /*public static BuyPriceInfo calculateBuyPriceForEntry(BigDecimal giveEntryQuoteBuy, BigDecimal getBaseBuy, BigDecimal fee) {
         BigDecimal withCommission = BigDecimal.ONE.add(fee);
         BigDecimal cleanQuote = giveEntryQuoteBuy.divide(withCommission, SCALE, RoundingMode.FLOOR);
         BigDecimal price = cleanQuote.divide(getBaseBuy, SCALE, RoundingMode.CEILING);
         BigDecimal commission = cleanQuote.multiply(fee);
 
         return new BuyPriceInfo(cleanQuote, giveEntryQuoteBuy, commission, price);
-    }
+    }*/
 
     public static BuyPriceInfo calculateBuyPriceExact(BigDecimal giveQuoteBuy, BigDecimal getBaseBuy, BigDecimal fee) {
-        BigDecimal withCommission = BigDecimal.ONE.add(fee);
-        BigDecimal cleanQuote = giveQuoteBuy.divide(withCommission, SCALE, RoundingMode.FLOOR);
-        BigDecimal commission = cleanQuote.multiply(fee);
-        BigDecimal price = cleanQuote.divide(getBaseBuy, SCALE, RoundingMode.CEILING);
+        BigDecimal commission = giveQuoteBuy.multiply(fee);
+        BigDecimal cleanQuote = giveQuoteBuy.subtract(commission);
+        BigDecimal price = cleanQuote.divide(getBaseBuy, SCALE, RoundingMode.FLOOR);
 
         return new BuyPriceInfo(giveQuoteBuy, cleanQuote, commission, price);
     }

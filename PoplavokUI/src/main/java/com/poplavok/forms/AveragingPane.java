@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
+import static com.flower.fxutils.JavaFxUtils.showMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.poplavok.data.model.Direction.LONG;
 import static com.poplavok.data.model.Direction.SHORT;
@@ -342,6 +343,11 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal holdingWithoutProfit = holding.subtract(profitBase);
 
                     PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, debt, checkNotNull(fee));
+                    BigDecimal adjustedDebt = LongShortCalculator.calculateQuoteAmountToGetShort(holdingWithoutProfit, tradeResult.price, fee).amount;
+                    if (adjustedDebt.compareTo(debt) < 0) {
+                        showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
+                    }
+                    debt = adjustedDebt;
 
                     checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
                     checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
@@ -356,6 +362,11 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal proceedsQuote = debt.add(profitQuote);
 
                     PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holding, proceedsQuote, checkNotNull(fee));
+                    BigDecimal adjustedProceedsQuote = LongShortCalculator.calculateQuoteAmountToGetShort(holding, tradeResult.price, fee).amount;
+                    if (adjustedProceedsQuote.compareTo(proceedsQuote) < 0) {
+                        showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedProceedsQuote), formatAmount(proceedsQuote)));
+                    }
+                    proceedsQuote = adjustedProceedsQuote;
 
                     checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
                     checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
@@ -378,6 +389,11 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal holdingWithoutProfit = holding.subtract(profitQuote);
 
                     BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, checkNotNull(fee));
+                    BigDecimal adjustedDebt = LongShortCalculator.calculateBaseAmountToGetLong(holdingWithoutProfit, tradeResult.price, fee).amount;
+                    if (adjustedDebt.compareTo(debt) < 0) {
+                        showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
+                    }
+                    debt = adjustedDebt;
 
                     checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
                     checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
@@ -392,6 +408,11 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal proceedsBase = debt.add(profitBase);
 
                     BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holding, proceedsBase, checkNotNull(fee));
+                    BigDecimal adjustedProceedsBase = LongShortCalculator.calculateBaseAmountToGetLong(holding, tradeResult.price, fee).amount;
+                    if (adjustedProceedsBase.compareTo(proceedsBase) < 0) {
+                        showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedProceedsBase), formatAmount(proceedsBase)));
+                    }
+                    proceedsBase = adjustedProceedsBase;
 
                     checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
                     checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
