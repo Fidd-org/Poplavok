@@ -35,7 +35,9 @@ public class LoanDAO {
     public static List<Loan> findByDestinationLevel(Session session, Level level) {
         return session.createQuery("from Loan l " +
                         "left join fetch l.sourceAccount " +
-                        "left join fetch l.sourceLevel " +
+                        "left join fetch l.sourceLevel sl " +
+                        "left join fetch sl.poplavok p " +
+                        "left join fetch p.marketTicker " +
                         "left join fetch l.destinationAccount " +
                         "left join fetch l.destinationLevel " +
                         "where l.destinationLevel = :level", Loan.class)
@@ -47,7 +49,9 @@ public class LoanDAO {
         return session.createQuery("select l, r from Loan l " +
                         "left join Repayment r on r.loan = l " +
                         "left join fetch l.sourceAccount " +
-                        "left join fetch l.sourceLevel " +
+                        "left join fetch l.sourceLevel sl " +
+                        "left join fetch sl.poplavok p " +
+                        "left join fetch p.marketTicker " +
                         "left join fetch l.destinationAccount " +
                         "left join fetch l.destinationLevel " +
                         "where l.destinationLevel = :level", Object[].class)

@@ -933,8 +933,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                                 }
                             });
 
-                            // TODO: open new poplavok tab?
-                            System.out.println(poplavokAndInverseLevel.poplavok().getId());
+                            mainApp.openPoplavokTab(poplavokAndInverseLevel.poplavok().getId(), poplavokAndInverseLevel.poplavok().getName());
                         }
 
                         refreshContent();

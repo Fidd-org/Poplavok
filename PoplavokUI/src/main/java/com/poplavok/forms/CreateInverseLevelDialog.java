@@ -216,9 +216,9 @@ public class CreateInverseLevelDialog extends VBox {
             Level newLevel = new Level();
             newLevel.setState(LevelState.INCEPTION);
             newLevel.setCreationDate(new Date());
-            // TODO: will new poplavok persist?
             newLevel.setPoplavok(checkNotNull(poplavok));
             newLevel.setProjectedPrice(nullToZero(price));
+            newLevel.setState(LevelState.TRADING);
 
             BigDecimal amount = nullToZero(fromString(checkNotNull(amountTextField).getText()));
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {

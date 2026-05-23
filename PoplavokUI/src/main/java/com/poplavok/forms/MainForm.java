@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class MainForm {
     @Nullable Stage mainStage;
     @FXML @Nullable Label serverInfoLabel;
@@ -29,7 +31,7 @@ public class MainForm {
     }
 
     public void setStatusText(String text) {
-        Preconditions.checkNotNull(serverInfoLabel).setText(text);
+        checkNotNull(serverInfoLabel).setText(text);
     }
 
     public void showAboutDialog() {
@@ -38,14 +40,14 @@ public class MainForm {
     }
 
     void addTab(Tab tab) {
-        Preconditions.checkNotNull(tabs).getTabs().add(tab);
+        checkNotNull(tabs).getTabs().add(tab);
         tabs.getSelectionModel().select(tab);
     }
 
-    public void quit() { Preconditions.checkNotNull(mainStage).close(); }
+    public void quit() { checkNotNull(mainStage).close(); }
 
     public void closeAllTabs() {
-        Preconditions.checkNotNull(tabs).getTabs().clear();
+        checkNotNull(tabs).getTabs().clear();
     }
 
     public void openCurrenciesTab() {
@@ -89,9 +91,20 @@ public class MainForm {
     }
 
     public void openPoplavokTab(Long poplavokId, @Nullable String poplavokName) {
-        poplavokName = StringUtils.defaultIfBlank(poplavokName, poplavokId.toString());
+        String finalPoplavokName = StringUtils.defaultIfBlank(poplavokName, poplavokId.toString());
+
+        for (Tab existingTab : checkNotNull(tabs).getTabs()) {
+            if (existingTab.getContent() instanceof PoplavokTab existingPoplavokTab) {
+                if (existingPoplavokTab.poplavokId.equals(poplavokId)) {
+                    tabs.getSelectionModel().select(existingTab);
+                    existingPoplavokTab.refreshContent();
+                    return;
+                }
+            }
+        }
+
         PoplavokTab poplavokTab = new PoplavokTab(this, poplavokId);
-        final Tab tab = new Tab("§ " + poplavokName, poplavokTab);
+        final Tab tab = new Tab("§ " + finalPoplavokName, poplavokTab);
         tab.setClosable(true);
 
         addTab(tab);
