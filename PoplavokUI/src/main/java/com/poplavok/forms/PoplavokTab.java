@@ -33,6 +33,7 @@ import com.poplavok.data.utils.LoanTransferManager;
 import com.poplavok.data.utils.RepaymentManager;
 import com.poplavok.data.utils.distributors.WithdrawalDistributor;
 import com.poplavok.forms.wrapper.LevelTransaction;
+import com.poplavok.forms.wrapper.PoplavokAndInverseLevel;
 import com.poplavok.forms.wrapper.repayment.LossRepaymentInfo;
 import com.poplavok.forms.wrapper.repayment.ProfitRepaymentInfo;
 import com.poplavok.forms.wrapper.repayment.RepayRepaymentInfo;
@@ -914,11 +915,29 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
 
             workspaceStage.setOnHidden(
                     ev -> {
-                        // TODO: get return poplavok, and whether it's a new poplavok
-                        Level level = createInverseLevelDialog.getReturnLevel();
-                        if (level != null) {
-                            //
+                        PoplavokAndInverseLevel poplavokAndInverseLevel = createInverseLevelDialog.getReturnPoplavokAndInverseLevel();
+                        if (poplavokAndInverseLevel != null) {
+                            DBUtil.connectCommitAndClose(sess -> {
+                                if (poplavokAndInverseLevel.isNewPoplavok()) {
+                                    PoplavokDAO.save(sess, poplavokAndInverseLevel.poplavok());
+                                } else {
+                                    PoplavokDAO.update(sess, poplavokAndInverseLevel.poplavok());
+                                }
+                                LevelDAO.save(sess, poplavokAndInverseLevel.level());
+
+                                for (Level initialSourceLevel : poplavokAndInverseLevel.initialLoanSourceLevels()) {
+                                    LevelDAO.update(sess, initialSourceLevel);
+                                }
+                                for (Loan initialLoan : poplavokAndInverseLevel.initialLoans()) {
+                                    LoanDAO.save(sess, initialLoan);
+                                }
+                            });
+
+                            // TODO: open new poplavok tab?
+                            System.out.println(poplavokAndInverseLevel.poplavok().getId());
                         }
+
+                        refreshContent();
                     }
             );
         } catch (Exception e) {
