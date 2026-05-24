@@ -333,6 +333,7 @@ public class AveragingPane extends AnchorPane {
         boolean profitInQuote = checkNotNull(profitInQuoteRadioButton).selectedProperty().get();
         boolean profitInBase = checkNotNull(profitInBaseRadioButton).selectedProperty().get();
 
+        boolean resetControls = true;
         if (holding.compareTo(BigDecimal.ZERO) != 0) {
             if (checkNotNull(direction) == LONG) {
                 // LONG
@@ -342,38 +343,46 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal profitBase = holding.multiply(profitRate);
                     BigDecimal holdingWithoutProfit = holding.subtract(profitBase);
 
-                    PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, debt, checkNotNull(fee));
-                    BigDecimal adjustedDebt = LongShortCalculator.calculateQuoteAmountToGetShort(holdingWithoutProfit, tradeResult.price, fee).amount;
-                    if (adjustedDebt.compareTo(debt) < 0) {
-                        showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
-                    }
-                    debt = adjustedDebt;
+                    if (debt.compareTo(BigDecimal.ZERO) != 0) {
+                        PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, debt, checkNotNull(fee));
+                        BigDecimal adjustedDebt = LongShortCalculator.calculateQuoteAmountToGetShort(holdingWithoutProfit, tradeResult.price, fee).amount;
+                        if (adjustedDebt.compareTo(debt) < 0) {
+                            showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
+                        }
+                        debt = adjustedDebt;
 
-                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
-                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
-                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
-                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+                        checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+                        checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                        checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                        checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
+                        checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+
+                        resetControls = false;
+                    }
                 } else if (profitInQuote) {
                     // LONG - Take Profit in QUOTE
 
                     BigDecimal profitQuote = debt.multiply(profitRate);
                     BigDecimal proceedsQuote = debt.add(profitQuote);
 
-                    PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holding, proceedsQuote, checkNotNull(fee));
-                    BigDecimal adjustedProceedsQuote = LongShortCalculator.calculateQuoteAmountToGetShort(holding, tradeResult.price, fee).amount;
-                    if (adjustedProceedsQuote.compareTo(proceedsQuote) < 0) {
-                        showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedProceedsQuote), formatAmount(proceedsQuote)));
-                    }
-                    proceedsQuote = adjustedProceedsQuote;
+                    if (proceedsQuote.compareTo(BigDecimal.ZERO) != 0) {
+                        PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holding, proceedsQuote, checkNotNull(fee));
+                        BigDecimal adjustedProceedsQuote = LongShortCalculator.calculateQuoteAmountToGetShort(holding, tradeResult.price, fee).amount;
+                        if (adjustedProceedsQuote.compareTo(proceedsQuote) < 0) {
+                            showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedProceedsQuote), formatAmount(proceedsQuote)));
+                        }
+                        proceedsQuote = adjustedProceedsQuote;
 
-                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
-                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsQuote));
-                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
-                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holding));
+                        checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                        checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsQuote));
+                        checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                        checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
+                        checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holding));
+
+                        resetControls = false;
+                    }
                 } else {
                     throw new RuntimeException("Please select to take profit in base or quote");
                 }
@@ -388,43 +397,53 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal profitQuote = holding.multiply(profitRate);
                     BigDecimal holdingWithoutProfit = holding.subtract(profitQuote);
 
-                    BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, checkNotNull(fee));
-                    BigDecimal adjustedDebt = LongShortCalculator.calculateBaseAmountToGetLong(holdingWithoutProfit, tradeResult.price, fee).amount;
-                    if (adjustedDebt.compareTo(debt) < 0) {
-                        showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
-                    }
-                    debt = adjustedDebt;
+                    if (debt.compareTo(BigDecimal.ZERO) != 0) {
+                        BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, checkNotNull(fee));
+                        BigDecimal adjustedDebt = LongShortCalculator.calculateBaseAmountToGetLong(holdingWithoutProfit, tradeResult.price, fee).amount;
+                        if (adjustedDebt.compareTo(debt) < 0) {
+                            showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
+                        }
+                        debt = adjustedDebt;
 
-                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
-                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
-                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
-                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+                        checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
+                        checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                        checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                        checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
+                        checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+
+                        resetControls = false;
+                    }
                 } else if (profitInBase) {
                     // SHORT - Take Profit in BASE
 
                     BigDecimal profitBase = debt.multiply(profitRate);
                     BigDecimal proceedsBase = debt.add(profitBase);
 
-                    BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holding, proceedsBase, checkNotNull(fee));
-                    BigDecimal adjustedProceedsBase = LongShortCalculator.calculateBaseAmountToGetLong(holding, tradeResult.price, fee).amount;
-                    if (adjustedProceedsBase.compareTo(proceedsBase) < 0) {
-                        showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedProceedsBase), formatAmount(proceedsBase)));
-                    }
-                    proceedsBase = adjustedProceedsBase;
+                    if (proceedsBase.compareTo(BigDecimal.ZERO) != 0) {
+                        BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holding, proceedsBase, checkNotNull(fee));
+                        BigDecimal adjustedProceedsBase = LongShortCalculator.calculateBaseAmountToGetLong(holding, tradeResult.price, fee).amount;
+                        if (adjustedProceedsBase.compareTo(proceedsBase) < 0) {
+                            showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedProceedsBase), formatAmount(proceedsBase)));
+                        }
+                        proceedsBase = adjustedProceedsBase;
 
-                    checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
-                    checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                    checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsBase));
-                    checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
-                    checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
-                    checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+                        checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holding));
+                        checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
+                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(proceedsBase));
+                        checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
+                        checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
+                        checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
+
+                        resetControls = false;
+                    }
                 } else {
                     throw new RuntimeException("Please select to take profit in base or quote");
                 }
             }
-        } else {
+        }
+
+        if (resetControls) {
             checkNotNull(toSellTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
             checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
             checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(BigDecimal.ZERO));
