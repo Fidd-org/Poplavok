@@ -58,4 +58,12 @@ public class PriceCalculator {
         BigDecimal withCommission = BigDecimal.ONE.add(fee);
         return fxEntryAmount.multiply(withCommission);
     }
+
+    public static BigDecimal calculateSellPriceFromTradeData(BigDecimal baseIn, BigDecimal commissionBase, BigDecimal quoteOut) {
+        return quoteOut.divide(baseIn.subtract(commissionBase), SCALE, RoundingMode.HALF_EVEN);
+    }
+
+    public static BigDecimal calculateBuyPriceFromTradeData(BigDecimal quoteIn, BigDecimal commissionQuote, BigDecimal baseOut) {
+        return quoteIn.subtract(commissionQuote).divide(baseOut, SCALE, RoundingMode.HALF_EVEN);
+    }
 }

@@ -34,6 +34,7 @@ import com.poplavok.data.utils.RepaymentManager;
 import com.poplavok.data.utils.distributors.WithdrawalDistributor;
 import com.poplavok.forms.wrapper.LevelTransaction;
 import com.poplavok.forms.wrapper.PoplavokAndInverseLevel;
+import com.poplavok.forms.wrapper.TradeWrapper;
 import com.poplavok.forms.wrapper.repayment.LossRepaymentInfo;
 import com.poplavok.forms.wrapper.repayment.ProfitRepaymentInfo;
 import com.poplavok.forms.wrapper.repayment.RepayRepaymentInfo;
@@ -86,11 +87,11 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @Nullable Poplavok poplavok;
     @Nullable FilteredList<Level> levels;
     @Nullable FilteredList<LevelTransaction> transactions;
-    @Nullable FilteredList<Trade> trades;
+    @Nullable FilteredList<TradeWrapper> trades;
 
     @FXML @Nullable TableView<Level> levelsTable;
     @FXML @Nullable TableView<LevelTransaction> transactionsTable;
-    @FXML @Nullable TableView<Trade> tradesTable;
+    @FXML @Nullable TableView<TradeWrapper> tradesTable;
 
     @FXML @Nullable TextField tickerTextField;
     @FXML @Nullable TextField feeTextField;
@@ -292,9 +293,9 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             // Trades loading
             if (tradesTable != null) {
                 try {
-                    List<Trade> levelTrades = DBUtil.connectGetResultAndClose(sess ->
+                    List<TradeWrapper> levelTrades = DBUtil.connectGetResultAndClose(sess ->
                             TradeDAO.findByLevel(sess, selectedLevel.getId())
-                    );
+                    ).stream().map(TradeWrapper::new).toList();
                     this.trades = new FilteredList<>(FXCollections.observableArrayList(levelTrades));
                     tradesTable.setItems(this.trades);
                     autoResizeTableColumns(tradesTable);

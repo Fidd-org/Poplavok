@@ -251,6 +251,11 @@
                                              <PropertyValueFactory property="Operation" />
                                          </cellValueFactory>
                                      </TableColumn>
+                                     <TableColumn text="TradePrice">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="CalculatedTradePrice" />
+                                         </cellValueFactory>
+                                     </TableColumn>
                                      <TableColumn text="AmountBaseIn">
                                          <cellValueFactory>
                                              <PropertyValueFactory property="AmountBaseIn" />
