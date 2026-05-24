@@ -241,41 +241,51 @@
                            <children>
                               <TableView fx:id="tradesTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <columns>
-                                    <TableColumn text="TransactionId">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="Id" />
-                                       </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="TransactionType">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="TransactionType" />
-                                       </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Amount">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="Amount" />
-                                       </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Date">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="Date" />
-                                       </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Currency">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="CurrencyCode" />
-                                       </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Source">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="SourceName" />
-                                       </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Destination">
-                                       <cellValueFactory>
-                                          <PropertyValueFactory property="DestinationName" />
-                                       </cellValueFactory>
-                                    </TableColumn>
+                                     <TableColumn text="Id">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="Id" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="Operation">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="Operation" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="AmountBaseIn">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="AmountBaseIn" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="AmountBaseOut">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="AmountBaseOut" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="AmountQuoteIn">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="AmountQuoteIn" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="AmountQuoteOut">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="AmountQuoteOut" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="CommissionBase">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="CommissionBase" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="CommissionQuote">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="CommissionQuote" />
+                                         </cellValueFactory>
+                                     </TableColumn>
+                                     <TableColumn text="Date">
+                                         <cellValueFactory>
+                                             <PropertyValueFactory property="Date" />
+                                         </cellValueFactory>
+                                     </TableColumn>
                                  </columns>
                               </TableView>
                            </children>

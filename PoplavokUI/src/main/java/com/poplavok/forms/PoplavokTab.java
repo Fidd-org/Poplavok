@@ -86,6 +86,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
     @Nullable Poplavok poplavok;
     @Nullable FilteredList<Level> levels;
     @Nullable FilteredList<LevelTransaction> transactions;
+    @Nullable FilteredList<Trade> trades;
 
     @FXML @Nullable TableView<Level> levelsTable;
     @FXML @Nullable TableView<LevelTransaction> transactionsTable;
@@ -191,6 +192,7 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             if (pnlTextField != null) pnlTextField.setText("");
             if (averagingPriceTextField != null) averagingPriceTextField.setText("");
             if (transactionsTable != null) transactionsTable.setItems(FXCollections.emptyObservableList());
+            if (tradesTable != null) tradesTable.setItems(FXCollections.emptyObservableList());
             return;
         }
 
@@ -269,21 +271,44 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             if (averagingPriceTextField != null) averagingPriceTextField.setText("");
         }
 
-        if (transactionsTable != null && selected.size() == 1) {
+        if (selected.size() == 1) {
             Level selectedLevel = selected.get(0);
-            try {
-                List<Transaction> levelTransactions = DBUtil.connectGetResultAndClose(sess ->
-                    TransactionDAO.findByLevel(sess, selectedLevel.getId())
-                );
-                this.transactions = new FilteredList<>(FXCollections.observableArrayList(
-                        levelTransactions.stream().map(t -> new LevelTransaction(t, selectedLevel)).toList()));
-                transactionsTable.setItems(this.transactions);
-                autoResizeTableColumns(transactionsTable);
-            } catch (Exception e) {
-                LOGGER.error("Error loading transactions for level", e);
+
+            // Transactions loading
+            if (transactionsTable != null) {
+                try {
+                    List<Transaction> levelTransactions = DBUtil.connectGetResultAndClose(sess ->
+                            TransactionDAO.findByLevel(sess, selectedLevel.getId())
+                    );
+                    this.transactions = new FilteredList<>(FXCollections.observableArrayList(
+                            levelTransactions.stream().map(t -> new LevelTransaction(t, selectedLevel)).toList()));
+                    transactionsTable.setItems(this.transactions);
+                    autoResizeTableColumns(transactionsTable);
+                } catch (Exception e) {
+                    LOGGER.error("Error loading transactions for level", e);
+                }
             }
-        } else if (transactionsTable != null) {
-            transactionsTable.setItems(FXCollections.emptyObservableList());
+
+            // Trades loading
+            if (tradesTable != null) {
+                try {
+                    List<Trade> levelTrades = DBUtil.connectGetResultAndClose(sess ->
+                            TradeDAO.findByLevel(sess, selectedLevel.getId())
+                    );
+                    this.trades = new FilteredList<>(FXCollections.observableArrayList(levelTrades));
+                    tradesTable.setItems(this.trades);
+                    autoResizeTableColumns(tradesTable);
+                } catch (Exception e) {
+                    LOGGER.error("Error loading trades for level", e);
+                }
+            }
+        } else {
+            if (transactionsTable != null) {
+                transactionsTable.setItems(FXCollections.emptyObservableList());
+            }
+            if (tradesTable != null) {
+                tradesTable.setItems(FXCollections.emptyObservableList());
+            }
         }
     }
 
