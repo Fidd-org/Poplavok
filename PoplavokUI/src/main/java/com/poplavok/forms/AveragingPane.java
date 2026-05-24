@@ -289,20 +289,20 @@ public class AveragingPane extends AnchorPane {
 
         boolean includeLentAmounts = checkNotNull(includeLentAmountsCheckBox).selectedProperty().get();
 
-        BigDecimal debt = BigDecimal.ZERO;
+        BigDecimal absoluteDebt = BigDecimal.ZERO;
         BigDecimal available = BigDecimal.ZERO;
         BigDecimal holding = BigDecimal.ZERO;
 
         for (Level lvl : averageLevels) {
             if (checkNotNull(direction) == LONG) {
-                debt = debt.add(nullToZero(lvl.getDebtQuote()));
+                absoluteDebt = absoluteDebt.add(nullToZero(lvl.getDebtQuote()));
                 available = available.add(nullToZero(lvl.getAvailableAmountQuote()));
                 holding = holding.add(nullToZero(lvl.getAvailableAmountBase()));
                 if (includeLentAmounts) {
                     holding = holding.add(nullToZero(lvl.getLentAmountBase()));
                 }
             } else {
-                debt = debt.add(nullToZero(lvl.getDebtBase()));
+                absoluteDebt = absoluteDebt.add(nullToZero(lvl.getDebtBase()));
                 available = available.add(nullToZero(lvl.getAvailableAmountBase()));
                 holding = holding.add(nullToZero(lvl.getAvailableAmountQuote()));
                 if (includeLentAmounts) {
@@ -310,9 +310,9 @@ public class AveragingPane extends AnchorPane {
                 }
             }
         }
-        BigDecimal toRepay = debt.subtract(available);
+        BigDecimal toRepay = absoluteDebt.subtract(available);
 
-        checkNotNull(debtTextField).setText(formatAmount(debt));
+        checkNotNull(debtTextField).setText(formatAmount(absoluteDebt));
         checkNotNull(availableTextField).setText(formatAmount(available));
         checkNotNull(toRepayTextField).setText(formatAmount(toRepay));
         checkNotNull(holdingTextField).setText(formatAmount(holding));
@@ -334,7 +334,7 @@ public class AveragingPane extends AnchorPane {
         boolean profitInBase = checkNotNull(profitInBaseRadioButton).selectedProperty().get();
 
         boolean resetControls = true;
-        if (holding.compareTo(BigDecimal.ZERO) != 0) {
+        if (holding.compareTo(BigDecimal.ZERO) != 0 && toRepay.compareTo(BigDecimal.ZERO) > 0) {
             if (checkNotNull(direction) == LONG) {
                 // LONG
 
@@ -343,17 +343,17 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal profitBase = holding.multiply(profitRate);
                     BigDecimal holdingWithoutProfit = holding.subtract(profitBase);
 
-                    if (debt.compareTo(BigDecimal.ZERO) != 0) {
-                        PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, debt, checkNotNull(fee));
+                    if (toRepay.compareTo(BigDecimal.ZERO) != 0) {
+                        PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holdingWithoutProfit, toRepay, checkNotNull(fee));
                         BigDecimal adjustedDebt = LongShortCalculator.calculateQuoteAmountToGetShort(holdingWithoutProfit, tradeResult.price, fee).amount;
-                        if (adjustedDebt.compareTo(debt) < 0) {
-                            showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
+                        if (adjustedDebt.compareTo(toRepay) < 0) {
+                            showMessage(String.format("Rounding error in `calculateSellPrice`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(toRepay)));
                         }
-                        debt = adjustedDebt;
+                        toRepay = adjustedDebt;
 
                         checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
                         checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(toRepay));
                         checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
                         checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitBase));
                         checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
@@ -363,8 +363,8 @@ public class AveragingPane extends AnchorPane {
                 } else if (profitInQuote) {
                     // LONG - Take Profit in QUOTE
 
-                    BigDecimal profitQuote = debt.multiply(profitRate);
-                    BigDecimal proceedsQuote = debt.add(profitQuote);
+                    BigDecimal profitQuote = toRepay.multiply(profitRate);
+                    BigDecimal proceedsQuote = toRepay.add(profitQuote);
 
                     if (proceedsQuote.compareTo(BigDecimal.ZERO) != 0) {
                         PriceInfo tradeResult = PriceCalculator.calculateSellPrice(holding, proceedsQuote, checkNotNull(fee));
@@ -397,17 +397,17 @@ public class AveragingPane extends AnchorPane {
                     BigDecimal profitQuote = holding.multiply(profitRate);
                     BigDecimal holdingWithoutProfit = holding.subtract(profitQuote);
 
-                    if (debt.compareTo(BigDecimal.ZERO) != 0) {
-                        BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, debt, checkNotNull(fee));
+                    if (toRepay.compareTo(BigDecimal.ZERO) != 0) {
+                        BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holdingWithoutProfit, toRepay, checkNotNull(fee));
                         BigDecimal adjustedDebt = LongShortCalculator.calculateBaseAmountToGetLong(holdingWithoutProfit, tradeResult.price, fee).amount;
-                        if (adjustedDebt.compareTo(debt) < 0) {
-                            showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(debt)));
+                        if (adjustedDebt.compareTo(toRepay) < 0) {
+                            showMessage(String.format("Rounding error in `calculateBuyPriceExact`, please investigate: %s < %s", formatAmount(adjustedDebt), formatAmount(toRepay)));
                         }
-                        debt = adjustedDebt;
+                        toRepay = adjustedDebt;
 
                         checkNotNull(toSellTextField).textProperty().setValue(formatAmount(holdingWithoutProfit));
                         checkNotNull(sellPriceTextField).textProperty().setValue(formatAmount(tradeResult.price));
-                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(debt));
+                        checkNotNull(proceedsTextField).textProperty().setValue(formatAmount(toRepay));
                         checkNotNull(commissionTextField).textProperty().setValue(formatAmount(tradeResult.commissionQuote));
                         checkNotNull(profitTextField).textProperty().setValue(formatAmount(profitQuote));
                         checkNotNull(fxUiEntryTextField).textProperty().setValue(formatAmount((tradeResult).entryQuote));
@@ -417,8 +417,8 @@ public class AveragingPane extends AnchorPane {
                 } else if (profitInBase) {
                     // SHORT - Take Profit in BASE
 
-                    BigDecimal profitBase = debt.multiply(profitRate);
-                    BigDecimal proceedsBase = debt.add(profitBase);
+                    BigDecimal profitBase = toRepay.multiply(profitRate);
+                    BigDecimal proceedsBase = toRepay.add(profitBase);
 
                     if (proceedsBase.compareTo(BigDecimal.ZERO) != 0) {
                         BuyPriceInfo tradeResult = PriceCalculator.calculateBuyPriceExact(holding, proceedsBase, checkNotNull(fee));
