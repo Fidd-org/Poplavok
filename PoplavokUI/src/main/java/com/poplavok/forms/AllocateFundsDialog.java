@@ -5,6 +5,7 @@ import com.poplavok.data.model.Account;
 import com.poplavok.data.model.Currency;
 import com.poplavok.data.model.InterestRateType;
 import com.poplavok.data.model.Level;
+import com.poplavok.data.model.LevelState;
 import com.poplavok.data.model.Loan;
 import com.poplavok.data.dao.AccountDAO;
 import com.poplavok.data.dao.LevelDAO;
@@ -33,6 +34,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import static com.flower.fxutils.JavaFxUtils.YesNo.YES;
 import static com.flower.fxutils.JavaFxUtils.autoResizeTableColumns;
 import static com.flower.fxutils.JavaFxUtils.createDecimalTextFormatter;
 import static com.flower.fxutils.JavaFxUtils.showMessage;
@@ -43,6 +45,8 @@ import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 
 public class AllocateFundsDialog extends VBox {
     final static Logger LOGGER = LoggerFactory.getLogger(AllocateFundsDialog.class);
+
+    public final static Loan MOVE_TO_ZERO_FUNDING_STATUS = new Loan();
 
     @FXML @Nullable TextField amountTextField;
     @FXML @Nullable TextField notesTextField;
@@ -126,10 +130,17 @@ public class AllocateFundsDialog extends VBox {
 
             loan.setAmount(nullToZero(fromString(checkNotNull(amountTextField).textProperty().get())));
             if (loan.getAmount() == null || loan.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                if (lvl.getState() == LevelState.INCEPTION && BigDecimal.ZERO.compareTo(nullToZero(loan.getAmount())) == 0) {
+                    if (YES == JavaFxUtils.showYesNoDialog("Loan amount is 0, would you like to move Level to FUNDING status?")) {
+                        returnLoan = MOVE_TO_ZERO_FUNDING_STATUS;
+                        checkNotNull(stage).close();
+                    }
+                    return;
+                }
+
                 showMessage("Loan must have a positive amount: > 0");
                 return;
             }
-
 
             loan.setDate(new Date());
             loan.setCurrency(currency);

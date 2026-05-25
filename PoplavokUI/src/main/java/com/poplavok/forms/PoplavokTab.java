@@ -80,6 +80,7 @@ import static com.poplavok.data.utils.BigDecimalUtil.SCALE;
 import static com.poplavok.data.utils.BigDecimalUtil.formatAmount;
 import static com.poplavok.data.utils.BigDecimalUtil.nullToZero;
 import static com.poplavok.data.utils.BigDecimalUtil.fromString;
+import static com.poplavok.forms.AllocateFundsDialog.MOVE_TO_ZERO_FUNDING_STATUS;
 
 public class PoplavokTab extends AnchorPane implements Refreshable {
     final static Logger LOGGER = LoggerFactory.getLogger(PoplavokTab.class);
@@ -1121,6 +1122,19 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
                         try {
                             Loan loan = allocateFundsDialog.getReturnLoan();
                             if (loan != null) {
+                                if (loan == MOVE_TO_ZERO_FUNDING_STATUS) {
+                                    if (lvl.getState() == LevelState.INCEPTION) {
+                                        lvl.setState(LevelState.FUNDING);
+                                        DBUtil.connectCommitAndClose(sess -> {
+                                            LevelDAO.update(sess, lvl);
+                                        });
+                                        refreshContent();
+                                    } else {
+                                        showMessage("Can't move to FUNDING. Loan is not in INCEPTION status.");
+                                    }
+                                    return;
+                                }
+
                                 if (loan.getLoanType() != ACCOUNT_FUNDED && loan.getLoanType() != POPLAVOK_FUNDED
                                         && loan.getLoanType() != EXTERNAL_CROSS_MARGIN && loan.getLoanType() != EXTERNAL_ISOLATED_MARGIN) {
                                     showMessage("Unsupported loan type: " + loan.getLoanType());

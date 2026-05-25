@@ -40,7 +40,7 @@ public class LevelDAO {
     public static List<Level> findByCurrencies(Session session, List<String> currencies) {
         String hql = "select l from Level l join fetch l.poplavok p join fetch p.marketTicker t " +
                      "join fetch t.base b join fetch t.quote q " +
-                     "where l.state = com.poplavok.data.model.LevelState.TRADING " +
+                     "where (l.state = com.poplavok.data.model.LevelState.TRADING or l.state = com.poplavok.data.model.LevelState.FUNDING) " +
                      "and p.isActive = true " +
                      "and (b.currency in :currencies or q.currency in :currencies)";
         List<Level> levels = session.createQuery(hql, Level.class)
