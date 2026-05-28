@@ -2,24 +2,42 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
-    id 'org.beryx.jlink' version '2.24.1'
+    id 'org.beryx.runtime' version '2.0.1'
     id "net.ltgt.errorprone" version "3.0.1"
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
 group 'com.poplavok'
 version '0.0.1'
+def jpackageVersion = version.toString().replaceFirst(/-.*/, '')
 
 repositories {
     mavenCentral()
 }
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+java {
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+}
+
 
 application {
-    mainModule = 'com.poplavok'
-    mainClass = 'com.poplavok.App'
+    mainClass = 'com.poplavok.AppLauncher'
+}
+
+runtime {
+    imageDir = layout.buildDirectory.dir("image").get().asFile
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages', '--ignore-signing-information']
+    launcher {
+        jvmArgs = ['-Dfile.encoding=UTF-8']
+    }
+
+    jpackage {
+        imageName = 'Poplavok'
+        installerName = 'Poplavok'
+        appVersion = jpackageVersion
+        installerType = 'app-image'
+    }
 }
 
 compileJava {
