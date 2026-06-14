@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.poplavok'
-version '1.0.1'
+version '1.0.2'
 
 repositories {
     mavenCentral()
@@ -77,7 +77,7 @@ tasks.withType(JavaCompile) {
     if (!name.toLowerCase().contains("test") && !name.toLowerCase().contains("build")) {
         options.errorprone {
             //Exclude Immutables generated code
-            excludedPaths.set(".*[\\\\/]generated[\\\\/]sources[\\\\/].*")
+            excludedPaths.set(".*generated.*sources.*")
             check("NullAway", CheckSeverity.ERROR)
             option("NullAway:AnnotatedPackages", "com.poplavok")
         }
