@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'com.poplavok'
-version '1.0.2'
+version '1.0.3'
 def jpackageVersion = version.toString().replaceFirst(/-.*/, '')
 
 repositories {
@@ -28,6 +28,9 @@ application {
 runtime {
     imageDir = layout.buildDirectory.dir("image").get().asFile
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages', '--ignore-signing-information']
+    addModules('java.scripting', 'java.prefs', 'jdk.unsupported', 'java.se', 'java.sql', 'java.naming', 'java.xml',
+            'java.logging', 'java.desktop', 'java.management', 'java.scripting', 'jdk.crypto.ec', 'jdk.crypto.cryptoki'
+    )
     launcher {
         jvmArgs = ['-Dfile.encoding=UTF-8']
     }
