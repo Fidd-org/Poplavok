@@ -20,3 +20,5 @@ gradle*
 generated
 
 /data/poplavok.mv.db
+
+poplavok_db*
