@@ -120,15 +120,6 @@ public class RepaySettleDebtDialog extends TabPane {
             throw new RuntimeException(exception);
         }
 
-        if (nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0 ||
-                nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0) {
-            checkNotNull(takeProfitToAccTab).disableProperty().setValue(true);
-            checkNotNull(takeProfitToLvlTab).disableProperty().setValue(true);
-        }
-        if (nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) <= 0 &&
-                nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) <= 0) {
-            checkNotNull(takeLossTab).disableProperty().setValue(true);
-        }
 
         this.tradeDirection = tradeDirection;
 
@@ -136,6 +127,49 @@ public class RepaySettleDebtDialog extends TabPane {
         this.level = level;
         //checkNotNull(addButton).textProperty().set("Update Level");
         levelId = level.getId();
+        boolean hasDebt = nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0 ||
+                nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0;
+
+        boolean disableTakeProfit = hasDebt;
+
+        if (hasDebt) {
+            // We allow taking profit in non-Loan currency under certain conditions when we consider the existing position profitable.
+            BigDecimal debtBase = nullToZero(level.getDebtBase());
+            BigDecimal debtQuote = nullToZero(level.getDebtQuote());
+            BigDecimal projBase = nullToZero(level.getProjectedAmountBase());
+            BigDecimal projQuote = nullToZero(level.getProjectedAmountQuote());
+            BigDecimal availBase = nullToZero(level.getAvailableAmountBase());
+            BigDecimal availQuote = nullToZero(level.getAvailableAmountQuote());
+
+            if (tradeDirection == Direction.LONG) {
+                if (debtQuote.compareTo(projQuote) <= 0 && projBase.compareTo(availBase) < 0) {
+                    disableTakeProfit = false;
+                    checkNotNull(takeProfitQuoteRadioButton).setDisable(true);
+                    checkNotNull(takeProfitLevelQuoteRadioButton).setDisable(true);
+
+                    checkNotNull(takeProfitBaseRadioButton).setSelected(true);
+                    checkNotNull(takeProfitLevelBaseRadioButton).setSelected(true);
+                }
+            } else if (tradeDirection == Direction.SHORT) {
+                if (debtBase.compareTo(projBase) <= 0 && projQuote.compareTo(availQuote) < 0) {
+                    disableTakeProfit = false;
+                    checkNotNull(takeProfitBaseRadioButton).setDisable(true);
+                    checkNotNull(takeProfitLevelBaseRadioButton).setDisable(true);
+
+                    checkNotNull(takeProfitQuoteRadioButton).setSelected(true);
+                    checkNotNull(takeProfitLevelQuoteRadioButton).setSelected(true);
+                }
+            }
+        }
+
+        if (disableTakeProfit) {
+            checkNotNull(takeProfitToAccTab).disableProperty().setValue(true);
+            checkNotNull(takeProfitToLvlTab).disableProperty().setValue(true);
+        }
+        
+        if (!hasDebt) {
+            checkNotNull(takeLossTab).disableProperty().setValue(true);
+        }
 
         List<LoanInfo> loanInfoList = DBUtil.connectGetResultAndClose(sess -> LoanDAO.getLoanInfosByDestinationLevel(sess, level));
         this.loans = new FilteredList<>(FXCollections.observableArrayList(loanInfoList));
@@ -254,7 +288,14 @@ public class RepaySettleDebtDialog extends TabPane {
         if (accounts != null) {
             accounts.setPredicate(acc -> {
                 if (checkNotNull(takeProfitQuoteRadioButton).isSelected()) {
-                    BigDecimal profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+                    boolean hasDebt = nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0
+                            || nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0;
+                    BigDecimal profitAmountQuote;
+                    if (hasDebt && tradeDirection == Direction.SHORT) {
+                        profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getProjectedAmountQuote()));
+                    } else {
+                        profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+                    }
                     if (profitAmountQuote.compareTo(BigDecimal.ZERO) <= 0) {
                         profitAmountQuote = BigDecimal.ZERO;
                     }
@@ -267,7 +308,14 @@ public class RepaySettleDebtDialog extends TabPane {
 
                     return acc.getCurrency().getCurrency().equals(ticker.getQuote().getCurrency());
                 } else if (checkNotNull(takeProfitBaseRadioButton).isSelected()) {
-                    BigDecimal profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+                    boolean hasDebt = nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0
+                            || nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0;
+                    BigDecimal profitAmountBase;
+                    if (hasDebt && tradeDirection == Direction.LONG) {
+                        profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getProjectedAmountBase()));
+                    } else {
+                        profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+                    }
                     if (profitAmountBase.compareTo(BigDecimal.ZERO) <= 0) {
                         profitAmountBase = BigDecimal.ZERO;
                     }
@@ -292,7 +340,14 @@ public class RepaySettleDebtDialog extends TabPane {
                 if (checkNotNull(takeProfitLevelQuoteRadioButton).isSelected()) {
                     String quote = ticker.getQuote().getCurrency();
 
-                    BigDecimal profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+                    boolean hasDebt = nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0
+                            || nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0;
+                    BigDecimal profitAmountQuote;
+                    if (hasDebt && tradeDirection == Direction.SHORT) {
+                        profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getProjectedAmountQuote()));
+                    } else {
+                        profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
+                    }
                     if (profitAmountQuote.compareTo(BigDecimal.ZERO) <= 0) {
                         profitAmountQuote = BigDecimal.ZERO;
                     }
@@ -308,7 +363,14 @@ public class RepaySettleDebtDialog extends TabPane {
                 } else if (checkNotNull(takeProfitLevelBaseRadioButton).isSelected()) {
                     String base = ticker.getBase().getCurrency();
 
-                    BigDecimal profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+                    boolean hasDebt = nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0
+                            || nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0;
+                    BigDecimal profitAmountBase;
+                    if (hasDebt && tradeDirection == Direction.LONG) {
+                        profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getProjectedAmountBase()));
+                    } else {
+                        profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
+                    }
                     if (profitAmountBase.compareTo(BigDecimal.ZERO) <= 0) {
                         profitAmountBase = BigDecimal.ZERO;
                     }
