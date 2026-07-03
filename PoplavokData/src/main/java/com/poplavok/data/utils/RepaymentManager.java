@@ -184,6 +184,10 @@ public class RepaymentManager {
     }
 
     public static Repayment takeProfitToLevel(Level sourceLevel, MarketTicker ticker, Level destinationLevel, BigDecimal repaymentAmount, String repaymentCurrency, Date date) {
+        if (sourceLevel.getId().equals(destinationLevel.getId())) {
+            throw new RuntimeException("Cannot take profit to the same level");
+        }
+
         // 1. Process source
 
         // Source level: remove amount from available

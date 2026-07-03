@@ -271,6 +271,7 @@ public class RepaySettleDebtDialog extends TabPane {
 
         List<Level> levelList = DBUtil.connectGetResultAndClose(
                 sess -> LevelDAO.findByCurrencies(sess, List.of(ticker.getQuote().getCurrency(), ticker.getBase().getCurrency())));
+        levelList.removeIf(l -> l.getId().equals(levelId));
         this.levels = new FilteredList<>(FXCollections.observableArrayList(levelList));
 
         checkNotNull(takeProfitLevelQuoteRadioButton).selectedProperty().addListener((obs, oldVal, newVal) -> updateProfitLevelsFilter(ticker));
