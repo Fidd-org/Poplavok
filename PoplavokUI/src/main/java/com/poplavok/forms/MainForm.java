@@ -35,7 +35,7 @@ public class MainForm {
     }
 
     public void showAboutDialog() {
-        Alert alert = new Alert(Alert.AlertType.NONE, "Poplavok v 1.0.4", ButtonType.OK);
+        Alert alert = new Alert(Alert.AlertType.NONE, "Poplavok v 1.0.5", ButtonType.OK);
         alert.showAndWait();
     }
 
