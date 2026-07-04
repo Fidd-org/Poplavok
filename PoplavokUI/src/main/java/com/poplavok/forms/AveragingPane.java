@@ -94,6 +94,7 @@ public class AveragingPane extends AnchorPane {
     @FXML @Nullable TextField retainTextField;
     @FXML @Nullable TextField retainWorthTextField;
     @FXML @Nullable TextField retainCommissionTextField;
+    @FXML @Nullable Label retainedCommissionInfoLabel;
 
     @FXML @Nullable Label retainCurrencyLabel;
     @FXML @Nullable Label retainWorhCurrencyLabel;
@@ -205,6 +206,7 @@ public class AveragingPane extends AnchorPane {
         checkNotNull(retainTextField).disableProperty().setValue(disable);
         checkNotNull(retainWorthTextField).disableProperty().setValue(disable);
         checkNotNull(retainCommissionTextField).disableProperty().setValue(disable);
+        checkNotNull(retainedCommissionInfoLabel).disableProperty().setValue(disable);
 
         checkNotNull(retainCurrencyLabel).disableProperty().setValue(disable);
         checkNotNull(retainWorhCurrencyLabel).disableProperty().setValue(disable);
@@ -225,7 +227,7 @@ public class AveragingPane extends AnchorPane {
         String retainedAmountStr = checkNotNull(retainTextField).textProperty().get();
         BigDecimal retainedAmount = nullToZero(fromString(retainedAmountStr));
 
-        BigDecimal fee = checkNotNull(retainCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
+        BigDecimal fee = checkNotNull(retainCommissionCheckBox).selectedProperty().get() ? this.fee : BigDecimal.ZERO;
         BigDecimal price = getAveragingPrice();
 
         BigDecimal debtAmount;
@@ -234,14 +236,15 @@ public class AveragingPane extends AnchorPane {
             AmountAndCommission aac;
             if (direction == LONG) {
                 aac = LongShortCalculator.calculateQuoteAmountToGiveLong(retainedAmount, price, checkNotNull(fee));
+                commissionAmount = aac.commissionQuote;
             } else if (direction == SHORT) {
                 aac = LongShortCalculator.calculateBaseAmountToGiveShort(retainedAmount, price, checkNotNull(fee));
+                commissionAmount = aac.commissionBase;
             } else {
                 throw new RuntimeException("Unknown Direction " + direction);
             }
 
             debtAmount = aac.amount;
-            commissionAmount = aac.commissionQuote;
         } else {
             debtAmount = BigDecimal.ZERO;
             commissionAmount = BigDecimal.ZERO;
@@ -256,7 +259,7 @@ public class AveragingPane extends AnchorPane {
         String debtAmountStr = checkNotNull(retainWorthTextField).textProperty().get();
         BigDecimal debtAmount = nullToZero(fromString(debtAmountStr));
 
-        BigDecimal fee = checkNotNull(retainCommissionCheckBox).selectedProperty().get() ? BigDecimal.ZERO : this.fee;
+        BigDecimal fee = checkNotNull(retainCommissionCheckBox).selectedProperty().get() ? this.fee : BigDecimal.ZERO;
         BigDecimal price = getAveragingPrice();
 
         BigDecimal retainedAmount;
@@ -265,14 +268,15 @@ public class AveragingPane extends AnchorPane {
             AmountAndCommission aac;
             if (direction == LONG) {
                 aac = LongShortCalculator.calculateBaseAmountToGetLong(debtAmount, price, checkNotNull(fee));
+                commissionAmount = aac.commissionQuote;
             } else if (direction == SHORT) {
                 aac = LongShortCalculator.calculateQuoteAmountToGetShort(debtAmount, price, checkNotNull(fee));
+                commissionAmount = aac.commissionBase;
             } else {
                 throw new RuntimeException("Unknown Direction " + direction);
             }
 
             retainedAmount = aac.amount;
-            commissionAmount = aac.commissionQuote;
         } else {
             retainedAmount = BigDecimal.ZERO;
             commissionAmount = BigDecimal.ZERO;
@@ -480,8 +484,16 @@ public class AveragingPane extends AnchorPane {
         checkNotNull(retainWorhCurrencyLabel).textProperty().setValue(debtCurrency);
 
         String quoteCurrency = checkNotNull(ticker).getQuote().getCurrency();
-        // Commission is always in QUOTE currency
-        checkNotNull(retainCommisionCurrencyLabel).textProperty().setValue(quoteCurrency);
+        String baseCurrency = checkNotNull(ticker).getBase().getCurrency();
+
+        if (direction == LONG) {
+            checkNotNull(retainCommisionCurrencyLabel).textProperty().setValue(quoteCurrency);
+        } else if (direction == SHORT) {
+            checkNotNull(retainCommisionCurrencyLabel).textProperty().setValue(baseCurrency);
+        } else {
+            throw new RuntimeException("Unknown direction " + direction);
+        }
+
         checkNotNull(commissionCurrencyLabel).textProperty().setValue(quoteCurrency);
         // Default: take profit in quote
         checkNotNull(profitCurrencyLabel).textProperty().setValue(quoteCurrency);
