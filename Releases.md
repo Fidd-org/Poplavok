@@ -1,5 +1,18 @@
 ```
 July 03, 2026
+Poplavok-1.0.8-portable-linux.zip
+88059338
+SHA2-256(Poplavok-1.0.8-portable-linux.zip)= d21bfdfc24d344f5a26e8f92f6b21dcc061366f4e8be135cf6d6a1c2a696024d
+Poplavok-1.0.8-portable-macos.zip
+83628676
+be50c5dba3a56ca1dc21d7f0a3346017bb1bd02deb7bd2311a24f3f9b96fee24  Poplavok-1.0.8-portable-macos.zip
+Poplavok-1.0.8-portable-windows.zip
+84394497
+EB4EC30B2A4CE810B391005E7A5124D0CC34AF6169293DD9F7754D4F8F468D6D
+```
+
+```
+July 03, 2026
 Poplavok-1.0.7-portable-linux.zip
 88059157
 SHA2-256= 5f2c1e2b913d611e01f105b9ef23d6201d4835e7e4b378f5f8f3579964735a57
