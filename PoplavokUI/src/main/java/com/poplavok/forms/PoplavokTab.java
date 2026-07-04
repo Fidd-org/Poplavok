@@ -620,17 +620,17 @@ public class PoplavokTab extends AnchorPane implements Refreshable {
             if (direction == LONG) {
                 levelDebt = nullToZero(lvl.getDebtQuote());
                 if (removeAvailableFromDebts) {
-                    levelDebt = levelDebt.subtract(lvl.getAvailableAmountQuote());
+                    levelDebt = levelDebt.subtract(nullToZero(lvl.getAvailableAmountQuote()));
                 }
 
-                levelHoldingsAmount = lvl.getAvailableAmountBase();
+                levelHoldingsAmount = nullToZero(lvl.getAvailableAmountBase());
             } else { //if (direction == SHORT) {
                 levelDebt = nullToZero(lvl.getDebtBase());
                 if (removeAvailableFromDebts) {
-                    levelDebt = levelDebt.subtract(lvl.getAvailableAmountBase());
+                    levelDebt = levelDebt.subtract(nullToZero(lvl.getAvailableAmountBase()));
                 }
 
-                levelHoldingsAmount = lvl.getAvailableAmountQuote();
+                levelHoldingsAmount = nullToZero(lvl.getAvailableAmountQuote());
             }
 
             levelDebts.add(levelDebt);
