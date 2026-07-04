@@ -130,7 +130,8 @@ public class RepaySettleDebtDialog extends TabPane {
         boolean hasDebt = nullToZero(level.getDebtBase()).compareTo(BigDecimal.ZERO) > 0 ||
                 nullToZero(level.getDebtQuote()).compareTo(BigDecimal.ZERO) > 0;
 
-        boolean disableTakeProfit = hasDebt;
+        boolean canTakeQuoteProfit = false;
+        boolean canTakeBaseProfit = false;
 
         if (hasDebt) {
             // We allow taking profit in non-Loan currency under certain conditions when we consider the existing position profitable.
@@ -143,31 +144,49 @@ public class RepaySettleDebtDialog extends TabPane {
 
             if (tradeDirection == Direction.LONG) {
                 if (debtQuote.compareTo(projQuote) <= 0 && projBase.compareTo(availBase) < 0) {
-                    disableTakeProfit = false;
-                    checkNotNull(takeProfitQuoteRadioButton).setDisable(true);
-                    checkNotNull(takeProfitLevelQuoteRadioButton).setDisable(true);
+                    // If we're not over projected debt and have surplus in BASE, we allow taking BASE surplus as profit
+                    canTakeBaseProfit = true;
+                }
 
-                    checkNotNull(takeProfitBaseRadioButton).setSelected(true);
-                    checkNotNull(takeProfitLevelBaseRadioButton).setSelected(true);
+                if (debtQuote.compareTo(projQuote) <= 0 && projBase.compareTo(availBase) <= 0 && availQuote.compareTo(BigDecimal.ZERO) > 0) {
+                    // If we're not over projected debt and are holding projected BASE amount or more, we allow taking QUOTE as profit (if any)
+                    canTakeQuoteProfit = true;
                 }
             } else if (tradeDirection == Direction.SHORT) {
                 if (debtBase.compareTo(projBase) <= 0 && projQuote.compareTo(availQuote) < 0) {
-                    disableTakeProfit = false;
-                    checkNotNull(takeProfitBaseRadioButton).setDisable(true);
-                    checkNotNull(takeProfitLevelBaseRadioButton).setDisable(true);
+                    // If we're not over projected debt and have surplus in QUOTE, we allow taking QUOTE surplus as profit
+                    canTakeQuoteProfit = true;
+                }
 
-                    checkNotNull(takeProfitQuoteRadioButton).setSelected(true);
-                    checkNotNull(takeProfitLevelQuoteRadioButton).setSelected(true);
+                if (debtQuote.compareTo(projQuote) <= 0 && projQuote.compareTo(availQuote) <= 0 && availBase.compareTo(BigDecimal.ZERO) > 0) {
+                    // If we're not over projected debt and are holding projected BASE amount or more, we allow taking BASE as profit (if any)
+                    canTakeBaseProfit = true;
                 }
             }
         }
 
-        if (disableTakeProfit) {
-            checkNotNull(takeProfitToAccTab).disableProperty().setValue(true);
-            checkNotNull(takeProfitToLvlTab).disableProperty().setValue(true);
-        }
-        
-        if (!hasDebt) {
+        if (hasDebt) {
+            if (canTakeBaseProfit && !canTakeQuoteProfit) {
+                checkNotNull(takeProfitQuoteRadioButton).setDisable(true);
+                checkNotNull(takeProfitLevelQuoteRadioButton).setDisable(true);
+
+                checkNotNull(takeProfitBaseRadioButton).setSelected(true);
+                checkNotNull(takeProfitLevelBaseRadioButton).setSelected(true);
+            }
+
+            if (!canTakeBaseProfit && canTakeQuoteProfit) {
+                checkNotNull(takeProfitBaseRadioButton).setDisable(true);
+                checkNotNull(takeProfitLevelBaseRadioButton).setDisable(true);
+
+                checkNotNull(takeProfitQuoteRadioButton).setSelected(true);
+                checkNotNull(takeProfitLevelQuoteRadioButton).setSelected(true);
+            }
+
+            if (!canTakeBaseProfit && !canTakeQuoteProfit) {
+                checkNotNull(takeProfitToAccTab).disableProperty().setValue(true);
+                checkNotNull(takeProfitToLvlTab).disableProperty().setValue(true);
+            }
+        } else {
             checkNotNull(takeLossTab).disableProperty().setValue(true);
         }
 
@@ -294,6 +313,8 @@ public class RepaySettleDebtDialog extends TabPane {
                     BigDecimal profitAmountQuote;
                     if (hasDebt && tradeDirection == Direction.SHORT) {
                         profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getProjectedAmountQuote()));
+                    } else if (tradeDirection == Direction.LONG && nullToZero(level.getAvailableAmountBase()).compareTo(nullToZero(level.getProjectedAmountBase())) >= 0) {
+                        profitAmountQuote = nullToZero(level.getAvailableAmountQuote());
                     } else {
                         profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
                     }
@@ -314,6 +335,8 @@ public class RepaySettleDebtDialog extends TabPane {
                     BigDecimal profitAmountBase;
                     if (hasDebt && tradeDirection == Direction.LONG) {
                         profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getProjectedAmountBase()));
+                    } else if (tradeDirection == Direction.SHORT && nullToZero(level.getAvailableAmountQuote()).compareTo(nullToZero(level.getProjectedAmountQuote())) >= 0) {
+                        profitAmountBase = nullToZero(level.getAvailableAmountBase());
                     } else {
                         profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
                     }
@@ -346,6 +369,8 @@ public class RepaySettleDebtDialog extends TabPane {
                     BigDecimal profitAmountQuote;
                     if (hasDebt && tradeDirection == Direction.SHORT) {
                         profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getProjectedAmountQuote()));
+                    } else if (tradeDirection == Direction.LONG && nullToZero(level.getAvailableAmountBase()).compareTo(nullToZero(level.getProjectedAmountBase())) >= 0) {
+                        profitAmountQuote = nullToZero(level.getAvailableAmountQuote());
                     } else {
                         profitAmountQuote = nullToZero(level.getAvailableAmountQuote()).subtract(nullToZero(level.getDebtQuote()));
                     }
@@ -369,6 +394,8 @@ public class RepaySettleDebtDialog extends TabPane {
                     BigDecimal profitAmountBase;
                     if (hasDebt && tradeDirection == Direction.LONG) {
                         profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getProjectedAmountBase()));
+                    } else if (tradeDirection == Direction.SHORT && nullToZero(level.getAvailableAmountQuote()).compareTo(nullToZero(level.getProjectedAmountQuote())) >= 0) {
+                        profitAmountBase = nullToZero(level.getAvailableAmountBase());
                     } else {
                         profitAmountBase = nullToZero(level.getAvailableAmountBase()).subtract(nullToZero(level.getDebtBase()));
                     }
