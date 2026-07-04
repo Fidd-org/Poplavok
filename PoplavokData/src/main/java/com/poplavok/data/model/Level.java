@@ -113,6 +113,10 @@ public class Level {
         return checkNotNull(id);
     }
 
+    public @Nullable Long getNullableId() {
+        return id;
+    }
+
     public void setId(@Nullable Long id) { this.id = id; }
 
     public Poplavok getPoplavok() {
